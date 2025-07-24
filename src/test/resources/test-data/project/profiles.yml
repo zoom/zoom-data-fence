@@ -1,0 +1,18 @@
+default-profile: dev
+profiles:
+  dev:
+    provider-name: SNOWFLAKE
+    connection:
+      snowflake:
+        connection-string: jdbc:snowflake://mock-url.localhost:443
+        connection-properties:
+          authenticator: externalbrowser
+          user: ${var.user}
+  dev-private-key:
+    provider-name: SNOWFLAKE
+    connection:
+      snowflake:
+        connection-string: jdbc:snowflake://mock-url.localhost:443
+        connection-properties:
+          user: ${var.user}
+          private-key-file: /path/to/private-key-file.pem

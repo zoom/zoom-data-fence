@@ -1,0 +1,34 @@
+roles:
+  role_1:
+    name: ${var.role}
+    grants:
+      - object-type: database
+        database-name: ${var.database}
+        privileges:
+          - usage
+          - monitor
+      - object-type: schema
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        privileges:
+          - usage
+          - monitor
+          - create semantic view
+      - object-type: table
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: ${var.table}
+        privileges:
+          - select
+          - ownership
+      - object-type: procedure
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        privileges:
+          - usage
+          - ownership
+      - object-type: application_role
+        object-name: SNOWFLAKE.TRUST_CENTER_VIEWER
+        privileges:
+          - usage

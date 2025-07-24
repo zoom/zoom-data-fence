@@ -1,0 +1,8 @@
+roles:
+  rbac-example-role-2:
+    name: rbac_example_2
+    grants:
+      - object-type: role
+        privileges:
+          - usage
+        object-name: rbac_example_1

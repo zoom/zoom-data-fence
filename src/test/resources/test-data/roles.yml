@@ -1,0 +1,35 @@
+roles:
+  rbac-example-role-1:
+    name: rbac_example_1
+    grants:
+      - database-name: my_db
+        object-type: database
+        privileges:
+          - usage
+      - database-name: my_db
+        schema-name: my_schema
+        object-type: schema
+        privileges:
+          - usage
+      - database-name: my_db
+        schema-name: my_schema
+        object-name: my_table
+        object-type: table
+        privileges:
+          - select
+      - database-name: my_db
+        schema-name: my_schema
+        object-name: my_table_2
+        object-type: external table
+        privileges:
+          - select
+  rbac-example-role-2:
+    name: rbac_example_2
+    grants:
+      - object-type: role
+        privileges:
+          - usage
+        object-name: rbac_example_1
+      - object-type: account
+        privileges:
+          - monitor
