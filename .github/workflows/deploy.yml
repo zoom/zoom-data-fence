@@ -5,7 +5,6 @@ on:
     # ToDo: Replace with tag
     branches:
      - main
-     - feature/deploy
 
 jobs:
   build:
