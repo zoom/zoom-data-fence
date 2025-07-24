@@ -1,0 +1,21 @@
+roles:
+  role_1:
+    name: ${var.role}
+    grants: []
+  role_2:
+    name: ${var.role2}
+    grants:
+      - object-type: table
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: ${var.table}
+        include-future: false
+        privileges:
+          - ownership
+      - object-type: procedure
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: false
+        privileges:
+          - ownership
