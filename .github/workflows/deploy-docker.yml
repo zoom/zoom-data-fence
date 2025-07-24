@@ -36,4 +36,5 @@ jobs:
         with:
           context: .
           push: true
+          provenance: mode=max
           tags: zoomvideo/zoom-data-fence:${{ steps.project.outputs.version }}
