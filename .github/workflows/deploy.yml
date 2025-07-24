@@ -23,3 +23,8 @@ jobs:
         id: project
       - name: Show extracted Maven project version
         run: echo ${{ steps.project.outputs.version }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKE_RHUB_TOKEN }}
