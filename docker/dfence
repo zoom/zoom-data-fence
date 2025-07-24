@@ -1,0 +1,2 @@
+#!/bin/sh
+java -Dnet.snowflake.jdbc.loggerImpl=net.snowflake.client.log.SLF4JLogger -jar /app/app.jar $@

@@ -194,7 +194,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>us.zoom.security.dfence.Main</mainClass>
+                            <mainClass>us.zoom.data.dfence.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
