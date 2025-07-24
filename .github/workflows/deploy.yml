@@ -8,10 +8,16 @@ on:
 jobs:
   build:
 
-    runs-on: maven:3.8.5-openjdk-17
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
       - name: Extract Maven project version
         run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
         id: project
