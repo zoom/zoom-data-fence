@@ -8,8 +8,10 @@ on:
 
 jobs:
   build:
-
+    environment: deploy
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
