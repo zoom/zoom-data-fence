@@ -1,0 +1,13 @@
+default-profile: system-test
+profiles:
+  system-test:
+    provider-name: SNOWFLAKE
+    connection:
+      snowflake:
+        connection-string: jdbc:snowflake://${var.snowflake-account}.snowflakecomputing.com:443
+        connection-properties:
+          authenticator: ${var.snowflake-authenticator}
+          user: ${var.snowflake-user}
+          password: ${var.snowflake-password}
+          sys-admin-role: ${var.snowflake-sysadmin-role}
+          security-admin-role: ${var.snowflake-securityadmin-role}
