@@ -3,7 +3,9 @@ name: Java CI with Maven
 on:
   push:
     # ToDo: Replace with tag
-    branches: [ "main", "feature/deploy" ]
+    branches:
+     - main
+     - feature/deploy
 
 jobs:
   build:
