@@ -5,6 +5,7 @@ on:
     # ToDo: Replace with tag
     branches:
      - main
+     - release
 
 jobs:
   build:
@@ -26,8 +27,20 @@ jobs:
         id: project
       - name: Show extracted Maven project version
         run: echo ${{ steps.project.outputs.version }}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        with:
+          images: |
+            zoomvideo/zoom-data-fence
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'release') }}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern=${{ steps.project.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}}
       - name: Login to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 #v3.4.0
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -40,7 +53,8 @@ jobs:
           push: true
           provenance: mode=max
           sbom: true
-          tags: zoomvideo/zoom-data-fence:${{ steps.project.outputs.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
       - name: Update repo description
         uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee98723ae # v4.0.0
         with:
