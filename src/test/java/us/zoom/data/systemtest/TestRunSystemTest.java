@@ -1,4 +1,4 @@
-package us.zoom.data.systest;
+package us.zoom.data.systemtest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

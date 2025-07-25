@@ -1,4 +1,4 @@
-package us.zoom.data.systest;
+package us.zoom.data.systemtest;
 
 import org.testng.annotations.*;
 import us.zoom.data.dfence.test.fixtures.SnowflakeConnectionProvider;

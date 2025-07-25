@@ -27,7 +27,7 @@ import java.util.concurrent.Callable;
                 ApplyCommand.class, CompileCommand.class, ImportCommand.class, ListRolesCommand.class})
 @Slf4j
 public class Main implements Callable<Integer> {
-    private static final String packageName = "us.zoom.security.dfence";
+    private static final String packageName = "us.zoom.data.dfence";
     @Option(
             names = {"--log-format"},
             description = "Logging format. One of ${COMPLETION-CANDIDATES}.",

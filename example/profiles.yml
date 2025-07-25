@@ -7,6 +7,6 @@ profiles:
         connection-string: jdbc:snowflake://${var.account}.snowflakecomputing.com:443
         connection-properties:
           user: ${var.user}
-          password: ${var.personal_access_token}
+          password: ${var.token}
           sys-admin-role: accountadmin
           security-admin-role: accountadmin

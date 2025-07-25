@@ -1,4 +1,4 @@
-package us.zoom.data.systest;
+package us.zoom.data.systemtest;
 
 import lombok.extern.slf4j.Slf4j;
 import net.snowflake.client.jdbc.internal.apache.commons.io.FileUtils;
@@ -11,10 +11,13 @@ import org.testng.annotations.Test;
 import us.zoom.data.dfence.providers.snowflake.SnowflakeConnectionProperties;
 import us.zoom.data.dfence.providers.snowflake.SnowflakeConnectionService;
 import us.zoom.data.dfence.providers.snowflake.SnowflakeProviderConfigModel;
+import us.zoom.data.dfence.providers.snowflake.SnowflakeRoleType;
 import us.zoom.data.dfence.test.fixtures.DirectoryLifecycleObject;
 import us.zoom.data.dfence.test.fixtures.LifecycleManager;
 import us.zoom.data.dfence.test.fixtures.SnowflakeLifecycleObject;
 
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetProvider;
 import java.io.*;
 import java.nio.file.Path;
 import java.security.KeyPair;
@@ -51,13 +54,12 @@ public class TestSnowflakeConnectionSystemTest extends SnowflakeSysTestBase {
 
         Path privateKeyPath = writePrivateKeyToPemFile(keyPair, tmpDirPath);
 
-        lifecycleManager.getLifecycleObjects()
-                .add(SnowflakeLifecycleObject.user(
-                        securityadminSnowflakeConnectionProvider, 
-                        userName,
-                        networkPolicy,
-                        password,
-                        keyPairPublicKeyString(keyPair)));
+        lifecycleManager.getLifecycleObjects().add(SnowflakeLifecycleObject.user(
+                securityadminSnowflakeConnectionProvider,
+                userName,
+                networkPolicy,
+                password,
+                keyPairPublicKeyString(keyPair)));
 
         log.info("Setting up lifecycleManager for {}", this.getClass().getSimpleName());
         lifecycleManager.setup();
@@ -129,7 +131,60 @@ public class TestSnowflakeConnectionSystemTest extends SnowflakeSysTestBase {
         try (Connection connection = snowflakeConnectionService.connection()) {
             connection.createStatement().execute("SELECT 1");
         }
+    }
 
+
+    @Test(groups = {"authTest"})
+    public void testPatAuth(ITestContext ctx) throws SQLException, InterruptedException {
+        UserAttributes userAttributes = (UserAttributes) Objects.requireNonNull(ctx.getAttribute("user-attributes"));
+        String userName = userAttributes.userName();
+        String token = null;
+        try (Connection connection = this.securityadminSnowflakeConnectionProvider.getConnection()) {
+            Statement grantRoleStatement = connection.createStatement();
+            grantRoleStatement.executeUpdate(String.format(
+                    "GRANT ROLE %s to USER %s",
+                    this.snowflakeSecurityAdminRole, userName
+            ));
+            Thread.sleep(1000);
+            Statement statement = connection.createStatement();
+            String sql = String.format(
+                    """
+                            EXECUTE IMMEDIATE
+                            $$
+                            DECLARE
+                            RESULT RESULTSET DEFAULT (ALTER USER %s ADD PROGRAMMATIC ACCESS TOKEN FOO DAYS_TO_EXPIRY = 1 ROLE_RESTRICTION = '%s');
+                            BEGIN
+                            RETURN TABLE(RESULT);
+                            END;
+                            $$
+                            """, userName, this.snowflakeSecurityAdminRole, this.snowflakeSecurityAdminRole, userName);
+            statement.executeQuery(sql);
+            ResultSet resultSet = statement.getResultSet();
+            try (CachedRowSet crs = RowSetProvider.newFactory().createCachedRowSet()) {
+                crs.populate(resultSet);
+                while (crs.next()) {
+                    token = crs.getString("token_secret");
+                }
+            }
+        }
+        if (token == null) {
+            throw new RuntimeException(String.format("Unable to get programmatic access token for user %s.", userName));
+        }
+        SnowflakeConnectionProperties snowflakeConnectionProperties = new SnowflakeConnectionProperties();
+        snowflakeConnectionProperties.setUser(userName);
+        snowflakeConnectionProperties.setPassword(token);
+        snowflakeConnectionProperties.setSecurityAdminRole(this.snowflakeSecurityAdminRole);
+        snowflakeConnectionProperties.setSysAdminRole(this.snowflakeSecurityAdminRole);
+        SnowflakeProviderConfigModel snowflakeProviderConfigModel = new SnowflakeProviderConfigModel();
+        snowflakeProviderConfigModel.setConnectionProperties(snowflakeConnectionProperties);
+        snowflakeProviderConfigModel.setConnectionString(String.format(
+                "jdbc:snowflake://%s.snowflakecomputing.com/",
+                snowflakeAccount));
+        SnowflakeConnectionService snowflakeConnectionService = new SnowflakeConnectionService(
+                snowflakeProviderConfigModel);
+        try (Connection connection = snowflakeConnectionService.connection(SnowflakeRoleType.SECURITYADMIN)) {
+            connection.createStatement().execute("SELECT 1");
+        }
     }
 
     @Test(groups = {"authTest"})
@@ -183,5 +238,11 @@ public class TestSnowflakeConnectionSystemTest extends SnowflakeSysTestBase {
         lifecycleManager.teardown();
     }
 
-    public record UserAttributes(String userName, String networkPolicy, String password, Path privateKeyPath, KeyPair keyPair) {}
+    public record UserAttributes(
+            String userName,
+            String networkPolicy,
+            String password,
+            Path privateKeyPath,
+            KeyPair keyPair) {
+    }
 }
