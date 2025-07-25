@@ -216,9 +216,9 @@ total-roles: 2
 total-changes: 0
 ```
 
-zoom-db-rbac strives to not run any statements against the database unless they are
+data-fence strives to not run any statements against the database unless they are
 actually needed. This reduces noise when one needs to look at system logs to investigate a
-change. In addition, note that zoom-db-rbac will remove grants which are not defined in
+change. In addition, note that data-fence will remove grants which are not defined in
 the roles file. Let's try manually granting a permission outside the process.
 
 ```sql
@@ -246,7 +246,7 @@ total-changes: 1
 ```
 
 This ability to revoke grants by deleting them from the configuration is a feature.
-However, it is important to note that if you are migrating roles to zoom-db-rbac, you need
+However, it is important to note that if you are migrating roles to data-fence, you need
 to include all the grants already in the backend. Prior to deployment, you should run a
 compile command and see no changes. Only at this point should you make additional changes.
 
@@ -395,7 +395,7 @@ roles:
 
 ### Granting Permissions To Roles Without Revoking Grants Provided Another Way
 
-While it is best for zoom-db-rbac to fully own the permissions for a role, in some cases,
+While it is best for data-fence to fully own the permissions for a role, in some cases,
 it is necessary to use the tool to grant permissions without revoking the permissions
 granted another way. This may be necessary while migrating ownership of objects or while
 migrating from another system. In these cases, the `revoke-other-grants`
