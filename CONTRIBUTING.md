@@ -4,8 +4,6 @@ We need contributors for Data Fence!
 
 Please follow this guide if you plan to contribute code to this project.
 
-[[_TOC_]]
-
 ## What We Need Help With
 
 While Data Fence works very well for Zoom's internal use cases, as we release this 
