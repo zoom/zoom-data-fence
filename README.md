@@ -1,14 +1,68 @@
-# zoom-data-fence
+# Zoom Data Fence (dfence)
 
-This is the future location of the Zoom Data Fence project. This is a placeholder for now.
+Data Fence is a Data Warehouse Security Management tool which helps database
+administrators keep data warehouse permissions stable, repeatable and easy to manage.
+
+1. Repeat the same security configuration across multiple environments.
+2. Automatically heal configuration drift by revoking undesired grants and granting 
+missing grants. This is a significant problem in SQL based data warehouses which have 
+stateful implicit behavior resulting from behavior such as creating objects and 
+dropping objects.
+3. Scale to manage millions of grants on hundreds of thousands of objects. Terraform 
+chokes on the scale of data warehouse grants.
+4. Gracefully handle the transient existance of objects controlled outside of the security 
+infrastructure.
+
+Currently, Data Fence only supports the [Snowflake](https://www.snowflake.com/en/) data 
+warehouse. However, with enough community support, it can support additional data 
+warehouses in the future. 
+
+While Data Fence can be run at deploy time only like other continuous deployment tools, 
+we have found that it works best when you run it on a schedule so that it is continuously 
+analyzing the grants in the warehouse, revoking undesired grants and granting missing 
+grants. 
+
+## Why We Made Data Fence
+Zoom's Analytics Data Warehouse contains hundreds of thousands of objects with millions 
+of total grants on objects to roles. As our analytics program matured, the need to manage 
+multiple environments and multiple regions required that we manage our Database 
+Security through source-controlled infrastructure as code. 
+
+We first attempted to use Terraform, which works very well for us for many other 
+infrastructure tasks. However, we found that while Terraform could technically 
+manage Snowflake grants, we where stretching it's intended design. Even though Terraform 
+is written in GoLang, Snowflake grants resulted in very large state files which degraded 
+performance and made development painful. In addition, the fundamental assumptions 
+of Terraform conflict with the SQL security use case. In most SQL security 
+implementations, the objects must be created before grants are placed on them. If the 
+object is dropped, all grants are lost. Tools like DBT frequently use drop and create for 
+small models. In such a design, Terraform would expect to control these objects and not 
+have them created or dropped outside of Terraform. 
+
+In addition, as we transitioned from manual control to infrastructure as code, we needed
+our tool which emphasizes self healing. If an administrator accidentally made a change on a 
+version controlled object or if object lifecycle changes altered the grants, we need the 
+tool to gracefully return the object to it's desired configuration. By running the tool 
+on the schedule, we can ensure that this happens soon after the mistake was made so that 
+applications don't start to depend on the manual grants.
+
+After having significant success at Zoom using Data Fence at scale since 2023, we have 
+decided to release this tool open source. 
+
+## Contributing
+We need contributors! As we move Data Fence from an internal to an open source tool, we 
+need community contributors who can add the features necessary to make the tool more 
+broadly applicable. Please view the [CONTRIBUTING.md](./CONTRIBUTING.md) file for 
+information on contributing.
 
 ## Usage With Image
 
 You can use this system locally, in a Continuous Deployment (CD) pipeline or in an 
 orchestration service with an image. 
 
-First create a programmatic access token on Snowflake. Note that this application is for 
-security administration and will therefore require elevated access.
+First create a programmatic access token on Snowflake so that you can login without a 
+browser. Note that this application is for security administration and will therefore 
+require elevated access.
 
 ```snowflake
 alter user MY_USER add programmatic access token dfence_test
