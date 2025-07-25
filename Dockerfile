@@ -8,4 +8,5 @@ FROM amazoncorretto:17 AS runtime
 ENV DFENCE_JAR_PATH="/app/app.jar"
 COPY --from=build /build/target/zoom-data-fence-jar-with-dependencies.jar ${DFENCE_JAR_PATH}
 COPY dfence /usr/bin/dfence
+USER 1000
 ENTRYPOINT ["dfence"]
