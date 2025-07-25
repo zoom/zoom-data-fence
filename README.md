@@ -17,7 +17,7 @@ Currently, Data Fence only supports the [Snowflake](https://www.snowflake.com/en
 warehouse. However, with enough community support, it can support additional data 
 warehouses in the future. 
 
-While Data Fence can be run at deploy time only like other continuous deployment tools, 
+While Data Fence can be run at deploy time like other continuous deployment tools, 
 we have found that it works best when you run it on a schedule so that it is continuously 
 analyzing the grants in the warehouse, revoking undesired grants and granting missing 
 grants. 
