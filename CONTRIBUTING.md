@@ -8,9 +8,9 @@ Please follow this guide if you plan to contribute code to this project.
 
 While Data Fence works very well for Zoom's internal use cases, as we release this 
 project open source, we expect that we will need help with making the tool into a more 
-broadly useful tool.  At the same time we plan to keep the tool focused on doing one 
-specific task very well instead of becoming a general purpose security tool. Categories 
-which we need help with include the following.
+broadly useful tool for other teams.  At the same time we plan to keep the tool 
+focused on doing one specific task very well instead of becoming a general purpose 
+security tool. Categories which we need help with include the following.
 
 1. Add support for generation of a native executable.
 2. Improve documentation. Add a wiki.
