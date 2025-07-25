@@ -1,0 +1,2 @@
+#!/bin/sh
+java -Dnet.snowflake.jdbc.loggerImpl=net.snowflake.client.log.SLF4JLogger -jar "${DFENCE_JAR_PATH:-target/zoom-data-fence-jar-with-dependencies.jar}" $@

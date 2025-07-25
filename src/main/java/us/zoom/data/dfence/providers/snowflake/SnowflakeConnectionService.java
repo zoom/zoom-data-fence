@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.snowflake.client.jdbc.SnowflakeSQLException;
 import us.zoom.data.dfence.exception.DatabaseConnectionError;
 import us.zoom.data.dfence.exception.RbacValueError;
 
@@ -60,7 +61,7 @@ public class SnowflakeConnectionService {
             // Configure connection pool
             hikariConfig.setMaximumPoolSize(config.getConnectionProperties().getMaxConnections());
             hikariConfig.setConnectionTimeout(config.getConnectionProperties().getLogInTimeout() * 1000L);
-            hikariConfig.setPoolName(this.hashCode() + "HikariThreadPoolZoomDbRbac");
+            hikariConfig.setPoolName(this.hashCode() + "HikariThreadPoolZoomDataFence");
             HikariDataSource dataSource = new HikariDataSource(hikariConfig);
             dataSources.put(roleType, dataSource);
         }
