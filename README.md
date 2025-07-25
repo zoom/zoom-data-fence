@@ -27,7 +27,7 @@ export DFENCE_ACCOUNT="<Your Snowflake Account Name>"
 Run a compile command in Docker using the [example configuration](./example).
 ```shell
 docker run -it -v $PWD/example:/example -e DFENCE_TOKEN -e DFENCE_USER -e DFENCE_ACCOUNT \
-  --workdir /example zoomvideo/zoom-data-fence
+  --workdir /example zoomvideo/zoom-data-fence \
   compile --var-file env/dev/vars.yml roles 
 ```
 
