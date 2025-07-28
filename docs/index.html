@@ -1,1 +1,39 @@
-<div>Hello World</div>
+---
+layout: default
+title: Home
+---
+
+<h1>Zoom Data Fence (dfence)</h1>
+
+<p>Data Fence is a Data Warehouse Security Management tool which helps database
+administrators keep data warehouse permissions stable, repeatable and easy to manage.</p>
+
+<ol>
+  <li>Repeat the same security configuration across multiple environments.</li>
+  <li>Automatically heal configuration drift by revoking undesired grants and granting 
+  missing grants. This is a significant problem in SQL based data warehouses which have 
+  stateful implicit behavior resulting from behavior such as creating objects and 
+  dropping objects.</li>
+  <li>Scale to manage millions of grants on hundreds of thousands of objects. Terraform 
+  chokes on the scale of data warehouse grants.</li>
+  <li>Gracefully handle the transient existance of objects controlled outside of the security 
+  infrastructure.</li>
+</ol>
+
+<p>Currently, Data Fence only supports the <a href="https://www.snowflake.com/en/">Snowflake</a> data 
+warehouse. However, with enough community support, it can support additional data 
+warehouses in the future.</p>
+
+<p>While Data Fence can be run at deploy time like other continuous deployment tools, 
+we have found that it works best when you run it on a schedule so that it is continuously 
+analyzing the grants in the warehouse, revoking undesired grants and granting missing 
+grants.</p>
+
+<h2>Quick Links</h2>
+<ul>
+  {% for item in site.navigation %}
+    {% if item.url != "/" %}
+      <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
+    {% endif %}
+  {% endfor %}
+</ul>
