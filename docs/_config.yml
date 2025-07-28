@@ -26,5 +26,7 @@ navigation:
     url: /contributing
   - title: Usage With Image
     url: /usage-with-image
+  - title: Playbook YAML
+    url: /playbook
   - title: Unsupported Grants
     url: /unsupported-grants
