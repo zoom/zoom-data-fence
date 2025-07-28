@@ -22,9 +22,9 @@ role_restriction = 'ACCOUNTADMIN';
 based on your needs when you write your own profile.</p>
 
 {% highlight shell %}
-export DFENCE_USER="&lt;Your Snowflake Login Name&gt;"
-export DFENCE_TOKEN="&lt;Your Programmatic Access Token&gt;"
-export DFENCE_ACCOUNT="&lt;Your Snowflake Account Name&gt;"
+export DFENCE_USER="<Your Snowflake Login Name>"
+export DFENCE_TOKEN="<Your Programmatic Access Token>"
+export DFENCE_ACCOUNT="<Your Snowflake Account Name>"
 {% endhighlight %}
 
 <p>Run a compile command in Docker using the <a href="https://github.com/zoom/zoom-data-fence/tree/main/example">example configuration</a>.</p>
@@ -252,7 +252,8 @@ dfence apply --profile-file local/profiles.yml --var-file local/variables-dev.ym
 or database. For example, this permission will grant `select` on all future and existing
 tables within database `my_db` to role `rbac_example_1`.</p>
 
-<pre><code class="language-yaml"># local/roles.yml
+{% highlight yaml %}
+# local/roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1
@@ -261,7 +262,8 @@ roles:
         object-name: "*"
         object-type: table
         privileges:
-          - select</code></pre>
+          - select
+{% endhighlight %}
 
 <p>There are times whwn you may wish to only affect future roles or current roles. By 
 default, both are included in a wildcard grant.</p>
@@ -269,7 +271,8 @@ default, both are included in a wildcard grant.</p>
 <p>For example, if you wish to leave existing grants alone but you want any new tables to 
 have the grant, then you would set `include-future: true` and `include-all: false`.</p>
 
-<pre><code class="language-yaml"># local/roles.yml
+{% highlight yaml %}
+# local/roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1
@@ -280,7 +283,8 @@ roles:
         include-future: true
         include-all: false
         privileges:
-          - select</code></pre>
+          - select
+{% endhighlight %}
 
 <h3>Ownership Grants</h3>
 
@@ -298,13 +302,17 @@ configuration.</p>
 
 <p>You can import existing roles in order to make a new playbook.</p>
 
-<pre><code class="language-shell">dfence import-roles role_a role_b</code></pre>
+{% highlight shell %}
+dfence import-roles role_a role_b
+{% endhighlight %}
 
 <p>In addition, it is possible to search for roles based on a regular expression. For
 example, in order to find all roles which start with UR_ or SR_, use the following
 command.</p>
 
-<pre><code class="language-shell">dfence import-roles --patterns '^UR_.*' '^SR_.*'</code></pre>
+{% highlight shell %}
+dfence import-roles --patterns '^UR_.*' '^SR_.*'
+{% endhighlight %}
 
 <h3>Multiple Roles Files</h3>
 
@@ -320,7 +328,8 @@ the role does not exist, we do not create it and thus cause problems with owners
 mask problems in the provisioning system. The `create` property can be set to false if you
 do not desire to create a role.</p>
 
-<pre><code class="language-yaml"># roles.yml
+{% highlight yaml %}
+# roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1
@@ -329,7 +338,8 @@ roles:
       - database-name: my_db
         object-type: database
         privileges:
-          - usage</code></pre>
+          - usage
+{% endhighlight %}
 
 <h3>Granting Permissions To Roles Without Revoking Grants Provided Another Way</h3>
 
@@ -339,7 +349,8 @@ granted another way. This may be necessary while migrating ownership of objects 
 migrating from another system. In these cases, the `revoke-other-grants`
 attribute may be set to `false`.</p>
 
-<pre><code class="language-yaml"># roles.yml
+{% highlight yaml %}
+# roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1
@@ -348,4 +359,5 @@ roles:
       - database-name: my_db
         object-type: database
         privileges:
-          - usage</code></pre>
+          - usage
+{% endhighlight %}
