@@ -1,0 +1,28 @@
+# Site settings
+title: Zoom Data Fence
+description: Data Warehouse Security Management tool
+url: ""
+baseurl: ""
+
+# Build settings
+markdown: kramdown
+theme: jekyll-theme-midnight
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Theme settings
+show_downloads: false
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Why We Made Data Fence
+    url: /why-we-made-data-fence
+  - title: Contributing
+    url: /contributing
+  - title: Usage With Image
+    url: /usage-with-image
+  - title: Unsupported Grants
+    url: /unsupported-grants

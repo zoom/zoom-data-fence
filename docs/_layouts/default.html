@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  {% seo %}
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <h1><a href="{{ '/' | relative_url }}">{{ site.title }}</a></h1>
+      <p>{{ site.description }}</p>
+      
+      <nav class="main-nav">
+        <ul>
+          {% for item in site.navigation %}
+            <li><a href="{{ item.url | relative_url }}" {% if page.url == item.url %}class="active"{% endif %}>{{ item.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </header>
+    
+    <section>
+      {{ content }}
+    </section>
+    
+    <footer>
+      <p>&copy; {{ site.time | date: '%Y' }} Zoom Video Communications, Inc.</p>
+    </footer>
+  </div>
+  
+  <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
+</body>
+</html>

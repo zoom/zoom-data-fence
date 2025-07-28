@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Why We Made Data Fence | Zoom Data Fence</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Why We Made Data Fence | Zoom Data Fence</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Why We Made Data Fence" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Data Warehouse Security Management tool" />
+<meta property="og:description" content="Data Warehouse Security Management tool" />
+<link rel="canonical" href="http://localhost:4000/why-we-made-data-fence.html" />
+<meta property="og:url" content="http://localhost:4000/why-we-made-data-fence.html" />
+<meta property="og:site_name" content="Zoom Data Fence" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Why We Made Data Fence" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Data Warehouse Security Management tool","headline":"Why We Made Data Fence","url":"http://localhost:4000/why-we-made-data-fence.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <h1><a href="/">Zoom Data Fence</a></h1>
+      <p>Data Warehouse Security Management tool</p>
+      
+      <nav class="main-nav">
+        <ul>
+          
+            <li><a href="/" >Home</a></li>
+          
+            <li><a href="/why-we-made-data-fence" >Why We Made Data Fence</a></li>
+          
+            <li><a href="/contributing" >Contributing</a></li>
+          
+            <li><a href="/usage-with-image" >Usage With Image</a></li>
+          
+            <li><a href="/unsupported-grants" >Unsupported Grants</a></li>
+          
+        </ul>
+      </nav>
+    </header>
+    
+    <section>
+      <h1>Why We Made Data Fence</h1>
+
+<p>Zoom's Analytics Data Warehouse contains hundreds of thousands of objects with millions 
+of total grants on objects to roles. As our analytics program matured, the need to manage 
+multiple environments and multiple regions required that we manage our Database 
+Security through source-controlled infrastructure as code.</p>
+
+<p>We first attempted to use Terraform, which works very well for us for many other 
+infrastructure tasks. However, we found that while Terraform could technically 
+manage Snowflake grants, we where stretching it's intended design. Even though Terraform 
+is written in GoLang, Snowflake grants resulted in very large state files which degraded 
+performance and made development painful. In addition, the fundamental assumptions 
+of Terraform conflict with the SQL security use case. In most SQL security 
+implementations, the objects must be created before grants are placed on them. If the 
+object is dropped, all grants are lost. Tools like DBT frequently use drop and create for 
+small models. In such a design, Terraform would expect to control these objects and not 
+have them created or dropped outside of Terraform.</p>
+
+<p>In addition, as we transitioned from manual control to infrastructure as code, we needed
+our tool which emphasizes self healing. If an administrator accidentally made a change on a 
+version controlled object or if object lifecycle changes altered the grants, we need the 
+tool to gracefully return the object to it's desired configuration. By running the tool 
+on the schedule, we can ensure that this happens soon after the mistake was made so that 
+applications don't start to depend on the manual grants.</p>
+
+<p>After having significant success at Zoom using Data Fence at scale since 2023, we have 
+decided to release this tool open source.</p>
+    </section>
+    
+    <footer>
+      <p>&copy; 2025 Zoom Video Communications, Inc.</p>
+    </footer>
+  </div>
+  
+  <script src="/assets/js/scale.fix.js"></script>
+</body>
+</html>

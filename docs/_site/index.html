@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home | Zoom Data Fence</title>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Home | Zoom Data Fence</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Home" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Data Warehouse Security Management tool" />
+<meta property="og:description" content="Data Warehouse Security Management tool" />
+<link rel="canonical" href="http://localhost:4000/" />
+<meta property="og:url" content="http://localhost:4000/" />
+<meta property="og:site_name" content="Zoom Data Fence" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Home" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","description":"Data Warehouse Security Management tool","headline":"Home","name":"Zoom Data Fence","url":"http://localhost:4000/"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <h1><a href="/">Zoom Data Fence</a></h1>
+      <p>Data Warehouse Security Management tool</p>
+      
+      <nav class="main-nav">
+        <ul>
+          
+            <li><a href="/" class="active">Home</a></li>
+          
+            <li><a href="/why-we-made-data-fence" >Why We Made Data Fence</a></li>
+          
+            <li><a href="/contributing" >Contributing</a></li>
+          
+            <li><a href="/usage-with-image" >Usage With Image</a></li>
+          
+            <li><a href="/unsupported-grants" >Unsupported Grants</a></li>
+          
+        </ul>
+      </nav>
+    </header>
+    
+    <section>
+      <h1>Zoom Data Fence (dfence)</h1>
+
+<p>Data Fence is a Data Warehouse Security Management tool which helps database
+administrators keep data warehouse permissions stable, repeatable and easy to manage.</p>
+
+<ol>
+  <li>Repeat the same security configuration across multiple environments.</li>
+  <li>Automatically heal configuration drift by revoking undesired grants and granting 
+  missing grants. This is a significant problem in SQL based data warehouses which have 
+  stateful implicit behavior resulting from behavior such as creating objects and 
+  dropping objects.</li>
+  <li>Scale to manage millions of grants on hundreds of thousands of objects. Terraform 
+  chokes on the scale of data warehouse grants.</li>
+  <li>Gracefully handle the transient existance of objects controlled outside of the security 
+  infrastructure.</li>
+</ol>
+
+<p>Currently, Data Fence only supports the <a href="https://www.snowflake.com/en/">Snowflake</a> data 
+warehouse. However, with enough community support, it can support additional data 
+warehouses in the future.</p>
+
+<p>While Data Fence can be run at deploy time like other continuous deployment tools, 
+we have found that it works best when you run it on a schedule so that it is continuously 
+analyzing the grants in the warehouse, revoking undesired grants and granting missing 
+grants.</p>
+
+<h2>Quick Links</h2>
+<ul>
+  
+    
+  
+    
+      <li><a href="/why-we-made-data-fence">Why We Made Data Fence</a></li>
+    
+  
+    
+      <li><a href="/contributing">Contributing</a></li>
+    
+  
+    
+      <li><a href="/usage-with-image">Usage With Image</a></li>
+    
+  
+    
+      <li><a href="/unsupported-grants">Unsupported Grants</a></li>
+    
+  
+</ul>
+
+    </section>
+    
+    <footer>
+      <p>&copy; 2025 Zoom Video Communications, Inc.</p>
+    </footer>
+  </div>
+  
+  <script src="/assets/js/scale.fix.js"></script>
+</body>
+</html>
