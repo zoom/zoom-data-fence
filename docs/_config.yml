@@ -1,12 +1,14 @@
 # Site settings
 title: Zoom Data Fence
 description: Data Warehouse Security Management tool
-url: ""
-baseurl: ""
+url: "https://zoom.github.io"
+baseurl: "/zoom-data-fence"
 
 # Build settings
 markdown: kramdown
-theme: jekyll-theme-midnight
+highlighter: rouge
+theme: null
+remote_theme: null
 plugins:
   - jekyll-seo-tag
   - jekyll-sitemap

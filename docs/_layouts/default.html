@@ -9,28 +9,32 @@
 </head>
 <body>
   <div class="wrapper">
-    <header>
-      <h1><a href="{{ '/' | relative_url }}">{{ site.title }}</a></h1>
-      <p>{{ site.description }}</p>
-      
-      <nav class="main-nav">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1><a href="{{ '/' | relative_url }}">{{ site.title }}</a></h1>
+        <p>{{ site.description }}</p>
+      </div>
+
+      <nav class="sidebar-nav">
         <ul>
           {% for item in site.navigation %}
             <li><a href="{{ item.url | relative_url }}" {% if page.url == item.url %}class="active"{% endif %}>{{ item.title }}</a></li>
           {% endfor %}
         </ul>
       </nav>
-    </header>
-    
-    <section>
-      {{ content }}
-    </section>
-    
-    <footer>
-      <p>&copy; {{ site.time | date: '%Y' }} Zoom Video Communications, Inc.</p>
-    </footer>
+    </aside>
+
+    <main class="content">
+      <div class="content-container">
+        {{ content }}
+      </div>
+
+      <footer>
+        <p>&copy; {{ site.time | date: '%Y' }} Zoom Video Communications, Inc.</p>
+      </footer>
+    </main>
   </div>
-  
+
   <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
 </body>
 </html>

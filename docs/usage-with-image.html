@@ -12,36 +12,45 @@ orchestration service with an image.</p>
 browser. Note that this application is for security administration and will therefore 
 require elevated access.</p>
 
-<pre><code class="language-sql">alter user MY_USER add programmatic access token dfence_test
-role_restriction = 'ACCOUNTADMIN';</code></pre>
+{% highlight sql %}
+alter user MY_USER add programmatic access token dfence_test
+role_restriction = 'ACCOUNTADMIN';
+{% endhighlight %}
 
 <p>Export Environment Variables. These are based on the variables required in 
 <a href="https://github.com/zoom/zoom-data-fence/blob/main/example/profiles.yml">example/profiles.yml</a>. You can specify your own variable names
 based on your needs when you write your own profile.</p>
 
-<pre><code class="language-shell">export DFENCE_USER="&lt;Your Snowflake Login Name&gt;"
+{% highlight shell %}
+export DFENCE_USER="&lt;Your Snowflake Login Name&gt;"
 export DFENCE_TOKEN="&lt;Your Programmatic Access Token&gt;"
-export DFENCE_ACCOUNT="&lt;Your Snowflake Account Name&gt;"</code></pre>
+export DFENCE_ACCOUNT="&lt;Your Snowflake Account Name&gt;"
+{% endhighlight %}
 
 <p>Run a compile command in Docker using the <a href="https://github.com/zoom/zoom-data-fence/tree/main/example">example configuration</a>.</p>
 
-<pre><code class="language-shell">docker run -it -v $PWD/example:/example -e DFENCE_TOKEN -e DFENCE_USER -e DFENCE_ACCOUNT \
+{% highlight shell %}
+docker run -it -v $PWD/example:/example -e DFENCE_TOKEN -e DFENCE_USER -e DFENCE_ACCOUNT \
   --workdir /example zoomvideo/zoom-data-fence \
-  compile --var-file env/dev/vars.yml roles</code></pre>
+  compile --var-file env/dev/vars.yml roles
+{% endhighlight %}
 
 <h3>Demo Setup</h3>
 
 <p>In order to demonstrate the tool, let's create some objects to grant permissions on.</p>
 
-<pre><code class="language-sql">create database if not exists my_db;
+{% highlight sql %}
+create database if not exists my_db;
 create schema if not exists my_db.my_schema;
-create table if not exists my_db.my_schema.my_table(idx integer);</code></pre>
+create table if not exists my_db.my_schema.my_table(idx integer);
+{% endhighlight %}
 
 <h3>Roles File</h3>
 
 <p>Create a file with a configuration using some databases which are under your control.</p>
 
-<pre><code class="language-yaml"># local/roles.yml
+{% highlight yaml %}
+# local/roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1
@@ -69,14 +78,16 @@ roles:
       - object-type: role
         privileges:
           - USAGE
-        object-name: rbac_example_1</code></pre>
+        object-name: rbac_example_1
+{% endhighlight %}
 
 <h3>Profiles File</h3>
 
 <p>Next you will need to create a profiles file that you can use to connect to the database.
 The profiles file can list multiple environments. This is a file for your filesystem only.</p>
 
-<pre><code class="language-yaml"># local/profiles.yml
+{% highlight yaml %}
+# local/profiles.yml
 default-profile: dev
 profiles:
   dev:
@@ -96,7 +107,8 @@ profiles:
         connection-properties:
           authenticator: externalbrowser
           user: YOUR.USERNAME
-          role: SECURITYADMIN</code></pre>
+          role: SECURITYADMIN
+{% endhighlight %}
 
 <p>Note that to use this tool you will need SECURITYADMIN or a similar role with enough
 permissions to create roles and manage grants.</p>
@@ -105,11 +117,14 @@ permissions to create roles and manage grants.</p>
 
 <p>Now you can compile your changes into a plan.</p>
 
-<pre><code class="language-shell">dfence compile --profile-file local/profiles.yml local/roles.yml</code></pre>
+{% highlight shell %}
+dfence compile --profile-file local/profiles.yml local/roles.yml
+{% endhighlight %}
 
 <p>You should see a set of changes that are planned.</p>
 
-<pre><code class="language-yaml">---
+{% highlight yaml %}
+---
 changes:
 - role-creation-statements:
   - "create role if not exists rbac_example_2;"
@@ -126,36 +141,48 @@ changes:
   role-id: "rdbac-example-role-1"
   role-name: "rbac_example_1"
 total-roles: 2
-total-changes: 2</code></pre>
+total-changes: 2
+{% endhighlight %}
 
 <p>If you would like to execute the changes, you can apply them.</p>
 
-<pre><code class="language-shell">dfence apply --profile-file local/profiles.yml local/roles.yml</code></pre>
+{% highlight shell %}
+dfence apply --profile-file local/profiles.yml local/roles.yml
+{% endhighlight %}
 
 <p>Now that we have made the changes, we can execute the compile step again. We should see no
 changes.</p>
 
-<pre><code class="language-shell">dfence compile --profile-file local/profiles.yml local/roles.yml</code></pre>
+{% highlight shell %}
+dfence compile --profile-file local/profiles.yml local/roles.yml
+{% endhighlight %}
 
-<pre><code class="language-yaml">---
+{% highlight yaml %}
+---
 changes: [ ]
 total-roles: 2
-total-changes: 0</code></pre>
+total-changes: 0
+{% endhighlight %}
 
 <p>data-fence strives to not run any statements against the database unless they are
 actually needed. This reduces noise when one needs to look at system logs to investigate a
 change. In addition, note that data-fence will remove grants which are not defined in
 the roles file. Let's try manually granting a permission outside the process.</p>
 
-<pre><code class="language-sql">grant create schema on database my_db to role rbac_example_1;</code></pre>
+{% highlight sql %}
+grant create schema on database my_db to role rbac_example_1;
+{% endhighlight %}
 
 <p>Now let's run the tool again.</p>
 
-<pre><code class="language-shell">dfence apply --profile-file local/profiles.yml local/roles.yml</code></pre>
+{% highlight shell %}
+dfence apply --profile-file local/profiles.yml local/roles.yml
+{% endhighlight %}
 
 <p>We now see that we are revoking the rogue grant.</p>
 
-<pre><code class="language-yaml">---
+{% highlight yaml %}
+---
 changes:
 - role-creation-statements: []
   role-grant-statements:
@@ -163,7 +190,8 @@ changes:
   role-id: "rdbac-example-role-1"
   role-name: "rbac_example_1"
 total-roles: 2
-total-changes: 1</code></pre>
+total-changes: 1
+{% endhighlight %}
 
 <p>This ability to revoke grants by deleting them from the configuration is a feature.
 However, it is important to note that if you are migrating roles to data-fence, you need
@@ -174,25 +202,30 @@ compile command and see no changes. Only at this point should you make additiona
 
 <p>Now we should clean up the objects that we made in our example.</p>
 
-<pre><code class="language-sql">use role sysadmin;
+{% highlight sql %}
+use role sysadmin;
 drop database if exists my_db;
 use role securityadmin;
 drop role if exists rbac_example_1;
 drop role if exists rbac_example_2;
-drop role if exists rbac_example_3;</code></pre>
+drop role if exists rbac_example_3;
+{% endhighlight %}
 
 <h3>Variables</h3>
 
 <p>Variables can be used in profile files and roles files. Create a variables file like this.</p>
 
-<pre><code class="language-yaml"># variables-dev.yml
+{% highlight yaml %}
+# variables-dev.yml
 env-suffix=dev
 src-database-name=src_experimental
-sso-finance-data-analyst-role=okta_finance_analyst_dev</code></pre>
+sso-finance-data-analyst-role=okta_finance_analyst_dev
+{% endhighlight %}
 
 <p>Now you can use these variables in the files.</p>
 
-<pre><code class="language-yaml"># roles.yml
+{% highlight yaml %}
+# roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1${var.env-suffix}
@@ -204,11 +237,14 @@ roles:
       - object-type: role
         object-name: ${var.sso-finance-data-analyst-role}
         privileges:
-          - usage</code></pre>
+          - usage
+{% endhighlight %}
 
 <p>You can pass these variables using the `--var-file` option.</p>
 
-<pre><code class="language-shell">dfence apply --profile-file local/profiles.yml --var-file local/variables-dev.yml local/roles.yml</code></pre>
+{% highlight shell %}
+dfence apply --profile-file local/profiles.yml --var-file local/variables-dev.yml local/roles.yml
+{% endhighlight %}
 
 <h3>Wildcard Grants</h3>
 
