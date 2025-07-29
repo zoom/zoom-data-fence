@@ -28,5 +28,9 @@ navigation:
     url: /getting-started
   - title: Defining Roles
     url: /defining-roles
+  - title: Connecting to a Database
+    url: /profiles.html
   - title: Unsupported Grants
     url: /unsupported-grants
+  - title: Variables
+    url: /variables

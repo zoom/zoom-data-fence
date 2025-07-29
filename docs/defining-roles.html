@@ -3,12 +3,16 @@ layout: default
 title: Defining Roles
 ---
 
-<p>The playbook YAML file is the core configuration file for Data Fence. It defines the roles and their permissions that will be managed by the tool.</p>
+<p>The playbook YAML files are the core configuration file for Data Fence. They defines the roles and their permissions
+  that will be managed by the tool. You can define as many playbook files as you like. The files will all be merged when
+  you run compile or apply.</p>
 
 <h2>Structure</h2>
 
-<p>The playbook file has the following top-level structure:</p>
+<p>The playbook files have the following top-level structure:</p>
 
+<div class="code-block">
+  <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
 roles:
   role-id-1:
@@ -19,6 +23,7 @@ roles:
     # role configuration
 role-owner: SECURITYADMIN  # Optional
 {% endhighlight %}
+</div>
 
 <h2>Fields</h2>
 
@@ -253,7 +258,6 @@ roles:
 <div class="code-block">
   <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
-# roles.yml
 roles:
   external-role:
     name: external_system_role
@@ -269,6 +273,7 @@ roles:
 <h3>Role without Revoking Other Grants</h3>
 
 <div class="code-block">
+  <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
 roles:
   hybrid-role:

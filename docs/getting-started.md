@@ -25,9 +25,9 @@ based on your needs when you write your own profile.</p>
 <div class="code-block">
   <div class="code-block-title">shell</div>
 {% highlight shell %}
-export DFENCE_USER="<Your Snowflake Login Name>"
-export DFENCE_TOKEN="<Your Programmatic Access Token>"
-export DFENCE_ACCOUNT="<Your Snowflake Account Name>"
+export DFENCE_USER="Your Snowflake Login Name"
+export DFENCE_TOKEN="Your Programmatic Access Token"
+export DFENCE_ACCOUNT="Your Snowflake Account Name"
 {% endhighlight %}
 </div>
 
@@ -405,7 +405,7 @@ granted another way. This may be necessary while migrating ownership of objects 
 migrating from another system. In these cases, the `revoke-other-grants`
 attribute may be set to `false`.</p>
 
-<div class="code-block" language="yaml">
+<div class="code-block">
   <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
 roles:
