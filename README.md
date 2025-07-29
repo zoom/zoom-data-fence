@@ -23,4 +23,3 @@ analyzing the grants in the warehouse, revoking undesired grants and granting mi
 grants.
 
 For additional information, please see the [Documentation](https://zoom.github.io/zoom-data-fence/).
-
