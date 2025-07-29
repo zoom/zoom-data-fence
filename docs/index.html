@@ -26,12 +26,3 @@ warehouses in the future.</p>
 we have found that it works best when you run it on a schedule so that it is continuously 
 analyzing the grants in the warehouse, revoking undesired grants and granting missing 
 grants.</p>
-
-<h2>Quick Links</h2>
-<ul>
-  {% for item in site.navigation %}
-    {% if item.url != "/" %}
-      <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
-    {% endif %}
-  {% endfor %}
-</ul>

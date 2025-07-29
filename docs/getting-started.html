@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Usage With Image
+title: Getting Started
 ---
 
 <p>You can use this system locally, in a Continuous Deployment (CD) pipeline or in an 
@@ -10,10 +10,13 @@ orchestration service with an image.</p>
 browser. Note that this application is for security administration and will therefore 
 require elevated access.</p>
 
+<div class="code-block">
+  <div class="code-block-title">Snowflake SQL</div>
 {% highlight sql %}
 alter user MY_USER add programmatic access token dfence_test
 role_restriction = 'ACCOUNTADMIN';
 {% endhighlight %}
+</div>
 
 <p>Export Environment Variables. These are based on the variables required in 
 <a href="https://github.com/zoom/zoom-data-fence/blob/main/example/profiles.yml">example/profiles.yml</a>. You can specify your own variable names
@@ -252,6 +255,7 @@ sso-finance-data-analyst-role=okta_finance_analyst_dev
 
 <p>Now you can use these variables in the files.</p>
 
+<div class="code-block">
 {% highlight yaml %}
 roles:
   rbac-example-role-1:
@@ -266,12 +270,15 @@ roles:
         privileges:
           - usage
 {% endhighlight %}
+</div>
 
 <p>You can pass these variables using the `--var-file` option.</p>
 
+<div class="code-block">
 {% highlight shell %}
 dfence apply --profile-file local/profiles.yml --var-file local/variables-dev.yml local/roles.yml
 {% endhighlight %}
+</div>
 
 <h3>Wildcard Grants</h3>
 
@@ -279,6 +286,7 @@ dfence apply --profile-file local/profiles.yml --var-file local/variables-dev.ym
 or database. For example, this permission will grant `select` on all future and existing
 tables within database `my_db` to role `rbac_example_1`.</p>
 
+<div class="code-block">
 {% highlight yaml %}
 roles:
   rbac-example-role-1:
@@ -290,6 +298,7 @@ roles:
         privileges:
           - select
 {% endhighlight %}
+</div>
 
 <p>There are times whwn you may wish to only affect future roles or current roles. By 
 default, both are included in a wildcard grant.</p>
@@ -297,6 +306,8 @@ default, both are included in a wildcard grant.</p>
 <p>For example, if you wish to leave existing grants alone but you want any new tables to 
 have the grant, then you would set `include-future: true` and `include-all: false`.</p>
 
+<div class="code-block">
+  <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
 roles:
   rbac-example-role-1:
@@ -310,6 +321,7 @@ roles:
         privileges:
           - select
 {% endhighlight %}
+</div>
 
 <h3>Ownership Grants</h3>
 
@@ -327,17 +339,34 @@ configuration.</p>
 
 <p>You can import existing roles in order to make a new playbook.</p>
 
+<div class="code-block">
+{% highlight yaml %}
+roles:
+  rbac-example-role-1:
+    name: rbac_example_1
+    grants:
+      - database-name: my_db
+        object-type: database
+  {% endhighlight %}
+</div>
+
+<div class="code-block">
+  <div class="code-block-title">shell</div>
 {% highlight shell %}
 dfence import-roles role_a role_b
 {% endhighlight %}
+</div>
 
 <p>In addition, it is possible to search for roles based on a regular expression. For
 example, in order to find all roles which start with UR_ or SR_, use the following
 command.</p>
 
+<div class="code-block">
+  <div class="code-block-title">shell</div>
 {% highlight shell %}
 dfence import-roles --patterns '^UR_.*' '^SR_.*'
 {% endhighlight %}
+</div>
 
 <h3>Multiple Roles Files</h3>
 
@@ -353,6 +382,8 @@ the role does not exist, we do not create it and thus cause problems with owners
 mask problems in the provisioning system. The `create` property can be set to false if you
 do not desire to create a role.</p>
 
+<div class="code-block">
+  <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
 roles:
   rbac-example-role-1:
@@ -364,6 +395,7 @@ roles:
         privileges:
           - usage
 {% endhighlight %}
+</div>
 
 <h3>Granting Permissions To Roles Without Revoking Grants Provided Another Way</h3>
 
@@ -373,6 +405,8 @@ granted another way. This may be necessary while migrating ownership of objects 
 migrating from another system. In these cases, the `revoke-other-grants`
 attribute may be set to `false`.</p>
 
+<div class="code-block" language="yaml">
+  <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
 roles:
   rbac-example-role-1:
@@ -384,3 +418,4 @@ roles:
         privileges:
           - usage
 {% endhighlight %}
+</div>

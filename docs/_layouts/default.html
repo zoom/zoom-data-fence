@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+  <title>
+    {% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}
+  </title>
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
   {% seo %}
 </head>
 <body>
   <header class="header">
-    <div class="header-title">{{ site.title }}</div>
+    <a href="{{ '/' | relative_url }}">
+      <div class="header-title">{{ site.title }}</div>
+    </a>
     <div class="header-links">
       <a href="https://github.com/zoom/zoom-data-fence" target="_blank" title="GitHub Repository">
         <img src="{{ '/resources/github-mark-white.svg' | relative_url }}" alt="GitHub" width="24" height="24">
@@ -48,7 +52,6 @@
     <p>&copy; {{ site.time | date: '%Y' }} Zoom Video Communications, Inc.</p>
   </div>
 
-  <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Find all highlight blocks
