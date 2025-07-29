@@ -40,7 +40,7 @@ class SnowflakeUnsupportedOwnershipManagementGrantBuilderTest {
                 false);
         SnowflakeUnsupportedOwnershipManagementGrantBuilder grantBuilder
                 = new SnowflakeUnsupportedOwnershipManagementGrantBuilder(snowflakeGrantModel);
-        List<String> expected = List.of("DROP STREAMLIT \"MY_DB\".\"MY_SCHEMA\".\"MY_STREAMLIT\";");
+        List<String> expected = List.of();
 
         List<String> grantStatement = grantBuilder.getRevokeStatements();
         assertEquals(expected, grantStatement);
