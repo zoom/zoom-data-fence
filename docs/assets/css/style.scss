@@ -16,6 +16,9 @@
   --sidebar-width: 260px;
   --header-height: 60px;
   --footer-height: 50px;
+  --table-background-color: #2d2d2d;
+  --table-text-color: #f0f0f0;
+  --table-alternate-background-color: #373737;
 }
 
 /* General styling */
@@ -87,6 +90,9 @@ h2 {
 .header-links {
   display: flex;
   align-items: center;
+  float: right;
+  margin-left: auto;
+  margin-right: 0;
 }
 
 .header-links a {
@@ -344,4 +350,18 @@ pre.highlight {
   .header-title {
     font-size: 1em;
   }
+
+}
+
+table, th, td {
+  border: 1px var(--primary-color) solid;
+}
+
+tbody tr:nth-child(odd) {
+  background-color: var(--table-alternate-background-color);
+}
+
+thead {
+  background-color: var(--primary-color);
+  color: var(--background-color);
 }

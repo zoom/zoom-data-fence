@@ -47,12 +47,9 @@ public class SnowflakeUnsupportedOwnershipManagementGrantBuilder extends Snowfla
             throw new InvalidGrantModelForGrantBuilder();
         }
         log.warn(String.format(
-                "It is not possible to revoke ownership on a notebook. The only thing we can do is drop the %s.",
-                grant.grantedOn()));
-        return List.of(String.format(
-                "DROP %s %s;",
-                SnowflakeObjectType.valueOf(grant.grantedOn()).getObjectType(),
-                this.grant.getEscapedName()));
+                "It is not possible to revoke ownership on a notebook. We will not be able to drop ownership grants on %s %s.",
+                grant.grantedOn(), grant.getEscapedName()));
+        return List.of();
     }
 
     @Override

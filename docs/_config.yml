@@ -26,7 +26,13 @@ navigation:
     url: /contributing
   - title: Getting Started
     url: /getting-started
-  - title: Playbook YAML
-    url: /playbook
+  - title: Defining Roles
+    url: /defining-roles
+  - title: Connecting to a Database
+    url: /profiles
+  - title: Variables
+    url: /variables
+  - title: Importing Roles
+    url: /importing-roles
   - title: Unsupported Grants
     url: /unsupported-grants

@@ -3,11 +3,6 @@
   Usage: {% include code_block.html title="Title" language="language" code=code_content %}
 {% endcomment %}
 
-<div class="code-block">
-  {% if include.title %}
-    <div class="code-block-title">{{ include.title }}</div>
-  {% endif %}
-  <div class="highlight">
-{% highlight {{ include.language }} %}{{ include.code }}{% endhighlight %}
-  </div>
+<div class="code-block">{% if include.title %}<div class="code-block-title">{{ include.title }}</div>{% endif %}
+<div class="highlight">{% highlight include.language  %}{{ include.code }}{% endhighlight %}</div>
 </div>
