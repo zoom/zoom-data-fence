@@ -29,8 +29,10 @@ navigation:
   - title: Defining Roles
     url: /defining-roles
   - title: Connecting to a Database
-    url: /profiles.html
-  - title: Unsupported Grants
-    url: /unsupported-grants
+    url: /profiles
   - title: Variables
     url: /variables
+  - title: Importing Roles
+    url: /importing-roles
+  - title: Unsupported Grants
+    url: /unsupported-grants

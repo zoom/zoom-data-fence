@@ -90,6 +90,9 @@ h2 {
 .header-links {
   display: flex;
   align-items: center;
+  float: right;
+  margin-left: auto;
+  margin-right: 0;
 }
 
 .header-links a {

@@ -6,7 +6,7 @@ title: Variables
 Variables can be used in profile files and roles files. Variables can come from files
 or from environment variables.
 
-# Variables From Roles Files
+# Dfence Variables From Roles Files
 Create a variables file like this.
 
 ```yaml
@@ -38,7 +38,7 @@ You can pass these variables using the `--var-file` option.
 dfence apply --profile-file local/profiles.yml --var-file local/variables-dev.yml local/roles.yml
 ```
 
-# Variables From Environment Variables
+# Dfence Variables From Environment Variables
 Variables can also come from environment variables. Environment variables should use 
 UPPER_SNAKE_CASE prefixed by DFENCE_. For example, the following variables are equivalent.
 
