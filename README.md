@@ -145,7 +145,7 @@ profiles:
     provider-name: SNOWFLAKE
     connection:
       snowflake:
-        connection-string: jdbc:snowflake://zoom-experimental.snowflakecomputing.com:443
+        connection-string: jdbc:snowflake://your-dev-account.snowflakecomputing.com:443
         connection-properties:
           authenticator: externalbrowser
           user: YOUR.USERNAME
@@ -154,7 +154,7 @@ profiles:
     provider-name: SNOWFLAKE
     connection:
       snowflake:
-        connection-string: jdbc:snowflake://zoomus.snowflakecomputing.com:443
+        connection-string: jdbc:snowflake://your-prod-account.snowflakecomputing.com:443
         connection-properties:
           authenticator: externalbrowser
           user: YOUR.USERNAME
