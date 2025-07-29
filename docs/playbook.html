@@ -1,0 +1,278 @@
+---
+layout: default
+title: Playbook YAML
+---
+
+<h1>Playbook YAML Documentation</h1>
+
+<p>The playbook YAML file is the core configuration file for Data Fence. It defines the roles and their permissions that will be managed by the tool.</p>
+
+<h2>Structure</h2>
+
+<p>The playbook file has the following top-level structure:</p>
+
+{% highlight yaml %}
+# playbook.yml
+roles:
+  role-id-1:
+    name: role_name_1
+    # role configuration
+  role-id-2:
+    name: role_name_2
+    # role configuration
+roleOwner: SECURITYADMIN  # Optional
+{% endhighlight %}
+
+<h2>Fields</h2>
+
+<h3>Top-Level Fields</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>roles</td>
+      <td>Map</td>
+      <td>Yes</td>
+      <td>-</td>
+      <td>A map of role IDs to role configurations</td>
+    </tr>
+    <tr>
+      <td>roleOwner</td>
+      <td>String</td>
+      <td>No</td>
+      <td>null</td>
+      <td>The default owner for all roles in the playbook</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Role Configuration Fields</h3>
+
+<p>Each role in the <code>roles</code> map has the following fields:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>name</td>
+      <td>String</td>
+      <td>Yes</td>
+      <td>-</td>
+      <td>The name of the role in the database</td>
+    </tr>
+    <tr>
+      <td>grants</td>
+      <td>List</td>
+      <td>No</td>
+      <td>[]</td>
+      <td>A list of privilege grants for the role</td>
+    </tr>
+    <tr>
+      <td>create</td>
+      <td>Boolean</td>
+      <td>No</td>
+      <td>true</td>
+      <td>Whether to create the role if it doesn't exist</td>
+    </tr>
+    <tr>
+      <td>revokeOtherGrants</td>
+      <td>Boolean</td>
+      <td>No</td>
+      <td>true</td>
+      <td>Whether to revoke grants not defined in the playbook</td>
+    </tr>
+    <tr>
+      <td>enable</td>
+      <td>Boolean</td>
+      <td>No</td>
+      <td>true</td>
+      <td>Whether to enable the role</td>
+    </tr>
+    <tr>
+      <td>roleOwner</td>
+      <td>String</td>
+      <td>No</td>
+      <td>null</td>
+      <td>The owner of the role, overrides the top-level roleOwner</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Privilege Grant Fields</h3>
+
+<p>Each item in the <code>grants</code> list has the following fields:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>objectType</td>
+      <td>String</td>
+      <td>Yes</td>
+      <td>-</td>
+      <td>The type of object to grant privileges on (e.g., database, schema, table, role)</td>
+    </tr>
+    <tr>
+      <td>objectName</td>
+      <td>String</td>
+      <td>*</td>
+      <td>null</td>
+      <td>The name of the object to grant privileges on</td>
+    </tr>
+    <tr>
+      <td>schemaName</td>
+      <td>String</td>
+      <td>*</td>
+      <td>null</td>
+      <td>The name of the schema containing the object</td>
+    </tr>
+    <tr>
+      <td>databaseName</td>
+      <td>String</td>
+      <td>*</td>
+      <td>null</td>
+      <td>The name of the database containing the schema or object</td>
+    </tr>
+    <tr>
+      <td>privileges</td>
+      <td>List</td>
+      <td>Yes</td>
+      <td>-</td>
+      <td>A list of privileges to grant (e.g., select, usage, create)</td>
+    </tr>
+    <tr>
+      <td>includeFuture</td>
+      <td>Boolean</td>
+      <td>No</td>
+      <td>true</td>
+      <td>Whether to include future objects in the grant</td>
+    </tr>
+    <tr>
+      <td>includeAll</td>
+      <td>Boolean</td>
+      <td>No</td>
+      <td>true</td>
+      <td>Whether to include all existing objects in the grant</td>
+    </tr>
+    <tr>
+      <td>enable</td>
+      <td>Boolean</td>
+      <td>No</td>
+      <td>true</td>
+      <td>Whether to enable the privilege grant</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>* At least one of <code>objectName</code>, <code>schemaName</code>, or <code>databaseName</code> must be provided, except for account-level grants.</p>
+
+<h2>Examples</h2>
+
+<h3>Basic Role with Database Access</h3>
+
+{% highlight yaml %}
+# roles.yml
+roles:
+  data-analyst-role:
+    name: data_analyst
+    grants:
+      - objectType: database
+        objectName: analytics_db
+        privileges:
+          - usage
+      - objectType: schema
+        databaseName: analytics_db
+        schemaName: public
+        privileges:
+          - usage
+      - objectType: table
+        databaseName: analytics_db
+        schemaName: public
+        objectName: "*"
+        privileges:
+          - select
+{% endhighlight %}
+
+<h3>Role with Wildcard Grants</h3>
+
+{% highlight yaml %}
+# roles.yml
+roles:
+  data-engineer-role:
+    name: data_engineer
+    grants:
+      - objectType: database
+        objectName: raw_data
+        privileges:
+          - usage
+      - objectType: schema
+        databaseName: raw_data
+        schemaName: "*"
+        privileges:
+          - usage
+      - objectType: table
+        databaseName: raw_data
+        schemaName: "*"
+        objectName: "*"
+        includeFuture: true
+        includeAll: true
+        privileges:
+          - select
+          - insert
+          - update
+{% endhighlight %}
+
+<h3>Role without Auto-Creation</h3>
+
+{% highlight yaml %}
+# roles.yml
+roles:
+  external-role:
+    name: external_system_role
+    create: false
+    grants:
+      - objectType: database
+        objectName: shared_data
+        privileges:
+          - usage
+{% endhighlight %}
+
+<h3>Role without Revoking Other Grants</h3>
+
+{% highlight yaml %}
+# roles.yml
+roles:
+  hybrid-role:
+    name: hybrid_managed_role
+    revokeOtherGrants: false
+    grants:
+      - objectType: database
+        objectName: app_data
+        privileges:
+          - usage
+{% endhighlight %}
