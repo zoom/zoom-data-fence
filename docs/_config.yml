@@ -1,0 +1,32 @@
+# Site settings
+title: Zoom Data Fence
+description: Data Warehouse Security Management tool
+url: "https://zoom.github.io"
+baseurl: "/zoom-data-fence"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: null
+remote_theme: null
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Theme settings
+show_downloads: false
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Why We Made Data Fence
+    url: /why-we-made-data-fence
+  - title: Contributing
+    url: /contributing
+  - title: Usage With Image
+    url: /usage-with-image
+  - title: Playbook YAML
+    url: /playbook
+  - title: Unsupported Grants
+    url: /unsupported-grants

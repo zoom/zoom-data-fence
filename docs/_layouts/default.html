@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  {% seo %}
+</head>
+<body>
+  <header class="header">
+    <div class="header-title">{{ site.title }}</div>
+    <div class="header-links">
+      <a href="https://github.com/zoom/zoom-data-fence" target="_blank" title="GitHub Repository">
+        <img src="{{ '/resources/github-mark-white.svg' | relative_url }}" alt="GitHub" width="24" height="24">
+      </a>
+    </div>
+  </header>
+
+  <div class="wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <p>{{ site.description }}</p>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          {% for item in site.navigation %}
+            <li><a href="{{ item.url | relative_url }}" {% if page.url == item.url %}class="active"{% endif %}>{{ item.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <div class="content-container">
+        {{ content }}
+      </div>
+
+      <footer>
+        <!-- Spacer for content bottom margin -->
+      </footer>
+    </main>
+  </div>
+
+  <div class="page-footer">
+    <p>&copy; {{ site.time | date: '%Y' }} Zoom Video Communications, Inc.</p>
+  </div>
+
+  <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Find all highlight blocks
+      var highlights = document.querySelectorAll('.highlight');
+
+      highlights.forEach(function(highlight) {
+        var pre = highlight.querySelector('pre');
+        if (!pre) return;
+
+        var code = pre.textContent;
+        var lines = code.split('\n');
+        var firstLine = lines[0].trim();
+
+        // Check if first line is a comment with a file name
+        if (firstLine.startsWith('#') || firstLine.startsWith('//') || firstLine.startsWith('/*')) {
+          var title = firstLine.replace(/^[#/\* ]+/, '').trim();
+
+          if (title) {
+            // Create container div
+            var container = document.createElement('div');
+            container.className = 'code-block';
+
+            // Create title div
+            var titleDiv = document.createElement('div');
+            titleDiv.className = 'code-block-title';
+            titleDiv.textContent = title;
+
+            // Replace the first line in the code (remove the comment)
+            pre.textContent = lines.slice(1).join('\n').trim();
+
+            // Add the title before the highlight block
+            highlight.parentNode.insertBefore(titleDiv, highlight);
+
+            // Wrap both in a container
+            var wrapper = document.createElement('div');
+            wrapper.className = 'code-block';
+            highlight.parentNode.insertBefore(wrapper, titleDiv);
+            wrapper.appendChild(titleDiv);
+            wrapper.appendChild(highlight);
+          } else {
+            // If no title, just wrap in a container
+            var container = document.createElement('div');
+            container.className = 'code-block';
+            highlight.parentNode.insertBefore(container, highlight);
+            container.appendChild(highlight);
+          }
+        } else {
+          // If no comment, just wrap in a container
+          var container = document.createElement('div');
+          container.className = 'code-block';
+          highlight.parentNode.insertBefore(container, highlight);
+          container.appendChild(highlight);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
