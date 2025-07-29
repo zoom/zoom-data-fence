@@ -20,7 +20,9 @@ warehouses in the future.
 While Data Fence can be run at deploy time like other continuous deployment tools, 
 we have found that it works best when you run it on a schedule so that it is continuously 
 analyzing the grants in the warehouse, revoking undesired grants and granting missing 
-grants. 
+grants.
+
+For additional information, please see the [Documentation](https://zoom.github.io/zoom-data-fence/).
 
 ## Why We Made Data Fence
 Zoom's Analytics Data Warehouse contains hundreds of thousands of objects with millions 

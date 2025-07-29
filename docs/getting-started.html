@@ -3,8 +3,6 @@ layout: default
 title: Usage With Image
 ---
 
-<h1>Usage With Image</h1>
-
 <p>You can use this system locally, in a Continuous Deployment (CD) pipeline or in an 
 orchestration service with an image.</p>
 
@@ -50,7 +48,6 @@ create table if not exists my_db.my_schema.my_table(idx integer);
 <p>Create a file with a configuration using some databases which are under your control.</p>
 
 {% highlight yaml %}
-# local/roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1
@@ -87,7 +84,6 @@ roles:
 The profiles file can list multiple environments. This is a file for your filesystem only.</p>
 
 {% highlight yaml %}
-# local/profiles.yml
 default-profile: dev
 profiles:
   dev:
@@ -216,7 +212,6 @@ drop role if exists rbac_example_3;
 <p>Variables can be used in profile files and roles files. Create a variables file like this.</p>
 
 {% highlight yaml %}
-# variables-dev.yml
 env-suffix=dev
 src-database-name=src_experimental
 sso-finance-data-analyst-role=okta_finance_analyst_dev
@@ -225,7 +220,6 @@ sso-finance-data-analyst-role=okta_finance_analyst_dev
 <p>Now you can use these variables in the files.</p>
 
 {% highlight yaml %}
-# roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1${var.env-suffix}
@@ -253,7 +247,6 @@ or database. For example, this permission will grant `select` on all future and 
 tables within database `my_db` to role `rbac_example_1`.</p>
 
 {% highlight yaml %}
-# local/roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1
@@ -272,7 +265,6 @@ default, both are included in a wildcard grant.</p>
 have the grant, then you would set `include-future: true` and `include-all: false`.</p>
 
 {% highlight yaml %}
-# local/roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1
@@ -329,7 +321,6 @@ mask problems in the provisioning system. The `create` property can be set to fa
 do not desire to create a role.</p>
 
 {% highlight yaml %}
-# roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1
@@ -350,7 +341,6 @@ migrating from another system. In these cases, the `revoke-other-grants`
 attribute may be set to `false`.</p>
 
 {% highlight yaml %}
-# roles.yml
 roles:
   rbac-example-role-1:
     name: rbac_example_1

@@ -24,8 +24,8 @@ navigation:
     url: /why-we-made-data-fence
   - title: Contributing
     url: /contributing
-  - title: Usage With Image
-    url: /usage-with-image
+  - title: Getting Started
+    url: /getting-started
   - title: Playbook YAML
     url: /playbook
   - title: Unsupported Grants

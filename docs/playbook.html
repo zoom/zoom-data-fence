@@ -3,8 +3,6 @@ layout: default
 title: Playbook YAML
 ---
 
-<h1>Playbook YAML Documentation</h1>
-
 <p>The playbook YAML file is the core configuration file for Data Fence. It defines the roles and their permissions that will be managed by the tool.</p>
 
 <h2>Structure</h2>
@@ -12,7 +10,6 @@ title: Playbook YAML
 <p>The playbook file has the following top-level structure:</p>
 
 {% highlight yaml %}
-# playbook.yml
 roles:
   role-id-1:
     name: role_name_1
@@ -20,7 +17,7 @@ roles:
   role-id-2:
     name: role_name_2
     # role configuration
-roleOwner: SECURITYADMIN  # Optional
+role-owner: SECURITYADMIN  # Optional
 {% endhighlight %}
 
 <h2>Fields</h2>
@@ -46,7 +43,7 @@ roleOwner: SECURITYADMIN  # Optional
       <td>A map of role IDs to role configurations</td>
     </tr>
     <tr>
-      <td>roleOwner</td>
+      <td>role-owner</td>
       <td>String</td>
       <td>No</td>
       <td>null</td>
@@ -106,11 +103,11 @@ roleOwner: SECURITYADMIN  # Optional
       <td>Whether to enable the role</td>
     </tr>
     <tr>
-      <td>roleOwner</td>
+      <td>role-owner</td>
       <td>String</td>
       <td>No</td>
       <td>null</td>
-      <td>The owner of the role, overrides the top-level roleOwner</td>
+      <td>The owner of the role, overrides the top-level role-owner</td>
     </tr>
   </tbody>
 </table>
@@ -131,21 +128,21 @@ roleOwner: SECURITYADMIN  # Optional
   </thead>
   <tbody>
     <tr>
-      <td>objectType</td>
+      <td>object-type</td>
       <td>String</td>
       <td>Yes</td>
       <td>-</td>
       <td>The type of object to grant privileges on (e.g., database, schema, table, role)</td>
     </tr>
     <tr>
-      <td>objectName</td>
+      <td>object-name</td>
       <td>String</td>
       <td>*</td>
       <td>null</td>
       <td>The name of the object to grant privileges on</td>
     </tr>
     <tr>
-      <td>schemaName</td>
+      <td>schema-name</td>
       <td>String</td>
       <td>*</td>
       <td>null</td>
@@ -166,14 +163,14 @@ roleOwner: SECURITYADMIN  # Optional
       <td>A list of privileges to grant (e.g., select, usage, create)</td>
     </tr>
     <tr>
-      <td>includeFuture</td>
+      <td>include-future</td>
       <td>Boolean</td>
       <td>No</td>
       <td>true</td>
       <td>Whether to include future objects in the grant</td>
     </tr>
     <tr>
-      <td>includeAll</td>
+      <td>include-all</td>
       <td>Boolean</td>
       <td>No</td>
       <td>true</td>
@@ -189,66 +186,72 @@ roleOwner: SECURITYADMIN  # Optional
   </tbody>
 </table>
 
-<p>* At least one of <code>objectName</code>, <code>schemaName</code>, or <code>databaseName</code> must be provided, except for account-level grants.</p>
+<p>* At least one of <code>object-name</code>, <code>schema-name</code>, or <code>databaseName</code> must be provided, except for account-level grants.</p>
 
 <h2>Examples</h2>
 
 <h3>Basic Role with Database Access</h3>
 
+<div class="code-block">
+  <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
-# roles.yml
 roles:
   data-analyst-role:
     name: data_analyst
     grants:
-      - objectType: database
-        objectName: analytics_db
+      - object-type: database
+        object-name: analytics_db
         privileges:
           - usage
-      - objectType: schema
+      - object-type: schema
         databaseName: analytics_db
-        schemaName: public
+        schema-name: public
         privileges:
           - usage
-      - objectType: table
+      - object-type: table
         databaseName: analytics_db
-        schemaName: public
-        objectName: "*"
+        schema-name: public
+        object-name: "*"
         privileges:
           - select
 {% endhighlight %}
+</div>
 
 <h3>Role with Wildcard Grants</h3>
 
+<div class="code-block">
+  <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
-# roles.yml
 roles:
   data-engineer-role:
     name: data_engineer
     grants:
-      - objectType: database
-        objectName: raw_data
+      - object-type: database
+        object-name: raw_data
         privileges:
           - usage
-      - objectType: schema
+      - object-type: schema
         databaseName: raw_data
-        schemaName: "*"
+        schema-name: "*"
         privileges:
           - usage
-      - objectType: table
+      - object-type: table
         databaseName: raw_data
-        schemaName: "*"
-        objectName: "*"
-        includeFuture: true
-        includeAll: true
+        schema-name: "*"
+        object-name: "*"
+        include-future: true
+        include-all: true
         privileges:
           - select
           - insert
           - update
 {% endhighlight %}
+</div>
 
 <h3>Role without Auto-Creation</h3>
 
+<div class="code-block">
+  <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
 # roles.yml
 roles:
@@ -256,24 +259,24 @@ roles:
     name: external_system_role
     create: false
     grants:
-      - objectType: database
-        objectName: shared_data
+      - object-type: database
+        object-name: shared_data
         privileges:
           - usage
 {% endhighlight %}
+</div>
 
 <h3>Role without Revoking Other Grants</h3>
 
 <div class="code-block">
 {% highlight yaml %}
-# roles.yml
 roles:
   hybrid-role:
     name: hybrid_managed_role
     revokeOtherGrants: false
     grants:
-      - objectType: database
-        objectName: app_data
+      - object-type: database
+        object-name: app_data
         privileges:
           - usage
 {% endhighlight %}

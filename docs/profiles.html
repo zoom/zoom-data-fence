@@ -1,0 +1,20 @@
+---
+layout: default
+title: Playbook YAML
+---
+
+<p>The profiles file is used to configure your connection to the database.</p>
+
+<h2>Structure</h2>
+
+<p>The profiles file has the following top-level structure:</p>
+
+{% highlight yaml %}
+default-profile: dev
+profiles:
+  dev:
+    provider-name: SNOWFLAKE
+    connection:
+      snowflake:
+        connection-string: jdbc:snowflake://your-dev-account.snowflakecomputing.com:443
+{% endhighlight %}
