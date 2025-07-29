@@ -5,7 +5,7 @@ title: Connecting to a Database
 
 The profiles file is used to configure your connection to the database.
 
-## Structure
+## Profiles.yaml File
 
 The profiles file has the following top-level structure:
 

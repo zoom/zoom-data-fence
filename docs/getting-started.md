@@ -13,7 +13,7 @@ require elevated access.
 
 ## Clone the Example
 
-You can try out the [example configuration](https://github.com/zoom/zoom-data-fence/tree/main/example).
+You can try out the [example configuration](https://github.com/zoom/zoom-data-fence/tree/main/docs/_includes/example).
 
 ```shell
 git clone https://github.com/zoom/zoom-data-fence.git
@@ -152,5 +152,5 @@ total-changes: 1
 total-roles: 2
 ```
 
-We can manage permissions on any snowflake object with Data Fence, such as tables, 
+We can [manage permissions for roles]({% link defining-roles.md %}) on any snowflake object with Data Fence, such as tables, 
 views, schemas, procedures, functions and database.
