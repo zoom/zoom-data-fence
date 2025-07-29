@@ -19,34 +19,45 @@ role_restriction = 'ACCOUNTADMIN';
 <a href="https://github.com/zoom/zoom-data-fence/blob/main/example/profiles.yml">example/profiles.yml</a>. You can specify your own variable names
 based on your needs when you write your own profile.</p>
 
+<div class="code-block">
+  <div class="code-block-title">shell</div>
 {% highlight shell %}
 export DFENCE_USER="<Your Snowflake Login Name>"
 export DFENCE_TOKEN="<Your Programmatic Access Token>"
 export DFENCE_ACCOUNT="<Your Snowflake Account Name>"
 {% endhighlight %}
+</div>
 
 <p>Run a compile command in Docker using the <a href="https://github.com/zoom/zoom-data-fence/tree/main/example">example configuration</a>.</p>
 
+<div class="code-block">
+<div class="code-block-title">shell</div>
 {% highlight shell %}
 docker run -it -v $PWD/example:/example -e DFENCE_TOKEN -e DFENCE_USER -e DFENCE_ACCOUNT \
   --workdir /example zoomvideo/zoom-data-fence \
   compile --var-file env/dev/vars.yml roles
 {% endhighlight %}
+</div>
 
 <h3>Demo Setup</h3>
 
 <p>In order to demonstrate the tool, let's create some objects to grant permissions on.</p>
 
+<div class="code-block">
+<div class="code-block-title">Snowflake SQL</div>
 {% highlight sql %}
 create database if not exists my_db;
 create schema if not exists my_db.my_schema;
 create table if not exists my_db.my_schema.my_table(idx integer);
 {% endhighlight %}
+</div>
 
 <h3>Roles File</h3>
 
 <p>Create a file with a configuration using some databases which are under your control.</p>
 
+<div class="code-block">
+  <div class="code-block-title">roles.yml</div>
 {% highlight yaml %}
 roles:
   rbac-example-role-1:
@@ -77,12 +88,15 @@ roles:
           - USAGE
         object-name: rbac_example_1
 {% endhighlight %}
+</div>
 
 <h3>Profiles File</h3>
 
 <p>Next you will need to create a profiles file that you can use to connect to the database.
 The profiles file can list multiple environments. This is a file for your filesystem only.</p>
 
+<div class="code-block">
+  <div class="code-block-title">profiles.yml</div>
 {% highlight yaml %}
 default-profile: dev
 profiles:
@@ -105,6 +119,7 @@ profiles:
           user: YOUR.USERNAME
           role: SECURITYADMIN
 {% endhighlight %}
+</div>
 
 <p>Note that to use this tool you will need SECURITYADMIN or a similar role with enough
 permissions to create roles and manage grants.</p>
@@ -119,6 +134,8 @@ dfence compile --profile-file local/profiles.yml local/roles.yml
 
 <p>You should see a set of changes that are planned.</p>
 
+<div class="code-block">
+ <div class="code-block-title">stdout</div>
 {% highlight yaml %}
 ---
 changes:
@@ -139,41 +156,57 @@ changes:
 total-roles: 2
 total-changes: 2
 {% endhighlight %}
+</div>
 
 <p>If you would like to execute the changes, you can apply them.</p>
 
+<div class="code-block">
+ <div class="code-block-title">shell</div>
 {% highlight shell %}
 dfence apply --profile-file local/profiles.yml local/roles.yml
 {% endhighlight %}
+</div>
 
 <p>Now that we have made the changes, we can execute the compile step again. We should see no
 changes.</p>
 
+<div class="code-block">
+ <div class="code-block-title">shell</div>
 {% highlight shell %}
 dfence compile --profile-file local/profiles.yml local/roles.yml
 {% endhighlight %}
+</div>
 
+<div class="code-block">
+<div class="code-block-title">stdout</div>
 {% highlight yaml %}
 ---
 changes: [ ]
 total-roles: 2
 total-changes: 0
 {% endhighlight %}
+</div>
 
 <p>data-fence strives to not run any statements against the database unless they are
 actually needed. This reduces noise when one needs to look at system logs to investigate a
 change. In addition, note that data-fence will remove grants which are not defined in
 the roles file. Let's try manually granting a permission outside the process.</p>
 
+<div class="code-block">
+<div class="code-block-title">Snowflake SQL</div>
 {% highlight sql %}
 grant create schema on database my_db to role rbac_example_1;
 {% endhighlight %}
+</div>
 
 <p>Now let's run the tool again.</p>
 
+<div class="code-block">
+  <div class="code-block-title">shell</div>
 {% highlight shell %}
 dfence apply --profile-file local/profiles.yml local/roles.yml
 {% endhighlight %}
+</div>
 
 <p>We now see that we are revoking the rogue grant.</p>
 
