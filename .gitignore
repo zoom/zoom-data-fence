@@ -186,3 +186,5 @@ __marimo__/
 local
 /docs/_site/
 .jekyll-cache/
+.java-version
+.DS_Store
