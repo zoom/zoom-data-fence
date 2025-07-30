@@ -1,4 +1,6 @@
 name: deploy-maven
+permissions:
+  contents: read
 on:
   push:
     # ToDo: Replace with tag
