@@ -14,6 +14,10 @@ jobs:
   get-version:
     environment: deploy
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      deploy: ${{ steps.determine-deploy.outputs.deploy }}
+      release: $${{ steps.determine-deploy.outputs.release }}
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK
@@ -53,16 +57,20 @@ jobs:
       run: echo "deploy=${DEPLOY}"
   deploy-docker:
     uses: ./.github/workflows/deploy-docker.yml
+    needs:
+      - get-version
     with:
-      deploy: ${{steps.determine-deploy.outputs.deploy}}
-      version: ${{steps.get-version.outputs.version}}
-      release: ${{ steps.determine-deploy.outputs.release }}
+      deploy: ${{ needs.get-version.outputs.deploy }}
+      version: ${{ needs.get-version.outputs.version }}
+      release: ${{ needs.get-version.outputs.release }}
   deploy-maven:
     uses: ./.github/workflows/deploy-maven.yml
+    needs:
+      - get-version
     with:
-      deploy: ${{steps.determine-deploy.outputs.deploy}}
-      version: ${{steps.get-version.outputs.version}}
-      release: ${{ steps.determine-deploy.outputs.release }}
+      deploy: ${{ needs.get-version.outputs.deploy }}
+      version: ${{ needs.get-version.outputs.version }}
+      release: ${{ needs.get-version.outputs.release }}
       java-version: ${{ env.JAVA_VERSION }}
       java-distribution: ${{ env.JAVA_DISTRIBUTION }}
 
