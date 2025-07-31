@@ -15,8 +15,6 @@ on:
         required: true
 
 jobs:
-  get-metadata:
-    uses: ./.github/workflows/build-metadata.yml
   build:
     environment: deploy
     runs-on: ubuntu-latest
