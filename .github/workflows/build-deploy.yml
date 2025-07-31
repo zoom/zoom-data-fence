@@ -64,8 +64,8 @@ jobs:
       - get-version
     env:
       DEPLOY: ${{ fromJSON(needs.get-version.outputs.deploy) }}
-      VERSION: ${{ fromJSON(needs.get-version.outputs.version) }}
-      RELEASE: ${{ needs.get-version.outputs.release }}
+      VERSION: ${{ needs.get-version.outputs.version }}
+      RELEASE: ${{ fromJSON(needs.get-version.outputs.release) }}
       JAVA-VERSION: ${{ needs.get-version.outputs.java-version }}
       JAVA-DISTRIBUTION: ${{ needs.get-version.outputs.java-distribution }}
     steps:
