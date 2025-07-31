@@ -24,9 +24,6 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Determine if Deploy
-        id: build-meta
-        uses: ./.github/workflows/build-metadata.yml
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0

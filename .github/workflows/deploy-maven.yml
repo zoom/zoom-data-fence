@@ -28,9 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Determine if Deploy
-        id: is-deploy
-        uses: ./.github/workflows/build-metadata.yml
       - name: Set up Maven Central Repository
         if: ${{ inputs.deploy }}
         uses: actions/setup-java@v4
