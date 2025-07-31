@@ -1,7 +1,7 @@
 package us.zoom.data.systemtest;
 
 import lombok.extern.slf4j.Slf4j;
-import net.snowflake.client.jdbc.internal.apache.commons.io.FileUtils;
+import org.apache.commons.io.FileUtils;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.testng.ITestContext;

@@ -1,6 +1,6 @@
 package us.zoom.data.dfence.test.fixtures;
 
-import net.snowflake.client.jdbc.internal.apache.commons.io.FileUtils;
+import org.apache.commons.io.FileUtils;
 
 import java.nio.file.Path;
 

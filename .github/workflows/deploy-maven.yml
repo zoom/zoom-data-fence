@@ -29,7 +29,7 @@ jobs:
           # Verify gpg secret key
           gpg --list-secret-keys --keyid-format LONG
       - name: Publish package
-        run:  mvn --batch-mode -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} clean deploy
+        run:  mvn -Ppublish --batch-mode -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} clean deploy
         env:
           MAVEN_USERNAME: ${{ vars.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}

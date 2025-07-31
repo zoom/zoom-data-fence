@@ -1,6 +1,6 @@
 package us.zoom.data.dfence;
 
-import net.snowflake.client.jdbc.internal.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 

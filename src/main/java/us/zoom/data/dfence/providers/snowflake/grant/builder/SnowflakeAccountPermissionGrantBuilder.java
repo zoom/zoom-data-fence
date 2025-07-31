@@ -1,7 +1,7 @@
 package us.zoom.data.dfence.providers.snowflake.grant.builder;
 
 import lombok.Getter;
-import net.snowflake.client.jdbc.internal.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import us.zoom.data.dfence.exception.InvalidGrantModelForGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.models.GrantValidationDefinition;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;

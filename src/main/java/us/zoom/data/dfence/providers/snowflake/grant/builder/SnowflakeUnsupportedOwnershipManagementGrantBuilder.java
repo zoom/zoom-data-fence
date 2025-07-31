@@ -3,7 +3,7 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.snowflake.client.jdbc.internal.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList;
 import us.zoom.data.dfence.exception.InvalidGrantModelForGrantBuilder;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.providers.snowflake.models.GrantValidationDefinition;
