@@ -45,10 +45,10 @@ jobs:
         VERSION: ${{ steps.get-version.outputs.version }}
         REF: ${{ github.ref }}
       run: |
-        if [ "refs/tags/v${VERSION}" = "${REF}" ] && [ "${VERSION}" ~= "[0-9]+.[0-9]+.[0-9]" ]; then
+        if [ "refs/tags/v${VERSION}"="${REF}" ] && [ "${VERSION}"~="[0-9]+.[0-9]+.[0-9]" ]; then
           echo "deploy=true" >> $GITHUB_OUTPUT
           echo "release=true" >> $GITHUB_OUTPUT
-        elif [ "${REF}" = "refs/head/main" ] && [ "${VERSION}" ~=  "[0-9]+.[0-9]+.[0-9]-SNAPSHOT" ]; then
+        elif [ "${REF}"="refs/head/main" ] && [ "${VERSION}"=~"[0-9]+.[0-9]+.[0-9]-SNAPSHOT" ]; then
           echo "deploy=true" >> $GITHUB_OUTPUT
           echo "release=false" >> $GITHUB_OUTPUT
         else
