@@ -7,6 +7,8 @@ on:
     tags:
       # Build Releases From Tags
       - v*.*.*
+permissions:
+  contents: read
 jobs:
   get-version:
     environment: deploy
