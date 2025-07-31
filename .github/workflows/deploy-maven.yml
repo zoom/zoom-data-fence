@@ -1,12 +1,26 @@
 name: deploy-maven
 on:
-  push:
-    branches:
-      # Build Snapshots From Main
-      - main
-    tags:
-      # Build Releases From Tags
-      - v*.*.*
+  workflow_call:
+    inputs:
+      deploy:
+        type: boolean
+        required: true
+      release:
+        type: boolean
+        required: true
+      version:
+        type: string
+        required: true
+      java-version:
+        type: string
+        required: true
+      java-distribution:
+        type: string
+        required: true
+env:
+  DEPLOY: ${{ inputs.deploy }}
+  RELEASE: ${{ inputs.release }}
+  VERSION: ${{ inputs.version }}
 
 jobs:
   publish:
@@ -18,24 +32,25 @@ jobs:
         id: is-deploy
         uses: ./.github/workflows/build-metadata.yml
       - name: Set up Maven Central Repository
-        if: ${{ steps.is-deploy.outputs.deploy }}
+        if: ${{ inputs.deploy }}
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: ${{inputs.java-version}}
+          distribution: ${{inputs.java-distribution}}
           server-id: central
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
+          cache: maven
       - id: install-secret-key
         name: Install gpg secret key
-        if: ${{ steps.is-deploy.outputs.deploy }}
+        if: ${{ inputs.deploy }}
         run: |
           # Install gpg secret key
           cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
           # Verify gpg secret key
           gpg --list-secret-keys --keyid-format LONG
       - name: Publish package
-        if: ${{ steps.is-deploy.outputs.deploy }}
+        if: ${{ inputs.deploy }}
         run:  mvn -Ppublish --batch-mode -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} clean deploy
         env:
           MAVEN_USERNAME: ${{ vars.OSSRH_USERNAME }}

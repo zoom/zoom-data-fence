@@ -2,21 +2,26 @@ name: build-docker
 permissions:
   contents: read
 on:
-  push:
-    branches:
-      # Build Snapshots From Main
-      - main
-    tags:
-      # Build Releases From Tags
-      - v*.*.*
+  workflow_call:
+    inputs:
+      deploy:
+        type: boolean
+        required: true
+      release:
+        type: boolean
+        required: true
+      version:
+        type: string
+        required: true
 
 jobs:
+  get-metadata:
+    uses: ./.github/workflows/build-metadata.yml
   build:
     environment: deploy
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
     steps:
       - uses: actions/checkout@v4
       - name: Determine if Deploy
@@ -25,14 +30,15 @@ jobs:
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+
         with:
           images: |
             zoomvideo/zoom-data-fence
           tags: |
-            type=raw,value=latest,enable=${{ steps.build-meta.outputs.release }}
-            type=raw,value=v${{ steps.build-meta.outputs.version }}
+            type=raw,value=latest,enable=${{ inputs.release }}
+            type=raw,value=v${{ inputs.version }}
       - name: Login to Docker Hub
-        if: ${{ steps.build-meta.outputs.deploy }}
+        if: ${{ inputs.deploy }}
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 #v3.4.0
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
@@ -43,14 +49,14 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ steps.build-meta.outputs.deploy }}
+          push: ${{ inputs.deploy}}
           provenance: mode=max
           sbom: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Update repo description
         uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
-        if: ${{ steps.build-meta.outputs.deploy }}
+        if: ${{ inputs.deploy }}
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
