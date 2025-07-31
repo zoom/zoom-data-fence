@@ -46,18 +46,24 @@ jobs:
         REF: ${{ github.ref }}
       run: |
         if [ "refs/tags/v${VERSION}" = "${REF}" ] && [ "${VERSION}" ~= "[0-9]+.[0-9]+.[0-9]" ]; then
-          echo "::set-output name=deploy::true"
-          echo "::set-output name=release::true"
+          echo "deploy=true" >> $GITHUB_OUTPUT
+          echo "release=true" >> $GITHUB_OUTPUT
         elif [ "${REF}" = "refs/head/main" ] && [ "${VERSION}" ~=  "[0-9]+.[0-9]+.[0-9]-SNAPSHOT" ]; then
-          echo "::set-output name=deploy::true"
-          echo "::set-output name=release::false"
+          echo "deploy=true" >> $GITHUB_OUTPUT
+          echo "release=false" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=deploy::false"
-        fi
+          echo "deploy=false" >> $GITHUB_OUTPUT
+          echo "release=false" >> $GITHUB_OUTPUT
+        fi;
+        echo "Github Output"
+        cat $GITHUB_OUTPUT
+        echo "env"
+        env
     - name: Print Deploy
       id: print-deploy
       env:
         DEPLOY: ${{ steps.determine-deploy.outputs.deploy }}
+        RELEASE: ${{ steps.determine-deploy.outputs.release }}
       run: echo "deploy=${DEPLOY}"
   deploy-docker:
     uses: ./.github/workflows/deploy-docker.yml
