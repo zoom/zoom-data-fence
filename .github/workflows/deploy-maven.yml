@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Determine if Deploy
         id: is-deploy
-        uses: ./.github/workflows/check-deploy
+        uses: ./.github/workflows/build-metadata.yml
       - name: Set up Maven Central Repository
         if: ${{ steps.is-deploy.outputs.deploy }}
         uses: actions/setup-java@v4
