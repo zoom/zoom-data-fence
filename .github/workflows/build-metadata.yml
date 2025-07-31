@@ -1,0 +1,48 @@
+name: build-metadata
+permissions:
+  contents: read
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        type: string
+        default: "17"
+      distribution:
+        type: string
+        default: "temurin"
+
+jobs:
+  get-version:
+    environment: deploy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: ${{ inputs.distribution }}
+        cache: maven
+    - name: Extract Maven project version
+      run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+      id: get-version
+    - name: Print Version
+      run: echo "version=${{ steps.get-version.outputs.version }}"
+    - name: Determine if Deploy
+      id: determine-deploy
+      # We want to build releases from tags matching the correct pattern and matching the pom version.
+      # We want to build snapshot releases from any push to main.
+      run: |
+        if [ "refs/tags/v${{ steps.get-version.outputs.version }}" = "${{ github.ref }}" ] && [ "${{ steps.get-version.outputs.version }}" ~= "[0-9]+.[0-9]+.[0-9]" ]; then
+          echo "::set-output name=deploy::true"
+          echo "::set-output name=release::true"
+        elif [ "${{ github.ref }}" = "refs/head/main" ] && [ "${{ steps.get-version.outputs.version }}" ~=  "[0-9]+.[0-9]+.[0-9]-SNAPSHOT" ]; then
+          echo "::set-output name=deploy::true"
+          echo "::set-output name=release::false"
+        else
+          echo "::set-output name=deploy::false"
+        fi
+    - name: Print Deploy
+      id: print-deploy
+      run: echo "deploy=${{ steps.determine-deploy.outputs.deploy }}"
+

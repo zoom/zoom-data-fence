@@ -3,17 +3,24 @@ permissions:
   contents: read
 on:
   push:
-    # ToDo: Replace with tag
     branches:
+      # Build Snapshots From Main
       - main
-      - release
+    tags:
+      # Build Releases From Tags
+      - [0-9]+.[0-9]+.[0-9]+
+
 jobs:
   publish:
     environment: deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Determine if Deploy
+        id: is-deploy
+        uses: ./.github/workflows/check-deploy
       - name: Set up Maven Central Repository
+        if: ${{ steps.is-deploy.outputs.deploy }}
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -23,12 +30,14 @@ jobs:
           server-password: MAVEN_PASSWORD
       - id: install-secret-key
         name: Install gpg secret key
+        if: ${{ steps.is-deploy.outputs.deploy }}
         run: |
           # Install gpg secret key
           cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
           # Verify gpg secret key
           gpg --list-secret-keys --keyid-format LONG
       - name: Publish package
+        if: ${{ steps.is-deploy.outputs.deploy }}
         run:  mvn -Ppublish --batch-mode -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} clean deploy
         env:
           MAVEN_USERNAME: ${{ vars.OSSRH_USERNAME }}
