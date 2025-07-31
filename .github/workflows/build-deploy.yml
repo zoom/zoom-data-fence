@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get-version.outputs.version }}
-      deploy: ${{ fromJSON(steps.determine-deploy.outputs.deploy) }}
-      release: ${{ fromJSON(steps.determine-deploy.outputs.release) }}
+      deploy: ${{ steps.determine-deploy.outputs.deploy == 'true' }}
+      release: ${{ steps.determine-deploy.outputs.release == 'true' }}
       java-version: ${{ steps.set-constants.outputs.java-version }}
       java-distribution: ${{ steps.set-constants.outputs.java-distribution }}
     steps:
