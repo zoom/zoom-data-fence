@@ -49,14 +49,14 @@ jobs:
             const VERSION = process.env.VERSION;
             
             if (`refs/tags/v${VERSION}` === REF && versionPattern.test(VERSION)) {
-              core.setOutput('deploy', 'true');
-              core.setOutput('release', 'true');
+              core.setOutput('deploy', true);
+              core.setOutput('release', true);
             } else if (REF === 'refs/heads/main' && snapshotPattern.test(VERSION)) {
-              core.setOutput('deploy', 'true');
-              core.setOutput('release', 'false');
+              core.setOutput('deploy', true);
+              core.setOutput('release', false);
             } else {
-              core.setOutput('deploy', 'false');
-              core.setOutput('release', 'false');
+              core.setOutput('deploy', false);
+              core.setOutput('release', false);
             }
   print-outputs:
     runs-on: ubuntu-latest
