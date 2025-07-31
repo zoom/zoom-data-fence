@@ -7,9 +7,6 @@ on:
     tags:
       # Build Releases From Tags
       - v*.*.*
-env:
-  JAVA_VERSION: "17"
-  JAVA_DISTRIBUTION: "temurin"
 jobs:
   get-version:
     environment: deploy
@@ -18,13 +15,20 @@ jobs:
       version: ${{ steps.get-version.outputs.version }}
       deploy: ${{ steps.determine-deploy.outputs.deploy }}
       release: $${{ steps.determine-deploy.outputs.release }}
+      java-version: ${{ steps.set-constants.outputs.java-version }}
+      java-distribution: ${{ steps.set-constants.outputs.java-distribution }}
     steps:
     - uses: actions/checkout@v4
+    - name: Set Constants
+      id: set-constants
+      run: |
+        echo "::set-output name=java-version::17"
+        echo "::set-output name=java-distribution::temurin"
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        java-version: ${{ env.JAVA_VERSION }}
-        distribution: ${{ env.JAVA_DISTRIBUTION }}
+        java-version: ${{ steps.set-constants.outputs.java-version }}
+        distribution: ${{ steps.set-constants.outputs.java-distribution }}
         cache: maven
     - name: Extract Maven project version
       run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
@@ -71,6 +75,6 @@ jobs:
       deploy: ${{ needs.get-version.outputs.deploy }}
       version: ${{ needs.get-version.outputs.version }}
       release: ${{ needs.get-version.outputs.release }}
-      java-version: ${{ env.JAVA_VERSION }}
-      java-distribution: ${{ env.JAVA_DISTRIBUTION }}
+      java-version: ${{ needs.get-version.outputs.java-version }}
+      java-distribution: ${{ needs.get-version.outputs.java-distribution }}
 
