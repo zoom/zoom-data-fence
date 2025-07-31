@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.get-version.outputs.version }}
-      deploy: ${{ steps.determine-deploy.outputs.deploy }}
-      release: $${{ steps.determine-deploy.outputs.release }}
+      deploy: ${{ fromJSON(steps.determine-deploy.outputs.deploy) }}
+      release: ${{ fromJSON(steps.determine-deploy.outputs.release) }}
       java-version: ${{ steps.set-constants.outputs.java-version }}
       java-distribution: ${{ steps.set-constants.outputs.java-distribution }}
     steps:
@@ -59,12 +59,6 @@ jobs:
         cat $GITHUB_OUTPUT
         echo "env"
         env
-    - name: Print Deploy
-      id: print-deploy
-      env:
-        DEPLOY: ${{ steps.determine-deploy.outputs.deploy }}
-        RELEASE: ${{ steps.determine-deploy.outputs.release }}
-      run: echo "deploy=${DEPLOY}"
   deploy-docker:
     uses: ./.github/workflows/deploy-docker.yml
     needs:
