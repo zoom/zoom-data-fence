@@ -6,7 +6,7 @@
 
     <groupId>us.zoom.data</groupId>
     <artifactId>zoom-data-fence</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <description>
         Data warehouse security infrastructure as code.
     </description>
@@ -340,7 +340,7 @@
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <waitUntil>published</waitUntil>
-                            <deploymentName>zoom-data-fence</deploymentName>
+                            <deploymentName>${project.groupId}-${project.artifactId}-${project.version}</deploymentName>
                         </configuration>
                     </plugin>
                     <plugin>

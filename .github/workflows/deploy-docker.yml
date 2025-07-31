@@ -1,11 +1,14 @@
-name: deploy-docker
-
+name: build-docker
+permissions:
+  contents: read
 on:
   push:
-    # ToDo: Replace with tag
     branches:
-     - main
-     - release
+      # Build Snapshots From Main
+      - main
+    tags:
+      # Build Releases From Tags
+      - [0-9]+.[0-9]+.[0-9]+
 
 jobs:
   build:
@@ -16,17 +19,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: maven
-      - name: Extract Maven project version
-        run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-        id: project
-      - name: Show extracted Maven project version
-        run: echo ${{ steps.project.outputs.version }}
+      - name: Determine if Deploy
+        id: build-meta
+        uses: ./.github/workflows/check-deploy
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
@@ -34,11 +29,10 @@ jobs:
           images: |
             zoomvideo/zoom-data-fence
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'release') }}
-            type=ref,event=branch
-            type=ref,event=pr
-            type=raw,value=v${{ steps.project.outputs.version }}
+            type=raw,value=latest,enable=${{ steps.build-meta.outputs.release }}
+            type=raw,value=v${{ steps.build-meta.outputs.version }}
       - name: Login to Docker Hub
+        if: ${{ steps.build-meta.outputs.deploy }}
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 #v3.4.0
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
@@ -49,13 +43,14 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
+          push: ${{ steps.build-meta.outputs.deploy }}
           provenance: mode=max
           sbom: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Update repo description
         uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
+        if: ${{ steps.build-meta.outputs.deploy }}
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
