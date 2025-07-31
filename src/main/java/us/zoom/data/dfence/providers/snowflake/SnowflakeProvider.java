@@ -1,8 +1,8 @@
 package us.zoom.data.dfence.providers.snowflake;
 
 import lombok.extern.slf4j.Slf4j;
-import net.snowflake.client.jdbc.internal.google.common.collect.MapDifference;
-import net.snowflake.client.jdbc.internal.google.common.collect.Maps;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
 import us.zoom.data.dfence.CompiledChanges;
 import us.zoom.data.dfence.Provider;
 import us.zoom.data.dfence.exception.DatabaseError;
