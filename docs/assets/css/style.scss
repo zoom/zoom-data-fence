@@ -14,7 +14,7 @@
   --code-background: #2d2d2d;
   --border-color: #333;
   --sidebar-width: 260px;
-  --header-height: 60px;
+  --header-height: 100px;
   --footer-height: 50px;
   --table-background-color: #2d2d2d;
   --table-text-color: #f0f0f0;
@@ -275,8 +275,8 @@ pre.highlight {
 .highlight .ge { font-style: italic; } /* Generic.Emph */
 .highlight .gr { color: #f92672; } /* Generic.Error */
 .highlight .gh { color: #75715e; } /* Generic.Heading */
-.highlight .gi { color: #a6e22e; background-color: #112b00; } /* Generic.Inserted */
-.highlight .gi .x { color: #a6e22e; background-color: #112b00; } /* Generic.Inserted.Specific */
+.highlight .gi { color: #d1c0f4; background-color: #112b00; } /* Generic.Inserted */
+.highlight .gi .x { color: #d1c0f4; background-color: #112b00; } /* Generic.Inserted.Specific */
 .highlight .go { color: #888; } /* Generic.Output */
 .highlight .gp { color: #f8f8f2; } /* Generic.Prompt */
 .highlight .gs { font-weight: bold; } /* Generic.Strong */
@@ -289,13 +289,13 @@ pre.highlight {
 .highlight .kt { color: #66d9ef; font-weight: bold; } /* Keyword.Type */
 .highlight .m { color: #ae81ff; } /* Literal.Number */
 .highlight .s { color: #e6db74; } /* Literal.String */
-.highlight .na { color: #a6e22e; } /* Name.Attribute */
+.highlight .na { color: #d1c0f4; } /* Name.Attribute */
 .highlight .nb { color: #66d9ef; } /* Name.Builtin */
-.highlight .nc { color: #a6e22e; font-weight: bold; } /* Name.Class */
+.highlight .nc { color: #d1c0f4; font-weight: bold; } /* Name.Class */
 .highlight .no { color: #66d9ef; } /* Name.Constant */
 .highlight .ni { color: #f8f8f2; } /* Name.Entity */
-.highlight .ne { color: #a6e22e; font-weight: bold; } /* Name.Exception */
-.highlight .nf { color: #a6e22e; font-weight: bold; } /* Name.Function */
+.highlight .ne { color: #d1c0f4; font-weight: bold; } /* Name.Exception */
+.highlight .nf { color: #d1c0f4; font-weight: bold; } /* Name.Function */
 .highlight .nn { color: #f8f8f2; } /* Name.Namespace */
 .highlight .nt { color: #f92672; } /* Name.Tag */
 .highlight .nv { color: #f8f8f2; } /* Name.Variable */
@@ -364,4 +364,8 @@ tbody tr:nth-child(odd) {
 thead {
   background-color: var(--primary-color);
   color: var(--background-color);
+}
+
+.logo {
+  object-fit: scale-down;
 }

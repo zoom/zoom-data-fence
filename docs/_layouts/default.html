@@ -7,12 +7,18 @@
     {% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}
   </title>
   <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ 'apple-touch-icon.png' | relative_url}}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ 'favicon-32x32.png' | relative_url }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ 'favicon-16x16.png' | relative_url }}">
+  <link rel="manifest" href="{{ 'site.webmanifest' | relative_url }}">
   {% seo %}
 </head>
 <body>
   <header class="header">
     <a href="{{ '/' | relative_url }}">
-      <div class="header-title">{{ site.title }}</div>
+      <div class="header-title">
+        <img src="{{ '/resources/data-fence-logo.svg' | relative_url }}" height="100">
+      </div>
     </a>
     <div class="header-links">
       <a href="https://github.com/zoom/zoom-data-fence" target="_blank" title="GitHub Repository">
