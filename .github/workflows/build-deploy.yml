@@ -58,23 +58,11 @@ jobs:
               core.setOutput('deploy', false);
               core.setOutput('release', false);
             }
-  print-outputs:
-    runs-on: ubuntu-latest
-    needs:
-      - get-version
-    env:
-      DEPLOY: ${{ fromJSON(needs.get-version.outputs.deploy) }}
-      VERSION: ${{ needs.get-version.outputs.version }}
-      RELEASE: ${{ fromJSON(needs.get-version.outputs.release) }}
-      JAVA-VERSION: ${{ needs.get-version.outputs.java-version }}
-      JAVA-DISTRIBUTION: ${{ needs.get-version.outputs.java-distribution }}
-    steps:
-      - name: Print output
-        run: env
   deploy-docker:
     uses: ./.github/workflows/deploy-docker.yml
     needs:
       - get-version
+    secrets: inherit
     with:
       deploy: ${{ fromJSON(needs.get-version.outputs.deploy) }}
       release: ${{ fromJSON(needs.get-version.outputs.release) }}
@@ -83,10 +71,11 @@ jobs:
     uses: ./.github/workflows/deploy-maven.yml
     needs:
       - get-version
+    secrets: inherit
     with:
       deploy: ${{ fromJSON(needs.get-version.outputs.deploy) }}
-      version: ${{ needs.get-version.outputs.version }}
       release: ${{ fromJSON(needs.get-version.outputs.release) }}
+      version: ${{ needs.get-version.outputs.version }}
       java-version: ${{ needs.get-version.outputs.java-version }}
       java-distribution: ${{ needs.get-version.outputs.java-distribution }}
 
