@@ -18,7 +18,7 @@ show_downloads: false
 
 # Navigation
 navigation:
-  - title: Home
+  - title: Zoom Data Fence
     url: /
   - title: Why We Made Data Fence
     url: /why-we-made-data-fence
@@ -26,6 +26,8 @@ navigation:
     url: /contributing
   - title: Getting Started
     url: /getting-started
+  - title: Install Docker Image
+    url: /install-docker-image
   - title: Defining Roles
     url: /defining-roles
   - title: Connecting to a Database
@@ -34,5 +36,7 @@ navigation:
     url: /variables
   - title: Importing Roles
     url: /importing-roles
+  - title: Install Java Package
+    url: /install-java-package
   - title: Unsupported Grants
     url: /unsupported-grants
