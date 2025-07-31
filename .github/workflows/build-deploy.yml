@@ -37,24 +37,28 @@ jobs:
       id: determine-deploy
       # We want to build releases from tags matching the correct pattern and matching the pom version.
       # We want to build snapshot releases from any push to main.
+      uses: actions/github-script@v6
       env:
         VERSION: ${{ steps.get-version.outputs.version }}
         REF: ${{ github.ref }}
-      run: |
-        if [[ "refs/tags/v${VERSION}"=="${REF}" ]] && [[ "${VERSION}"=~"[0-9]+.[0-9]+.[0-9]" ]]; then
-          echo "deploy=true" >> $GITHUB_OUTPUT
-          echo "release=true" >> $GITHUB_OUTPUT
-        elif [[ "${REF}"=="refs/heads/main" ]] && [[ "${VERSION}"=~"[0-9]+.[0-9]+.[0-9]-SNAPSHOT" ]]; then
-          echo "deploy=true" >> $GITHUB_OUTPUT
-          echo "release=false" >> $GITHUB_OUTPUT
-        else
-          echo "deploy=false" >> $GITHUB_OUTPUT
-          echo "release=false" >> $GITHUB_OUTPUT
-        fi;
-        echo "Github Output"
-        cat $GITHUB_OUTPUT
-        echo "env"
-        env
+      with:
+        script: |
+          const core = require('@actions/core');
+          const versionPattern = /[0-9]+\.[0-9]+\.[0-9]/;
+          const snapshotPattern = /[0-9]+\.[0-9]+\.[0-9]-SNAPSHOT/;
+          const REF = process.env.REF;
+          const VERSION = process.env.VERSION;
+
+          if (`refs/tags/v${VERSION}` === REF && versionPattern.test(VERSION)) {
+            core.setOutput('deploy', 'true');
+            core.setOutput('release', 'true');
+          } else if (REF === 'refs/heads/main' && snapshotPattern.test(VERSION)) {
+            core.setOutput('deploy', 'true');
+            core.setOutput('release', 'false');
+          } else {
+            core.setOutput('deploy', 'false');
+            core.setOutput('release', 'false');
+          }
   deploy-docker:
     uses: ./.github/workflows/deploy-docker.yml
     needs:
