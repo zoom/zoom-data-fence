@@ -31,12 +31,8 @@ jobs:
         distribution: ${{ steps.set-constants.outputs.java-distribution }}
         cache: maven
     - name: Extract Maven project version
-      run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+      run: echo "version=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_OUTPUT
       id: get-version
-    - name: Print Version
-      env:
-        VERSION: ${{ steps.get-version.outputs.version }}
-      run: echo "version=${VERSION}"
     - name: Determine if Deploy
       id: determine-deploy
       # We want to build releases from tags matching the correct pattern and matching the pom version.
