@@ -2,29 +2,41 @@
 layout: default
 title: Why We Made Data Fence
 ---
+Zoom's Analytics Data Warehouse manages hundreds of thousands of objects with millions of
+total permissions granted to roles. As we expanded to multiple environments and regions, we needed a better
+approach to security management.
 
-Zoom's Analytics Data Warehouse contains hundreds of thousands of objects with millions 
-of total grants on objects to roles. As our analytics program matured, the need to manage 
-multiple environments and multiple regions required that we manage our Database 
-Security through source-controlled infrastructure as code.
+## The Enterprise-Scale Challenge
 
-We first attempted to use Terraform, which works very well for us for many other 
-infrastructure tasks. However, we found that while Terraform could technically 
-manage Snowflake grants, we were stretching Terraform's intended design. Even though Terraform 
-is written in GoLang, Snowflake grants resulted in very large state files which degraded 
-performance and made development painful. In addition, the fundamental assumptions 
-of Terraform conflict with the SQL security use case. In most SQL security 
-implementations, the objects must be created before grants are placed on them. If the 
-object is dropped, all grants are lost. Tools like DBT frequently use drop and create for 
-small models. In such a design, Terraform would expect to control these objects and not 
-have them created or dropped outside of Terraform.
+Our growing data infrastructure demanded a systematic approach to security. Manual processes
+simply could not provide the consistency and reliability we needed across our expanding
+analytics ecosystem.
 
-In addition, as we transitioned from manual control to infrastructure as code, we needed
-a tool capable of self-healing. If an administrator accidentally made a change on a 
-version-controlled object or if object lifecycle changes altered the grants, we need the 
-tool to gracefully return the object to its desired configuration. By running the tool 
-on the schedule, we can ensure that this happens soon after the mistake was made so that 
-applications don't start to depend on the manual grants.
+## Beyond Traditional Tools
 
-After having significant success at Zoom using Data Fence at scale since 2023, we have 
-decided to release this tool open source.
+We first tried Terraform, our go-to solution for infrastructure management. Unfortunately,
+Terraform was not the right fit for our Snowflake security needs.
+
+* **Performance Degradation**: The sheer volume of Snowflake grants created massive state files
+  that slowed development and hampered our team's productivity.
+
+* **Architectural Mismatch**: Terraform's design philosophy clashed with SQL security realities.
+  In SQL environments, objects must exist before permissions are granted, and when objects are
+  dropped, their permissions vanish too. This fundamental disconnect created ongoing friction
+  with our development workflows.
+
+## The Self-Healing Solution
+
+We needed more than just automation. We needed resilience. Our solution had to address key
+requirements for modern data security management.
+
+* Automatically fix accidental permission changes made outside our control systems.
+* Handle permission disruptions when underlying objects change during normal operations.
+* Maintain desired security configurations through scheduled enforcement, preventing
+  dependency on temporary manual changes.
+
+## From Internal Success to Open Source
+
+Since 2023, we have successfully used Data Fence to implement access control at enterprise
+scale. Now we are sharing this solution as an open source tool so others can benefit from our
+experience solving these complex data security challenges.
