@@ -19,7 +19,7 @@ become reluctant to remove access that has existed for a long time for fear of b
 unknown processes. By revoking undesired access immediately, Data Fence prevents 
 applications and users from becoming dependent on over grants.  
 
-![High Level Data Flow]({{"/resources/data-fence-high-level-data-flow.png" | relative_url}}){: width="100%" height="auto" }
+![High Level Data Flow]({{"/assets/images/data-fence-high-level-data-flow.png" | relative_url}}){: width="100%" height="auto" }
 
 ### Key Capabilities
 
