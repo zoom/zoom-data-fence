@@ -36,9 +36,15 @@
   <div class="wrapper">
     <aside class="sidebar">
       <nav class="sidebar-nav">
-        <ul>
+        <ul class="level0">
           {% for item in site.navigation %}
-            <li><a href="{{ item.url | relative_url }}" {% if page.url == item.url %}class="active"{% endif %}>{{ item.title }}</a></li>
+            <li ><a href="{{ item.url | relative_url }}" {% if page.url ==  item.url %}class="active"{% endif %}>{{item.title}}</a>
+              <ul class="level1">
+                {% for subentry in item.subfolderitems %}
+                <li><a href="{{ subentry.url | relative_url }}" {% if page.url == subentry.url %}class="active"{% endif %}>{{ subentry.title }}</a>
+                {% endfor %}
+              </ul>
+            </li>
           {% endfor %}
         </ul>
       </nav>

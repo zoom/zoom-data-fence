@@ -40,7 +40,7 @@ approval, quality and release processes can be leveraged.
 ### Current Support and Roadmap
 
 Currently, Data Fence exclusively supports [Snowflake](https://www.snowflake.com) data warehouse environments. With
-sufficient community interest, we can also support additional data warehouse platforms.
+sufficient community contribution, we can also support additional data warehouse platforms.
 
 ### Deployment Recommendation
 
