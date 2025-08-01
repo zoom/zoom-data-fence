@@ -49,6 +49,12 @@ jobs:
         run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         env:
           JEKYLL_ENV: production
+      - name: list_asset_image_contents
+        working-directory: ./docs
+        run: ls -la assets/images
+      - name: list_compiled_asset_image_contents
+        working-directory: ./docs
+        run: ls -la _site/assets/images
       - name: Upload artifact
         # Automatically uploads an artifact from the './_site' directory by default
         uses: actions/upload-pages-artifact@v3
