@@ -46,7 +46,7 @@ export DFENCE_TOKEN="Your Programmatic Access Token"
 export DFENCE_ACCOUNT="Your Snowflake Account Name"
 ```
 
-# Define Snowflake Roles To Create
+## Define Snowflake Roles To Create
 Now we will use a role definition file to define roles.
 
 ```yaml
@@ -61,12 +61,27 @@ for each environment. Here we have placed the environment file at env/dev/vars.y
 ```yaml
 {% include example/env/dev/vars.yml %}
 ```
-Run a compile command using Docker.
+
+## Execute in DFence Docker Container
+Now, mount the directory and secrets to a data fence docker container running interactively.
 
 ```shell
 docker run -it -v $PWD:/example -e DFENCE_TOKEN -e DFENCE_USER -e DFENCE_ACCOUNT \
-  --workdir /example zoomvideo/zoom-data-fence \
-  compile --var-file env/dev/vars.yml roles
+  --workdir /example --entrypoint bash zoomvideo/zoom-data-fence
+```
+You should now have a shell in the docker container. 
+
+Make sure that you can run dfence by running a help command. 
+
+```shell
+dfence --help
+```
+
+## Compile Changes
+Run a `dfence compile` command to connect to the database and plan the changes.
+
+```shell
+dfence compile --var-file env/dev/vars.yml roles
 ```
 
 You should now see the compiled changes which would be run.
@@ -91,24 +106,9 @@ total-changes: 2
 total-roles: 2
 ```
 
-
-Alternately, you can execute within a docker container. 
-
-```shell
-docker run -it -v $PWD:/example -e DFENCE_TOKEN -e DFENCE_USER -e DFENCE_ACCOUNT \
-  --workdir /example --entrypoint bash zoomvideo/zoom-data-fence
-```
-
-Now you should have a shell in the docker container. You can run the compile command
-directly.
-
-
-```shell
-dfence compile --var-file env/dev/vars.yml roles
-```
-
 If you like the compiled result, you can instead run the apply command.
 
+## Apply Changes
 ```shell
 dfence apply --var-file env/dev/vars.yml roles
 ```
@@ -126,7 +126,7 @@ total-roles: 2
 ```
 
 # Evolve Roles
-No let's edit the roles file to remove example_2_dev role's usage permission 
+Now let's edit the roles file to remove example_2_dev role's usage permission 
 on the example_1_dev role.
 
 ```yaml

@@ -141,7 +141,7 @@ using IntelliJ's built in built optimization. This includes If you every time yo
 test case. If you iterate quickly and suffer from impatience, this solution may not be for
 you.
 
-![IntelliJ Settings](docs/resources/intellij-global-maven-runner-settings.png "Maven IntelliJ Build Settings")
+![IntelliJ Settings](docs/assets/images/intellij-global-maven-runner-settings.png "Maven IntelliJ Build Settings")
 
 Set
 **Build, Execution, Deployment >> Build Tools >> Maven >> Runner >> Delegate IDE Build/Run
@@ -173,13 +173,13 @@ working only to realize that the specific run configuration for a test case you 
 running does not have the pre-build configuration turned on or that the test case got
 destroyed and recreated and lost it's configuration.
 
-![Inetllij Settings](docs/resources/intellij-run-configuration-settings-pre-build.png "Run Maven Prior to Build in Run Configuration.")
+![Inetllij Settings](docs/assets/images/intellij-run-configuration-settings-pre-build.png "Run Maven Prior to Build in Run Configuration.")
 
 You can make this a little less painful by deleting all existing run configurations and
 settings the change using a template instead. However, if you have a template for Junit
 and a template for running the application, you need to change it in both.
 
-![IntelliJ Settings](docs/resources/intellij-edit-run-configuration-template.png "Change a Configuration Template.")
+![IntelliJ Settings](docs/assets/images/intellij-edit-run-configuration-template.png "Change a Configuration Template.")
 
 We have placed a couple default run configuration templates in version control in the
 [run](./run) directory to see if this helps make it easier to provide a consistent
