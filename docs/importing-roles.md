@@ -10,7 +10,7 @@ dfence import-roles role_a role_b
 ```
 
 In addition, it is possible to search for roles based on a regular expression. For
-example, in order to find all roles which start with UR_ or SR_, use the following
+example, in order to find all roles that start with UR_ or SR_, use the following
 command.
 
 ```shell
