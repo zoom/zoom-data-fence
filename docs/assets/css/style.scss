@@ -103,7 +103,7 @@ h2 {
 }
 
 .header-links a:hover {
-  color: var(--primary-color);
+  color: var(--primary-hover);
   text-decoration: none;
 }
 
@@ -149,7 +149,13 @@ h2 {
   ul {
     list-style-type: none;
     padding: 0;
-    margin: 0;
+    margin: 10px;
+    .level0{
+      font-size: 1.2em;
+    }
+    .level1{
+      font-size: 0.9em;
+    }
   }
 
   li {
@@ -164,12 +170,13 @@ h2 {
 
     &:hover, &.active {
       background-color: rgba(75, 94, 170, 0.1);
-      color: var(--primary-color);
+      color: var(--primary-hover);
       text-decoration: none;
     }
 
     &.active {
       font-weight: 600;
+      color: var(--primary-color);
     }
   }
 }

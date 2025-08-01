@@ -21,20 +21,23 @@ navigation:
   - title: Zoom Data Fence
     url: /
   - title: Why We Made Data Fence
-    url: /why-we-made-data-fence
+    url: /why-we-made-data-fence.html
   - title: Contributing
-    url: /contributing
-  - title: Getting Started
-    url: /getting-started
-  - title: Install Docker Image
-    url: /install-docker-image
-  - title: Defining Roles
-    url: /defining-roles
-  - title: Connecting to a Database
-    url: /profiles
-  - title: Variables
-    url: /variables
-  - title: Importing Roles
-    url: /importing-roles
-  - title: Install Java Package
-    url: /install-java-package
+    url: /contributing.html
+  - title: Documentation
+    url: /getting-started.html
+    subfolderitems:
+    - title: Getting Started
+      url: /getting-started.html
+    - title: Install Docker Image
+      url: /install-docker-image.html
+    - title: Defining Roles
+      url: /defining-roles.html
+    - title: Connecting to a Database
+      url: /profiles.html
+    - title: Variables
+      url: /variables.html
+    - title: Importing Roles
+      url: /importing-roles.html
+    - title: Install Java Package
+      url: /install-java-package.html
