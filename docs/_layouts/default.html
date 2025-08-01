@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  <link rel="icon" href="{{ '/favicon.svg' | relative_url }}" type="image/svg+xml">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>
     {% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}
   </title>
-  <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
-  <link rel="apple-touch-icon" sizes="180x180" href="{{ '/apple-touch-icon.png' | relative_url}}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ '/favicon-32x32.png' | relative_url }}">
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ '/favicon-16x16.png' | relative_url }}">
-  <link rel="manifest" href="{{ '/site.webmanifest' | relative_url }}">
   {% seo %}
 </head>
 <body>
@@ -38,10 +35,6 @@
 
   <div class="wrapper">
     <aside class="sidebar">
-      <div class="sidebar-header">
-        <p>{{ site.description }}</p>
-      </div>
-
       <nav class="sidebar-nav">
         <ul>
           {% for item in site.navigation %}
@@ -64,7 +57,7 @@
   </div>
 
   <div class="page-footer">
-    <p>&copy; {{ site.time | date: '%Y' }} Zoom Video Communications, Inc.</p>
+    <p> Copyright ©{{ site.time | date: '%Y' }} Zoom Communications, Inc. All rights reserved.</p>
   </div>
 
   <script>
