@@ -3,24 +3,40 @@ layout: default
 title: Zoom Data Fence
 ---
 
-Data Fence is a Data Warehouse Security Management tool that helps database
-administrators keep data warehouse permissions stable, repeatable and easy to manage.
 
-* Repeat the same security configuration across multiple environments.
-* Automatically heal configuration drift by revoking undesired grants and granting 
-  missing grants. This is a significant problem in SQL-based data warehouses which have
-  stateful implicit behavior resulting from behavior such as creating objects and 
-  dropping objects.
-* Scale to manage millions of grants on hundreds of thousands of objects. Terraform 
-  chokes on the scale of data warehouse grants.
-* Gracefully handle the transient existence of objects controlled outside of the security
-  infrastructure.
+Data Fence provides robust data warehouse security management that ensures stable,
+repeatable permission structures across your environment.
 
-Currently, Data Fence only supports the [Snowflake]("https://www.snowflake.com/en/">Snowflake) data 
-warehouse. However, with enough community support, it can support additional data 
-warehouses in the future.
+## Enterprise Data Warehouse Security Management
 
-While Data Fence can be run at deployment time like other continuous deployment tools, 
-we have found that it works best when you run it on a schedule so that it is continuously 
-analyzing the grants in the warehouse, revoking undesired grants and granting missing 
-grants.
+As AI and machine learning applications increasingly access sensitive data, Data Fence
+creates the essential security layer that enables innovation while preventing unauthorized
+access. By proactively correcting drift in role permissions, Data Fence ensures that 
+both humans and autonomous systems operate reliably within intended boundaries.
+
+### Key Capabilities
+
+* **Cross-Environment Consistency** — Deploy identical security configurations across
+multiple environments, ensuring uniformity in your security posture.
+* **Automatic Configuration Healing** — Proactively identifies and resolves permission drift
+by revoking unauthorized grants and restoring missing ones. This addresses a critical
+challenge in SQL-based data warehouses where stateful behaviors from object creation and
+deletion can compromise security integrity.
+* **Enterprise-Grade Scalability** — Efficiently manages millions of grants across hundreds
+of thousands of objects—a scale that overwhelms traditional tools like Terraform.
+* **Adaptive Object Management** — Seamlessly handles objects with transient lifecycles that
+exist outside your security infrastructure, maintaining protection without disrupting
+operations.
+
+### Current Support and Roadmap
+
+Currently, Data Fence exclusively supports Snowflake data warehouse environments. With
+sufficient community interest, support for additional data warehouse platforms is planned
+for future releases.
+
+### Deployment Recommendation
+
+While Data Fence can integrate with standard continuous deployment workflows, optimal
+results are achieved through scheduled execution. This approach enables continuous
+monitoring and automatic remediation of permission discrepancies, ensuring your warehouse
+maintains proper access controls at all times.

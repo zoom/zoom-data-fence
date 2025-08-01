@@ -1,6 +1,6 @@
 # Site settings
 title: Zoom Data Fence
-description: Data Warehouse Security Management tool
+description: Data Warehouse Security Management Tool
 url: "https://zoom.github.io"
 baseurl: "/zoom-data-fence"
 
