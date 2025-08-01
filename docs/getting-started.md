@@ -91,8 +91,6 @@ total-changes: 2
 total-roles: 2
 ```
 
-Now you should have a shell in the docker container. You can run the compile command
-directly.
 
 Alternately, you can execute within a docker container. 
 
@@ -100,6 +98,9 @@ Alternately, you can execute within a docker container.
 docker run -it -v $PWD:/example -e DFENCE_TOKEN -e DFENCE_USER -e DFENCE_ACCOUNT \
   --workdir /example --entrypoint bash zoomvideo/zoom-data-fence
 ```
+
+Now you should have a shell in the docker container. You can run the compile command
+directly.
 
 
 ```shell
