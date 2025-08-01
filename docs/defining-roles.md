@@ -218,3 +218,9 @@ However, such an outcome is not desirable. When such ownership revocations occur
 are an indication that object ownership needs to be explicitly assigned to a role in the
 configuration.
 
+## Unsupported Grants
+Certain features and grants are not supported. These include.
+
+* Snowflake Imported Privileges on Shares
+* New grant types for features that have not yet been mapped in this application.
+

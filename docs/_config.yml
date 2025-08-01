@@ -38,5 +38,3 @@ navigation:
     url: /importing-roles
   - title: Install Java Package
     url: /install-java-package
-  - title: Unsupported Grants
-    url: /unsupported-grants
