@@ -13,6 +13,7 @@ import us.zoom.data.dfence.exception.VariableNotFoundException;
 import us.zoom.data.dfence.playbook.model.PlaybookModel;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.playbook.model.PlaybookRoleModel;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +78,7 @@ class PlaybookTest {
                                 "mock-role-enabled",
                                 new PlaybookRoleModel("mock_role_enabled", List.of()),
                                 "mock-role-disabled",
-                                new PlaybookRoleModel("mock_role_disabled", List.of(), true, true, false, null))),
+                                new PlaybookRoleModel("mock_role_disabled", List.of(), true, true, false, null, UnsupportedRevokeBehavior.IGNORE))),
                         new PlaybookModel(Map.of(
                                 "mock-role-enabled",
                                 new PlaybookRoleModel("mock_role_enabled", List.of())))
@@ -269,9 +270,9 @@ class PlaybookTest {
         PlaybookModel playbookModel = new PlaybookModel(
                 Map.of(
                         "role-a",
-                        new PlaybookRoleModel("role_a", List.of(), true, true, true, null)), "SECURITYADMIN");
+                        new PlaybookRoleModel("role_a", List.of(), true, true, true, null, UnsupportedRevokeBehavior.IGNORE)), "SECURITYADMIN");
         PlaybookModel playbookModelExpected = new PlaybookModel(
-                Map.of("role-a", new PlaybookRoleModel("role_a", List.of(), true, true, true, "SECURITYADMIN")),
+                Map.of("role-a", new PlaybookRoleModel("role_a", List.of(), true, true, true, "SECURITYADMIN", UnsupportedRevokeBehavior.IGNORE)),
                 "SECURITYADMIN");
         assertEquals(playbookModelExpected, Playbook.propagateDefaults(playbookModel));
     }

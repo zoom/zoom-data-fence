@@ -3,12 +3,14 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 import lombok.Getter;
 import com.google.common.collect.ImmutableList;
 import us.zoom.data.dfence.exception.InvalidGrantModelForGrantBuilder;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.GrantValidationDefinition;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter  
 public class SnowflakeAccountPermissionGrantBuilder extends SnowflakeGrantBuilder {
 
     public static List<GrantValidationDefinition> validCombinations = List.of(new GrantValidationDefinition(
@@ -55,10 +57,11 @@ public class SnowflakeAccountPermissionGrantBuilder extends SnowflakeGrantBuilde
                 add("VIEW LINEAGE");
             }}), List.of(SnowflakeObjectType.ACCOUNT)));
 
-    @Getter
     private final SnowflakeGrantModel grant;
+    private final SnowflakeGrantBuilderOptions options;
 
-    public SnowflakeAccountPermissionGrantBuilder(SnowflakeGrantModel grant) {
+    public SnowflakeAccountPermissionGrantBuilder(SnowflakeGrantModel grant, SnowflakeGrantBuilderOptions options) {
+        this.options = options;
         // The account name parameter is not used in any of the grant statements and we
         // don't want to need to know it. We mask it out. This matters for key creation
         // with the getKey method.

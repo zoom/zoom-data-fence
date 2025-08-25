@@ -1,6 +1,7 @@
 package us.zoom.data.dfence.providers.snowflake.grant.builder;
 
 import org.junit.jupiter.api.BeforeEach;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 class SnowflakePermissionGrantBuilderTest {
@@ -9,6 +10,7 @@ class SnowflakePermissionGrantBuilderTest {
 
     @BeforeEach
     void setUp() {
+        SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
         permissionGrantBuilder = new SnowflakePermissionGrantBuilder(new SnowflakeGrantModel(
                 "SELECT",
                 "TABLE",
@@ -17,6 +19,6 @@ class SnowflakePermissionGrantBuilderTest {
                 "MOCK_ROLE",
                 false,
                 false,
-                false));
+                false), options);
     }
 }

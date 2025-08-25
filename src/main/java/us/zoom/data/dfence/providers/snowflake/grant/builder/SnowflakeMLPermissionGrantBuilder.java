@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import us.zoom.data.dfence.exception.InvalidGrantModelForGrantBuilder;
 import us.zoom.data.dfence.exception.RbacDataError;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.GrantValidationDefinition;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
@@ -23,6 +24,7 @@ public class SnowflakeMLPermissionGrantBuilder extends SnowflakeGrantBuilder {
     }});
 
     private SnowflakeGrantModel grant;
+    private SnowflakeGrantBuilderOptions options;
 
     public static String transformPrivilege(String permission) {
         if (!permission.startsWith("CREATE ")) {

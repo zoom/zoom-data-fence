@@ -1,6 +1,7 @@
 package us.zoom.data.dfence.providers.snowflake.grant.builder;
 
 import us.zoom.data.dfence.exception.InvalidGrantModelForGrantBuilder;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.ContainerGrantParts;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
@@ -8,8 +9,8 @@ import java.util.List;
 
 public class SnowflakeFuturePermissionGrantBuilder extends SnowflakePermissionGrantBuilder {
     public SnowflakeFuturePermissionGrantBuilder(
-            SnowflakeGrantModel grant) {
-        super(grant);
+            SnowflakeGrantModel grant, SnowflakeGrantBuilderOptions options) {
+        super(grant, options);
     }
 
     @Override

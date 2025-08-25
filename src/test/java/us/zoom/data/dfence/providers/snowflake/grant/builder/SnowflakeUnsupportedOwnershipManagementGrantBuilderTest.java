@@ -2,6 +2,7 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.exception.RbacDataError;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 import java.util.List;
@@ -22,8 +23,9 @@ class SnowflakeUnsupportedOwnershipManagementGrantBuilderTest {
                 false,
                 false,
                 false);
+        SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
         SnowflakeUnsupportedOwnershipManagementGrantBuilder grantBuilder
-                = new SnowflakeUnsupportedOwnershipManagementGrantBuilder(snowflakeGrantModel);
+                = new SnowflakeUnsupportedOwnershipManagementGrantBuilder(snowflakeGrantModel, options);
         assertThrows(RbacDataError.class, () -> grantBuilder.getGrantStatements());
     }
 
@@ -38,8 +40,9 @@ class SnowflakeUnsupportedOwnershipManagementGrantBuilderTest {
                 false,
                 false,
                 false);
+        SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
         SnowflakeUnsupportedOwnershipManagementGrantBuilder grantBuilder
-                = new SnowflakeUnsupportedOwnershipManagementGrantBuilder(snowflakeGrantModel);
+                = new SnowflakeUnsupportedOwnershipManagementGrantBuilder(snowflakeGrantModel, options);
         List<String> expected = List.of();
 
         List<String> grantStatement = grantBuilder.getRevokeStatements();

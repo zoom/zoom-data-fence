@@ -3,6 +3,7 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 import io.vavr.NotImplementedError;
 import lombok.extern.slf4j.Slf4j;
 import us.zoom.data.dfence.exception.InvalidGrantModelForGrantBuilder;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.ContainerGrantParts;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
@@ -11,8 +12,8 @@ import java.util.List;
 @Slf4j
 public class SnowflakeAllPermissionGrantBuilder extends SnowflakePermissionGrantBuilder {
 
-    public SnowflakeAllPermissionGrantBuilder(SnowflakeGrantModel grant) {
-        super(grant);
+    public SnowflakeAllPermissionGrantBuilder(SnowflakeGrantModel grant, SnowflakeGrantBuilderOptions options) {
+        super(grant, options);
     }
 
     @Override

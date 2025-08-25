@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakePermissionGrantBuilder;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.test.fixtures.resultset.MockResultSet;
 import us.zoom.data.dfence.test.fixtures.resultset.MockResultSet.I;
@@ -75,6 +76,7 @@ class SnowflakeGrantsServiceTest {
                                         new I("MOCK_ROLE"),
                                         new I(false))), columnNames));
                 when(futureGrantsStatement.getResultSet()).thenReturn(new MockResultSet(List.of(), columnNames));
+                SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
                 SnowflakeGrantBuilder builder = new SnowflakePermissionGrantBuilder(new SnowflakeGrantModel(
                         "SELECT",
                         "TABLE",
@@ -83,7 +85,7 @@ class SnowflakeGrantsServiceTest {
                         "MOCK_ROLE",
                         false,
                         false,
-                        false));
+                        false), options);
                 Map<String, SnowflakeGrantBuilder> expected = Map.of(builder.getKey(), builder);
                 Map<String, SnowflakeGrantBuilder> actual = snowflakeGrantsService.getGrants(roleName, skipUnkownTypes);
                 assertEquals(expected, actual);
@@ -121,6 +123,7 @@ class SnowflakeGrantsServiceTest {
                                         new I("MOCK_ROLE"),
                                         new I(false))), columnNames));
                 when(futureGrantsStatement.getResultSet()).thenReturn(new MockResultSet(List.of(), columnNames));
+                SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
                 SnowflakeGrantBuilder builder = new SnowflakePermissionGrantBuilder(new SnowflakeGrantModel(
                         "SELECT",
                         "TABLE",
@@ -129,7 +132,7 @@ class SnowflakeGrantsServiceTest {
                         "MOCK_ROLE",
                         false,
                         false,
-                        false));
+                        false), options);
                 Map<String, SnowflakeGrantBuilder> expected = Map.of(builder.getKey(), builder);
                 Map<String, SnowflakeGrantBuilder> actual = snowflakeGrantsService.getGrants(roleName, skipUnkownTypes);
                 assertEquals(expected, actual);
@@ -167,6 +170,7 @@ class SnowflakeGrantsServiceTest {
                                         new I("MOCK_ROLE"),
                                         new I(false))), columnNames));
                 when(futureGrantsStatement.getResultSet()).thenReturn(new MockResultSet(List.of(), columnNames));
+                SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
                 SnowflakeGrantBuilder builder = new SnowflakePermissionGrantBuilder(new SnowflakeGrantModel(
                         "SELECT",
                         "TABLE",
@@ -175,7 +179,7 @@ class SnowflakeGrantsServiceTest {
                         "MOCK_ROLE",
                         false,
                         false,
-                        false));
+                        false), options);
                 Map<String, SnowflakeGrantBuilder> expected = Map.of(builder.getKey(), builder);
                 Map<String, SnowflakeGrantBuilder> actual = snowflakeGrantsService.getGrants(roleName, skipUnkownTypes);
                 assertEquals(expected, actual);

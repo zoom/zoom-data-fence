@@ -42,7 +42,8 @@ public class Playbook {
                 playbookRoleModel.create(),
                 playbookRoleModel.revokeOtherGrants(),
                 playbookRoleModel.enable(),
-                playbookRoleModel.roleOwner());
+                playbookRoleModel.roleOwner(),
+                playbookRoleModel.unsupportedRevokeBehavior());
     }
 
     public static PlaybookModel propagateDefaults(PlaybookModel playbookModel) {
@@ -55,7 +56,8 @@ public class Playbook {
                             roleSource.create(),
                             roleSource.revokeOtherGrants(),
                             roleSource.enable(),
-                            roleSource.roleOwner() != null ? roleSource.roleOwner() : playbookModel.roleOwner());
+                            roleSource.roleOwner() != null ? roleSource.roleOwner() : playbookModel.roleOwner(),
+                            roleSource.unsupportedRevokeBehavior());
                 }));
         return new PlaybookModel(roles, playbookModel.roleOwner());
     }

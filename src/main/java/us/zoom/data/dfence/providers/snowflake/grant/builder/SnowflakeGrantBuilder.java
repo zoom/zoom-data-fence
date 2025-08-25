@@ -17,28 +17,34 @@ public abstract class SnowflakeGrantBuilder {
         return fromGrant(grant, new SnowflakeGrantBuilderOptions());
     }
 
+    public static SnowflakeGrantBuilder fromGrant(SnowflakeGrantModel grant, Boolean suppressErrors) {
+        SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
+        options.setSuppressErrors(suppressErrors);
+        return fromGrant(grant, options);
+    }
+
     public static SnowflakeGrantBuilder fromGrant(
             SnowflakeGrantModel grant,
             SnowflakeGrantBuilderOptions options
     ) {
         SnowflakeGrantBuilder[] snowflakeGrantBuilders = new SnowflakeGrantBuilder[]{
-                new SnowflakeRoleGrantBuilder(grant),
-                new SnowflakePermissionGrantBuilder(grant),
-                new SnowflakeOwnershipGrantBuilder(grant),
-                new SnowflakeAccountPermissionGrantBuilder(grant),
-                new SnowflakeMLPermissionGrantBuilder(grant),
-                new SnowflakeCorePermissionGrantBuilder(grant),
-                new SnowflakeFuturePermissionGrantBuilder(grant),
-                new SnowflakeFutureMLPermissionGrantBuilder(grant),
-                new SnowflakeFutureCorePermissionGrantBuilder(grant),
-                new SnowflakeFutureOwnershipGrantBuilder(grant),
-                new SnowflakeDatabaseRoleGrantBuilder(grant),
-                new SnowflakeAllPermissionGrantBuilder(grant),
-                new SnowflakeAllOwnershipGrantBuilder(grant),
-                new SnowflakeAllMLPermissionGrantBuilder(grant),
-                new SnowflakeAllCorePermissionGrantBuilder(grant),
-                new SnowflakeApplicationRoleGrantBuilder(grant),
-                new SnowflakeUnsupportedOwnershipManagementGrantBuilder(grant)};
+                new SnowflakeRoleGrantBuilder(grant, options),
+                new SnowflakePermissionGrantBuilder(grant, options),
+                new SnowflakeOwnershipGrantBuilder(grant, options),
+                new SnowflakeAccountPermissionGrantBuilder(grant, options),
+                new SnowflakeMLPermissionGrantBuilder(grant, options),
+                new SnowflakeCorePermissionGrantBuilder(grant, options),
+                new SnowflakeFuturePermissionGrantBuilder(grant, options),
+                new SnowflakeFutureMLPermissionGrantBuilder(grant, options),
+                new SnowflakeFutureCorePermissionGrantBuilder(grant, options),
+                new SnowflakeFutureOwnershipGrantBuilder(grant, options),
+                new SnowflakeDatabaseRoleGrantBuilder(grant, options),
+                new SnowflakeAllPermissionGrantBuilder(grant, options),
+                new SnowflakeAllOwnershipGrantBuilder(grant, options),
+                new SnowflakeAllMLPermissionGrantBuilder(grant, options),
+                new SnowflakeAllCorePermissionGrantBuilder(grant, options),
+                new SnowflakeApplicationRoleGrantBuilder(grant, options),
+                new SnowflakeUnsupportedOwnershipManagementGrantBuilder(grant, options)};
         for (SnowflakeGrantBuilder builder : snowflakeGrantBuilders) {
             if (builder.isValid()) {
                 return builder;
