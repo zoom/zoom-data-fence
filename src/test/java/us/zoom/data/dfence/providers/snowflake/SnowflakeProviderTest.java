@@ -15,6 +15,8 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeApplicatio
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakePermissionGrantBuilder;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
@@ -85,6 +87,8 @@ class SnowflakeProviderTest {
                 List.of("GRANT UPDATE ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE MOCK_ROLE_NAME;"),
                 List.of("GRANT USAGE ON DATABASE \"MOCK_DB_NAME\" TO ROLE MOCK_ROLE_NAME;"));
         List<String> expectedRoleCreationStatements = List.of("CREATE ROLE IF NOT EXISTS MOCK_ROLE_NAME;");
+        SnowflakeGrantBuilderOptions extraGrantOptions = new SnowflakeGrantBuilderOptions();
+        extraGrantOptions.setSuppressErrors(false);
         SnowflakeGrantBuilder extraGrant = new SnowflakePermissionGrantBuilder(new SnowflakeGrantModel(
                 "create table",
                 "SCHEMA",
@@ -93,7 +97,7 @@ class SnowflakeProviderTest {
                 roleName,
                 false,
                 false,
-                false));
+                false), extraGrantOptions);
         return Stream.of(
                 new CompileRoleChangesTestParams(
                         new PlaybookRoleModel(roleName, playbookPrivilegeGrants),
@@ -126,7 +130,7 @@ class SnowflakeProviderTest {
                             addAll(expectedRoleGrantStatements);
                         }})),
                 new CompileRoleChangesTestParams(
-                        new PlaybookRoleModel(roleName, playbookPrivilegeGrants, true, false, true, null),
+                        new PlaybookRoleModel(roleName, playbookPrivilegeGrants, true, false, true, null, UnsupportedRevokeBehavior.IGNORE),
                         roleId,
                         true,
                         List.of("SOME_OTHER_ROLE", roleName.toUpperCase()),
@@ -154,7 +158,7 @@ class SnowflakeProviderTest {
                         Map.of(),
                         new CompiledChanges(roleId, roleName, List.of(), expectedRoleGrantStatements)),
                 new CompileRoleChangesTestParams(
-                        new PlaybookRoleModel(roleName, playbookPrivilegeGrants, false, true, true, null),
+                        new PlaybookRoleModel(roleName, playbookPrivilegeGrants, false, true, true, null, UnsupportedRevokeBehavior.IGNORE),
                         roleId,
                         false,
                         List.of("SOME_OTHER_ROLE"),
@@ -359,7 +363,7 @@ class SnowflakeProviderTest {
     void compileChangesRoleCreationOwner() {
         PlaybookModel playbookModel = new PlaybookModel(Map.of(
                 "role-a",
-                new PlaybookRoleModel("role_a", List.of(), true, true, true, "SECURITYADMIN")));
+                new PlaybookRoleModel("role_a", List.of(), true, true, true, "SECURITYADMIN", UnsupportedRevokeBehavior.IGNORE)));
         when(snowflakeGrantsService.getGrants("role_a")).thenReturn(Map.of());
         when(snowflakeObjectsService.getContainerObjectQualNames(
                 eq(SnowflakeObjectType.ACCOUNT),
@@ -442,7 +446,8 @@ class SnowflakeProviderTest {
                 params.revokeCurrentGrants,
                 false,
                 new PlaybookModel(Map.of()),
-                false);
+                false,
+                UnsupportedRevokeBehavior.IGNORE);
         try {
             assertEquals(
                     params.expected.stream().flatMap(Collection::stream).toList(),
@@ -476,7 +481,8 @@ class SnowflakeProviderTest {
                 true,
                 false,
                 new PlaybookModel(Map.of()),
-                false);
+                false,
+                UnsupportedRevokeBehavior.IGNORE);
         assertEquals(expectedStatements, actualStatements);
 
     }
@@ -492,6 +498,8 @@ class SnowflakeProviderTest {
                 true,
                 true);
         String roleName = "mock_role_name";
+        SnowflakeGrantBuilderOptions expectedOptions = new SnowflakeGrantBuilderOptions();
+        expectedOptions.setSuppressErrors(false);
         List<SnowflakeGrantBuilder> expectedBuilders = List.of(
                 new SnowflakePermissionGrantBuilder(new SnowflakeGrantModel(
                         "SELECT",
@@ -501,7 +509,7 @@ class SnowflakeProviderTest {
                         "MOCK_ROLE_NAME",
                         false,
                         false,
-                        false)), new SnowflakePermissionGrantBuilder(new SnowflakeGrantModel(
+                        false), expectedOptions), new SnowflakePermissionGrantBuilder(new SnowflakeGrantModel(
                         "UPDATE",
                         "TABLE",
                         "MOCK_DB_NAME.MOCK_SCHEMA_NAME.MOCK_TABLE_NAME",
@@ -509,10 +517,12 @@ class SnowflakeProviderTest {
                         "MOCK_ROLE_NAME",
                         false,
                         false,
-                        false)));
+                        false), expectedOptions));
+        SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
+        options.setSuppressErrors(false);
         List<SnowflakeGrantBuilder> actualBuilders = this.snowflakeProvider.playbookGrantToSnowflakeGrants(playbookPrivilegeGrant,
                 roleName,
-                false);
+                options);
         assertEquals(expectedBuilders, actualBuilders);
     }
 
@@ -527,6 +537,8 @@ class SnowflakeProviderTest {
                 true,
                 true);
         String roleName = "mock_role_name";
+        SnowflakeGrantBuilderOptions expectedOptions = new SnowflakeGrantBuilderOptions();
+        expectedOptions.setSuppressErrors(false);
         List<SnowflakeGrantBuilder> expectedBuilders = List.of(
                 new SnowflakeApplicationRoleGrantBuilder(new SnowflakeGrantModel(
                         "USAGE",
@@ -536,10 +548,12 @@ class SnowflakeProviderTest {
                         "MOCK_ROLE_NAME",
                         false,
                         false,
-                        false)));
+                        false), expectedOptions));
+        SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
+        options.setSuppressErrors(false);
         List<SnowflakeGrantBuilder> actualBuilders = this.snowflakeProvider.playbookGrantToSnowflakeGrants(playbookPrivilegeGrant,
                 roleName,
-                false);
+                options);
         assertEquals(expectedBuilders.get(0).getKey(), actualBuilders.get(0).getKey());
         assertEquals(expectedBuilders, actualBuilders);
     }

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import com.google.common.collect.ImmutableList;
 import us.zoom.data.dfence.exception.InvalidGrantModelForGrantBuilder;
 import us.zoom.data.dfence.exception.RbacDataError;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.GrantValidationDefinition;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
@@ -26,6 +27,7 @@ public class SnowflakeUnsupportedOwnershipManagementGrantBuilder extends Snowfla
     }});
 
     private final SnowflakeGrantModel grant;
+    private final SnowflakeGrantBuilderOptions options;
 
 
     @Override
@@ -45,6 +47,26 @@ public class SnowflakeUnsupportedOwnershipManagementGrantBuilder extends Snowfla
     public List<String> getRevokeStatements() {
         if (!this.isValid()) {
             throw new InvalidGrantModelForGrantBuilder();
+        }
+        switch (options.getUnsupportedRevokeBehavior()) {
+            case IGNORE -> {
+                log.warn(String.format(
+                        "It is not possible to revoke ownership on a %s. We will not be able to drop ownership grants on %s %s.",
+                        grant.grantedOn(),
+                        grant.grantedOn(),
+                        grant.getEscapedName()));
+                return List.of();
+            }
+            case DROP -> {
+                log.warn(String.format(
+                        "It is not possible to revoke ownership on a %s. The only thing we can do is drop the %s.",
+                        grant.grantedOn(),
+                        grant.grantedOn()));
+                return List.of(String.format(
+                        "DROP %s %s;",
+                        SnowflakeObjectType.valueOf(grant.grantedOn()).getObjectType(),
+                        this.grant.getEscapedName()));
+            }
         }
         log.warn(String.format(
                 "It is not possible to revoke ownership on a notebook. We will not be able to drop ownership grants on %s %s.",

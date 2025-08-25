@@ -2,19 +2,22 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 
 import lombok.Getter;
 import us.zoom.data.dfence.exception.InvalidGrantModelForGrantBuilder;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.GrantValidationDefinition;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 import java.util.List;
 import java.util.Objects;
 
+@Getter
 public class SnowflakeApplicationRoleGrantBuilder extends SnowflakeGrantBuilder {
 
     private static final List<GrantValidationDefinition> validCombinations
             = List.of(new GrantValidationDefinition(List.of("USAGE"), List.of(SnowflakeObjectType.APPLICATION_ROLE)));
 
-    public SnowflakeApplicationRoleGrantBuilder(SnowflakeGrantModel grant) {
+    public SnowflakeApplicationRoleGrantBuilder(SnowflakeGrantModel grant, SnowflakeGrantBuilderOptions options) {
         this.grant = grant;
+        this.options = options;
     }
 
     @Override
@@ -22,8 +25,8 @@ public class SnowflakeApplicationRoleGrantBuilder extends SnowflakeGrantBuilder 
         return validCombinations;
     }
 
-    @Getter
     private SnowflakeGrantModel grant;
+    private SnowflakeGrantBuilderOptions options;
 
     @Override
     public List<String> getGrantStatements() {

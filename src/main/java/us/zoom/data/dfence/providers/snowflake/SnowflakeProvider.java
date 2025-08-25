@@ -13,6 +13,8 @@ import us.zoom.data.dfence.playbook.model.PlaybookRoleModel;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.GrantBuilderDiff;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.sql.ObjectName;
@@ -259,7 +261,8 @@ public class SnowflakeProvider implements Provider {
                     role.revokeOtherGrants(),
                     consolidateWildcardsToAllGrants,
                     playbookModel,
-                    ignoreUnknownGrants));
+                    ignoreUnknownGrants,
+                    role.unsupportedRevokeBehavior()));
         } else {
             log.debug(
                     "Skipping grant statement creation for role {} because it does not exist " + "and is not planned to be created.",
@@ -276,11 +279,15 @@ public class SnowflakeProvider implements Provider {
             Boolean revokeOtherGrants,
             Boolean consolidateWildcardsToAllGrants,
             PlaybookModel playbookModel,
-            Boolean ignoreUnknownGrants) {
+            Boolean ignoreUnknownGrants,
+            UnsupportedRevokeBehavior unsupportedRevokeBehavior) {
         try {
+            SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
+            options.setSuppressErrors(ignoreUnknownGrants);
+            options.setUnsupportedRevokeBehavior(unsupportedRevokeBehavior);
             Map<String, SnowflakeGrantBuilder> desiredGrantBuilders = forkJoinPool.submit(() -> 
                 privilegeGrants.parallelStream()
-                    .flatMap(x -> playbookGrantToSnowflakeGrants(x, roleName, false).stream())
+                    .flatMap(x -> playbookGrantToSnowflakeGrants(x, roleName, options).stream())
                     .collect(Collectors.toMap(SnowflakeGrantBuilder::getKey, x -> x, (x0, x1) -> x0))
             ).join();
             List<List<String>> statements = new ArrayList<>();
@@ -331,11 +338,11 @@ public class SnowflakeProvider implements Provider {
     public List<SnowflakeGrantBuilder> playbookGrantToSnowflakeGrants(
             PlaybookPrivilegeGrant playbookPrivilegeGrant,
             String roleName,
-            Boolean skipMissingGrantBuilder) {
+            SnowflakeGrantBuilderOptions options) {
         List<SnowflakeGrantModel> grants = new ArrayList<>();
         grants.addAll(standardGrants(playbookPrivilegeGrant, roleName));
         grants.addAll(containerGrants(playbookPrivilegeGrant, roleName));
-        return grants.stream().map(x -> SnowflakeGrantBuilder.fromGrant(x, skipMissingGrantBuilder))
+        return grants.stream().map(x -> SnowflakeGrantBuilder.fromGrant(x, options))
                 .filter(Objects::nonNull).toList();
     }
 

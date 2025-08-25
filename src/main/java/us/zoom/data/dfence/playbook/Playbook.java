@@ -30,7 +30,7 @@ public class Playbook {
         Map<String, PlaybookRoleModel> playbookRoleModelsFiltered = playbookModel.roles().keySet().stream()
                 .filter(k -> playbookModel.roles().get(k).enable())
                 .collect(Collectors.toMap(k -> k, k -> filterRole(playbookModel.roles().get(k))));
-        return new PlaybookModel(playbookRoleModelsFiltered, playbookModel.roleOwner());
+        return new PlaybookModel(playbookRoleModelsFiltered, playbookModel.roleOwner(), playbookModel.unsupportedRevokeBehavior());
     }
 
     public static PlaybookRoleModel filterRole(PlaybookRoleModel playbookRoleModel) {
@@ -42,7 +42,8 @@ public class Playbook {
                 playbookRoleModel.create(),
                 playbookRoleModel.revokeOtherGrants(),
                 playbookRoleModel.enable(),
-                playbookRoleModel.roleOwner());
+                playbookRoleModel.roleOwner(),
+                playbookRoleModel.unsupportedRevokeBehavior());
     }
 
     public static PlaybookModel propagateDefaults(PlaybookModel playbookModel) {
@@ -55,9 +56,10 @@ public class Playbook {
                             roleSource.create(),
                             roleSource.revokeOtherGrants(),
                             roleSource.enable(),
-                            roleSource.roleOwner() != null ? roleSource.roleOwner() : playbookModel.roleOwner());
+                            roleSource.roleOwner() != null ? roleSource.roleOwner() : playbookModel.roleOwner(),
+                            roleSource.unsupportedRevokeBehavior() != null ? roleSource.unsupportedRevokeBehavior() : playbookModel.unsupportedRevokeBehavior());
                 }));
-        return new PlaybookModel(roles, playbookModel.roleOwner());
+        return new PlaybookModel(roles, playbookModel.roleOwner(), playbookModel.unsupportedRevokeBehavior());
     }
 
 

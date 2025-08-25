@@ -1,5 +1,7 @@
 package us.zoom.data.dfence.playbook.model;
 
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
+
 import java.util.List;
 
 public record PlaybookRoleModel(
@@ -7,7 +9,7 @@ public record PlaybookRoleModel(
 
         Boolean create, Boolean revokeOtherGrants, Boolean enable,
 
-        String roleOwner) {
+        String roleOwner, UnsupportedRevokeBehavior unsupportedRevokeBehavior) {
     public PlaybookRoleModel {
         if (grants != null) {
             grants = List.copyOf(grants);
@@ -23,9 +25,12 @@ public record PlaybookRoleModel(
         if (revokeOtherGrants == null) {
             revokeOtherGrants = true;
         }
+        if (unsupportedRevokeBehavior == null) {
+            unsupportedRevokeBehavior = UnsupportedRevokeBehavior.IGNORE;
+        }
     }
 
     public PlaybookRoleModel(String name, List<PlaybookPrivilegeGrant> grants) {
-        this(name, grants, null, null, null, null);
+        this(name, grants, null, null, null, null, null);
     }
 }

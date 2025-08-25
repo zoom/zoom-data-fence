@@ -3,6 +3,7 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 import lombok.extern.slf4j.Slf4j;
 import us.zoom.data.dfence.exception.NoGrantBuilderError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.GrantValidationDefinition;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.sql.ObjectName;
@@ -13,28 +14,37 @@ import java.util.List;
 public abstract class SnowflakeGrantBuilder {
 
     public static SnowflakeGrantBuilder fromGrant(SnowflakeGrantModel grant) {
-        return fromGrant(grant, false);
+        return fromGrant(grant, new SnowflakeGrantBuilderOptions());
     }
 
-    public static SnowflakeGrantBuilder fromGrant(SnowflakeGrantModel grant, Boolean suppressError) {
+    public static SnowflakeGrantBuilder fromGrant(SnowflakeGrantModel grant, Boolean suppressErrors) {
+        SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
+        options.setSuppressErrors(suppressErrors);
+        return fromGrant(grant, options);
+    }
+
+    public static SnowflakeGrantBuilder fromGrant(
+            SnowflakeGrantModel grant,
+            SnowflakeGrantBuilderOptions options
+    ) {
         SnowflakeGrantBuilder[] snowflakeGrantBuilders = new SnowflakeGrantBuilder[]{
-                new SnowflakeRoleGrantBuilder(grant),
-                new SnowflakePermissionGrantBuilder(grant),
-                new SnowflakeOwnershipGrantBuilder(grant),
-                new SnowflakeAccountPermissionGrantBuilder(grant),
-                new SnowflakeMLPermissionGrantBuilder(grant),
-                new SnowflakeCorePermissionGrantBuilder(grant),
-                new SnowflakeFuturePermissionGrantBuilder(grant),
-                new SnowflakeFutureMLPermissionGrantBuilder(grant),
-                new SnowflakeFutureCorePermissionGrantBuilder(grant),
-                new SnowflakeFutureOwnershipGrantBuilder(grant),
-                new SnowflakeDatabaseRoleGrantBuilder(grant),
-                new SnowflakeAllPermissionGrantBuilder(grant),
-                new SnowflakeAllOwnershipGrantBuilder(grant),
-                new SnowflakeAllMLPermissionGrantBuilder(grant),
-                new SnowflakeAllCorePermissionGrantBuilder(grant),
-                new SnowflakeApplicationRoleGrantBuilder(grant),
-                new SnowflakeUnsupportedOwnershipManagementGrantBuilder(grant)};
+                new SnowflakeRoleGrantBuilder(grant, options),
+                new SnowflakePermissionGrantBuilder(grant, options),
+                new SnowflakeOwnershipGrantBuilder(grant, options),
+                new SnowflakeAccountPermissionGrantBuilder(grant, options),
+                new SnowflakeMLPermissionGrantBuilder(grant, options),
+                new SnowflakeCorePermissionGrantBuilder(grant, options),
+                new SnowflakeFuturePermissionGrantBuilder(grant, options),
+                new SnowflakeFutureMLPermissionGrantBuilder(grant, options),
+                new SnowflakeFutureCorePermissionGrantBuilder(grant, options),
+                new SnowflakeFutureOwnershipGrantBuilder(grant, options),
+                new SnowflakeDatabaseRoleGrantBuilder(grant, options),
+                new SnowflakeAllPermissionGrantBuilder(grant, options),
+                new SnowflakeAllOwnershipGrantBuilder(grant, options),
+                new SnowflakeAllMLPermissionGrantBuilder(grant, options),
+                new SnowflakeAllCorePermissionGrantBuilder(grant, options),
+                new SnowflakeApplicationRoleGrantBuilder(grant, options),
+                new SnowflakeUnsupportedOwnershipManagementGrantBuilder(grant, options)};
         for (SnowflakeGrantBuilder builder : snowflakeGrantBuilders) {
             if (builder.isValid()) {
                 return builder;
@@ -42,7 +52,7 @@ public abstract class SnowflakeGrantBuilder {
         }
         String msg = String.format("No compatible grant builder found for grant %s", grant);
         NoGrantBuilderError err = new NoGrantBuilderError(msg);
-        if (suppressError) {
+        if (options.getSuppressErrors()) {
             log.error(msg, err);
             return null;
         }
