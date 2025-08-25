@@ -1,4 +1,4 @@
-t package us.zoom.data.dfence.playbook.model;
+package us.zoom.data.dfence.playbook.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,8 +25,8 @@ public record PlaybookModel(
     public static PlaybookModel merge(List<PlaybookModel> playbooks) {
         Set<String> intersectionRoleKeys = new HashSet<>();
         HashMap<String, PlaybookRoleModel> newRoles = new HashMap<>();
-        List<String> roleOwners = new ArrayList<>();
-        List<UnsupportedRevokeBehavior> unsupportedRevokeBehaviors = new ArrayList<>();
+        Set<String> roleOwners = new HashSet<>();
+        Set<UnsupportedRevokeBehavior> unsupportedRevokeBehaviors = new HashSet<>();
         playbooks.forEach(playbook -> {
             intersectionRoleKeys.clear();
             intersectionRoleKeys.addAll(newRoles.keySet());
@@ -51,7 +51,7 @@ public record PlaybookModel(
         });
         String roleOwner = null;
         if (roleOwners.size() == 1) {
-            roleOwner = roleOwners.get(0);
+            roleOwner = roleOwners.iterator().next();
         }
         if (roleOwners.size() > 1) {
             throw new RbacDataError("Role owner is declared more than once with values " + String.join(
@@ -61,7 +61,7 @@ public record PlaybookModel(
         
         UnsupportedRevokeBehavior unsupportedRevokeBehavior = null;
         if (unsupportedRevokeBehaviors.size() == 1) {
-            unsupportedRevokeBehavior = unsupportedRevokeBehaviors.get(0);
+            unsupportedRevokeBehavior = unsupportedRevokeBehaviors.iterator().next();
         }
         if (unsupportedRevokeBehaviors.size() > 1) {
             throw new RbacDataError("Unsupported revoke behavior is declared more than once with values " + 
