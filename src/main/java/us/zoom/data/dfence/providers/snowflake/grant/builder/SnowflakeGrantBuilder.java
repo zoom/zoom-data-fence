@@ -3,6 +3,7 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 import lombok.extern.slf4j.Slf4j;
 import us.zoom.data.dfence.exception.NoGrantBuilderError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.GrantValidationDefinition;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.sql.ObjectName;
@@ -13,10 +14,13 @@ import java.util.List;
 public abstract class SnowflakeGrantBuilder {
 
     public static SnowflakeGrantBuilder fromGrant(SnowflakeGrantModel grant) {
-        return fromGrant(grant, false);
+        return fromGrant(grant, new SnowflakeGrantBuilderOptions());
     }
 
-    public static SnowflakeGrantBuilder fromGrant(SnowflakeGrantModel grant, Boolean suppressError) {
+    public static SnowflakeGrantBuilder fromGrant(
+            SnowflakeGrantModel grant,
+            SnowflakeGrantBuilderOptions options
+    ) {
         SnowflakeGrantBuilder[] snowflakeGrantBuilders = new SnowflakeGrantBuilder[]{
                 new SnowflakeRoleGrantBuilder(grant),
                 new SnowflakePermissionGrantBuilder(grant),
@@ -42,7 +46,7 @@ public abstract class SnowflakeGrantBuilder {
         }
         String msg = String.format("No compatible grant builder found for grant %s", grant);
         NoGrantBuilderError err = new NoGrantBuilderError(msg);
-        if (suppressError) {
+        if (options.getSuppressErrors()) {
             log.error(msg, err);
             return null;
         }
