@@ -56,6 +56,13 @@ jobs:
       - name: Build JAR
         run: mvn -B package -P assembly --file pom.xml
       
+      - name: Verify JAR exists
+        run: |
+          echo "Checking if JAR file exists..."
+          ls -la target/
+          echo "JAR file should be: target/zoom-data-fence-jar-with-dependencies.jar"
+          test -f target/zoom-data-fence-jar-with-dependencies.jar
+      
       - name: Build Docker image (no push)
         uses: docker/build-push-action@v6
         with:
