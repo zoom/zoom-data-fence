@@ -21,14 +21,14 @@ jobs:
       java-version: ${{ steps.set-constants.outputs.java-version }}
       java-distribution: ${{ steps.set-constants.outputs.java-distribution }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Set Constants
         id: set-constants
         run: |
           echo "java-version=17" >> $GITHUB_OUTPUT
           echo "java-distribution=temurin" >> $GITHUB_OUTPUT
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
         with:
           java-version: ${{ steps.set-constants.outputs.java-version }}
           distribution: ${{ steps.set-constants.outputs.java-distribution }}
@@ -40,7 +40,7 @@ jobs:
         id: determine-deploy
         # We want to build releases from tags matching the correct pattern and matching the pom version.
         # We want to build snapshot releases from any push to main.
-        uses: actions/github-script@v6
+        uses: actions/github-script@00f12e3e20659f42342b1c0226afda7f7c042325 # v6
         env:
           VERSION: ${{ steps.get-version.outputs.version }}
           REF: ${{ github.ref }}
@@ -69,9 +69,9 @@ jobs:
     outputs:
       jar-path: ${{ steps.build.outputs.jar-path }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
         with:
           java-version: ${{ needs.get-version.outputs.java-version }}
           distribution: ${{ needs.get-version.outputs.java-distribution }}
@@ -82,7 +82,7 @@ jobs:
           mvn --batch-mode --fail-fast -P assembly package
           echo "jar-path=target/zoom-data-fence-jar-with-dependencies.jar" >> $GITHUB_OUTPUT
       - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: zoom-data-fence-jar
           path: target/zoom-data-fence-jar-with-dependencies.jar
@@ -94,14 +94,14 @@ jobs:
     needs: [get-version, build-jar]
     if: ${{ fromJSON(needs.get-version.outputs.deploy) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Download JAR artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: zoom-data-fence-jar
           path: target/
       - name: Set up Maven Central Repository
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
         with:
           java-version: ${{ needs.get-version.outputs.java-version }}
           distribution: ${{ needs.get-version.outputs.java-distribution }}
@@ -132,9 +132,9 @@ jobs:
       matrix:
         variant: [standard, aws-cli]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Download JAR artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: zoom-data-fence-jar
           path: target/
@@ -151,14 +151,14 @@ jobs:
             type=raw,value=${{ matrix.variant }},enable=${{ matrix.variant == 'aws-cli' && needs.get-version.outputs.release }}
       - name: Login to Docker Hub
         if: ${{ fromJSON(needs.get-version.outputs.deploy) }}
-        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 #v3.4.0
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
         with:
           context: .
           push: ${{ fromJSON(needs.get-version.outputs.deploy) }}
