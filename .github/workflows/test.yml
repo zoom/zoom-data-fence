@@ -118,7 +118,7 @@ jobs:
         if: matrix.variant == 'aws-cli'
         run: |
           echo "Testing tar command availability..."
-          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "tar --version"
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "tar --help > /dev/null && echo 'tar is working'"
           docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "command -v tar"
       
       - name: Validate tar command not available (standard variant only)
