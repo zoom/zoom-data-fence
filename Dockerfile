@@ -12,10 +12,19 @@ COPY dfence /usr/bin/dfence
 
 # Install AWS CLI if requested
 RUN if [ "$INSTALL_AWS_CLI" = "true" ]; then \
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+        yum update -y && yum install -y unzip && \
+        ARCH=$(uname -m) && \
+        if [ "$ARCH" = "x86_64" ]; then \
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"; \
+        elif [ "$ARCH" = "aarch64" ]; then \
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"; \
+        else \
+            echo "Unsupported architecture: $ARCH" && exit 1; \
+        fi && \
         unzip awscliv2.zip && \
         ./aws/install && \
         rm -rf awscliv2.zip aws && \
+        yum remove -y unzip && yum clean all && \
         aws --version; \
     fi
 
