@@ -102,6 +102,14 @@ jobs:
           docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "whoami"
           docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "id"
       
+      - name: Validate home directory and working directory
+        run: |
+          echo "Testing home directory and working directory..."
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "echo 'HOME: '\$HOME"
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "echo 'PWD: '\$PWD"
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "test \$HOME = '/home/app' && echo 'Home directory is correct: /home/app'"
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "test \$PWD = '/app' && echo 'Working directory is correct: /app'"
+      
       - name: Validate JAR file integrity
         run: |
           echo "Testing JAR file integrity..."
