@@ -114,6 +114,19 @@ jobs:
           echo "Testing AWS CLI installation..."
           docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "aws --version"
       
+      - name: Validate tar command (aws-cli variant only)
+        if: matrix.variant == 'aws-cli'
+        run: |
+          echo "Testing tar command availability..."
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "tar --help > /dev/null && echo 'tar is working'"
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "command -v tar"
+      
+      - name: Validate tar command not available (standard variant only)
+        if: matrix.variant == 'standard'
+        run: |
+          echo "Testing tar command is NOT available in standard variant..."
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "! command -v tar" || (echo "tar should not be available in standard variant" && exit 1)
+      
       - name: Validate file permissions
         run: |
           echo "Testing file permissions..."
