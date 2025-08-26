@@ -1,0 +1,79 @@
+name: Validate Docker Images
+
+on:
+  pull_request:
+    paths:
+      - 'Dockerfile'
+      - '.github/workflows/**'
+      - 'src/**'
+      - 'dfence'
+      - 'pom.xml'
+
+jobs:
+  validate-docker:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        variant: [standard, aws-cli]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Build JAR
+        run: mvn --batch-mode --fail-fast -P assembly package
+      
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: test-image:${{ matrix.variant }}
+          build-args: |
+            JAR_PATH=target/zoom-data-fence-jar-with-dependencies.jar
+            INSTALL_AWS_CLI=${{ matrix.variant == 'aws-cli' }}
+      
+      - name: Validate basic functionality
+        run: |
+          echo "Testing basic dfence functionality..."
+          docker run --rm test-image:${{ matrix.variant }} --help
+      
+      - name: Validate dfence command execution
+        run: |
+          echo "Testing dfence command execution..."
+          docker run --rm test-image:${{ matrix.variant }} dfence --help
+      
+      - name: Validate AWS CLI (aws-cli variant only)
+        if: matrix.variant == 'aws-cli'
+        run: |
+          echo "Testing AWS CLI installation..."
+          docker run --rm test-image:${{ matrix.variant }} aws --version
+      
+      - name: Validate file permissions
+        run: |
+          echo "Testing file permissions..."
+          docker run --rm test-image:${{ matrix.variant }} ls -la /app/
+          docker run --rm test-image:${{ matrix.variant }} ls -la /usr/bin/dfence
+      
+      - name: Validate user context
+        run: |
+          echo "Testing user context..."
+          docker run --rm test-image:${{ matrix.variant }} whoami
+          docker run --rm test-image:${{ matrix.variant }} id
+      
+      - name: Validate JAR file integrity
+        run: |
+          echo "Testing JAR file integrity..."
+          docker run --rm test-image:${{ matrix.variant }} java -jar /app/app.jar --help
+      
+      - name: Validate environment variables
+        run: |
+          echo "Testing environment variables..."
+          docker run --rm test-image:${{ matrix.variant }} env | grep DFENCE
