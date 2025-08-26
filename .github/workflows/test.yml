@@ -33,7 +33,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: mvn -B package -P assembly --file pom.xml
 
   docker-test:
     needs: test
@@ -54,7 +54,7 @@ jobs:
           cache: maven
       
       - name: Build JAR
-        run: mvn -B package --file pom.xml
+        run: mvn -B package -P assembly --file pom.xml
       
       - name: Build Docker image (no push)
         uses: docker/build-push-action@v6
