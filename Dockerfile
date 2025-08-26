@@ -1,14 +1,17 @@
-FROM maven:3.9-amazoncorretto-17-debian AS build
-COPY pom.xml /build/
-COPY src /build/src
-WORKDIR /build/
-RUN mvn --batch-mode --fail-fast -P assembly package
-
 FROM amazoncorretto:17 AS runtime
 ARG INSTALL_AWS_CLI=false
+ARG JAR_PATH=target/zoom-data-fence-jar-with-dependencies.jar
 ENV DFENCE_JAR_PATH="/app/app.jar"
-COPY --from=build /build/target/zoom-data-fence-jar-with-dependencies.jar ${DFENCE_JAR_PATH}
+COPY ${JAR_PATH} ${DFENCE_JAR_PATH}
 COPY dfence /usr/bin/dfence
+
+# Create app user for backward compatibility
+RUN yum install -y shadow-utils && \
+    useradd -r -s /bin/bash -d /app app && \
+    mkdir -p /app && \
+    chown app:app /app && \
+    yum remove -y shadow-utils && \
+    yum clean all
 
 # Install AWS CLI if requested
 WORKDIR /app

@@ -1,4 +1,4 @@
-name: test
+name: Test
 
 permissions:
   contents: read
@@ -14,17 +14,100 @@ on:
       - main
       - release
       - release/*
+    paths:
+      - 'Dockerfile'
+      - '.github/workflows/**'
+      - 'src/**'
+      - 'dfence'
+      - 'pom.xml'
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
         run: mvn -B package --file pom.xml
+
+  docker-test:
+    needs: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        variant: [standard, aws-cli]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      
+      - name: Set up Java
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: maven
+      
+      - name: Build JAR
+        run: mvn -B package -P assembly --file pom.xml
+      
+      - name: Verify JAR exists
+        run: |
+          echo "Checking if JAR file exists..."
+          ls -la target/
+          echo "JAR file should be: target/zoom-data-fence-jar-with-dependencies.jar"
+          test -f target/zoom-data-fence-jar-with-dependencies.jar
+      
+      - name: Build Docker image (no push)
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: test-image:${{ matrix.variant }}
+          build-args: |
+            JAR_PATH=target/zoom-data-fence-jar-with-dependencies.jar
+            INSTALL_AWS_CLI=${{ matrix.variant == 'aws-cli' }}
+      
+      - name: Validate basic functionality
+        run: |
+          echo "Testing basic dfence functionality..."
+          docker run --rm test-image:${{ matrix.variant }} --help
+      
+      - name: Validate dfence command execution
+        run: |
+          echo "Testing dfence command execution..."
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "dfence --help"
+      
+      - name: Validate AWS CLI (aws-cli variant only)
+        if: matrix.variant == 'aws-cli'
+        run: |
+          echo "Testing AWS CLI installation..."
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "aws --version"
+      
+      - name: Validate file permissions
+        run: |
+          echo "Testing file permissions..."
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "ls -la /app/"
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "ls -la /usr/bin/dfence"
+      
+      - name: Validate user context
+        run: |
+          echo "Testing user context..."
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "whoami"
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "id"
+      
+      - name: Validate JAR file integrity
+        run: |
+          echo "Testing JAR file integrity..."
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "java -jar /app/app.jar --help"
+      
+      - name: Validate environment variables
+        run: |
+          echo "Testing environment variables..."
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "env | grep DFENCE"
