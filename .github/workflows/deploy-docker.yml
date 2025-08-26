@@ -1,4 +1,4 @@
-name: unified-build-deploy
+name: Deploy Docker Images
 on:
   push:
     branches:
@@ -76,7 +76,7 @@ jobs:
           java-version: ${{ needs.get-version.outputs.java-version }}
           distribution: ${{ needs.get-version.outputs.java-distribution }}
           cache: maven
-      - name: Build JAR
+      - name: Build JAR for Docker
         id: build
         run: |
           mvn --batch-mode --fail-fast -P assembly package
@@ -87,40 +87,6 @@ jobs:
           name: zoom-data-fence-jar
           path: target/zoom-data-fence-jar-with-dependencies.jar
           retention-days: 1
-
-  deploy-maven:
-    environment: deploy
-    runs-on: ubuntu-latest
-    needs: [get-version, build-jar]
-    if: ${{ fromJSON(needs.get-version.outputs.deploy) }}
-    steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Download JAR artifact
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: zoom-data-fence-jar
-          path: target/
-      - name: Set up Maven Central Repository
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
-        with:
-          java-version: ${{ needs.get-version.outputs.java-version }}
-          distribution: ${{ needs.get-version.outputs.java-distribution }}
-          server-id: central
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-          cache: maven
-      - id: install-secret-key
-        name: Install gpg secret key
-        run: |
-          # Install gpg secret key
-          cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
-          # Verify gpg secret key
-          gpg --list-secret-keys --keyid-format LONG
-      - name: Publish package
-        run: mvn -Ppublish --batch-mode -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} clean deploy
-        env:
-          MAVEN_USERNAME: ${{ vars.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
 
   deploy-docker:
     environment: deploy
