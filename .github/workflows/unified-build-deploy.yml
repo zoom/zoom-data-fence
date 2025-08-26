@@ -1,0 +1,180 @@
+name: unified-build-deploy
+on:
+  push:
+    branches:
+      # Build Snapshots From Main
+      - main
+    tags:
+      # Build Releases From Tags
+      - v*.*.*
+permissions:
+  contents: read
+
+jobs:
+  get-version:
+    environment: deploy
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      deploy: ${{ steps.determine-deploy.outputs.deploy }}
+      release: ${{ steps.determine-deploy.outputs.release }}
+      java-version: ${{ steps.set-constants.outputs.java-version }}
+      java-distribution: ${{ steps.set-constants.outputs.java-distribution }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set Constants
+        id: set-constants
+        run: |
+          echo "java-version=17" >> $GITHUB_OUTPUT
+          echo "java-distribution=temurin" >> $GITHUB_OUTPUT
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ steps.set-constants.outputs.java-version }}
+          distribution: ${{ steps.set-constants.outputs.java-distribution }}
+          cache: maven
+      - name: Extract Maven project version
+        run: echo "version=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_OUTPUT
+        id: get-version
+      - name: Determine if Deploy
+        id: determine-deploy
+        # We want to build releases from tags matching the correct pattern and matching the pom version.
+        # We want to build snapshot releases from any push to main.
+        uses: actions/github-script@v6
+        env:
+          VERSION: ${{ steps.get-version.outputs.version }}
+          REF: ${{ github.ref }}
+        with:
+          script: |
+            const versionPattern = /[0-9]+\.[0-9]+\.[0-9]/;
+            const snapshotPattern = /[0-9]+\.[0-9]+\.[0-9]-SNAPSHOT/;
+            const REF = process.env.REF;
+            const VERSION = process.env.VERSION;
+            
+            if (`refs/tags/v${VERSION}` === REF && versionPattern.test(VERSION)) {
+              core.setOutput('deploy', true);
+              core.setOutput('release', true);
+            } else if (REF === 'refs/heads/main' && snapshotPattern.test(VERSION)) {
+              core.setOutput('deploy', true);
+              core.setOutput('release', false);
+            } else {
+              core.setOutput('deploy', false);
+              core.setOutput('release', false);
+            }
+
+  build-jar:
+    environment: deploy
+    runs-on: ubuntu-latest
+    needs: get-version
+    outputs:
+      jar-path: ${{ steps.build.outputs.jar-path }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ needs.get-version.outputs.java-version }}
+          distribution: ${{ needs.get-version.outputs.java-distribution }}
+          cache: maven
+      - name: Build JAR
+        id: build
+        run: |
+          mvn --batch-mode --fail-fast -P assembly package
+          echo "jar-path=target/zoom-data-fence-jar-with-dependencies.jar" >> $GITHUB_OUTPUT
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: zoom-data-fence-jar
+          path: target/zoom-data-fence-jar-with-dependencies.jar
+          retention-days: 1
+
+  deploy-maven:
+    environment: deploy
+    runs-on: ubuntu-latest
+    needs: [get-version, build-jar]
+    if: ${{ fromJSON(needs.get-version.outputs.deploy) }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: zoom-data-fence-jar
+          path: target/
+      - name: Set up Maven Central Repository
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ needs.get-version.outputs.java-version }}
+          distribution: ${{ needs.get-version.outputs.java-distribution }}
+          server-id: central
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          cache: maven
+      - id: install-secret-key
+        name: Install gpg secret key
+        run: |
+          # Install gpg secret key
+          cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
+          # Verify gpg secret key
+          gpg --list-secret-keys --keyid-format LONG
+      - name: Publish package
+        run: mvn -Ppublish --batch-mode -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} clean deploy
+        env:
+          MAVEN_USERNAME: ${{ vars.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+
+  deploy-docker:
+    environment: deploy
+    runs-on: ubuntu-latest
+    needs: [get-version, build-jar]
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        variant: [standard, aws-cli]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: zoom-data-fence-jar
+          path: target/
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        with:
+          images: |
+            zoomvideo/zoom-data-fence
+          tags: |
+            type=raw,value=latest,enable=${{ needs.get-version.outputs.release && matrix.variant == 'standard' }}
+            type=raw,value=v${{ needs.get-version.outputs.version }},enable=${{ matrix.variant == 'standard' }}
+            type=raw,value=v${{ needs.get-version.outputs.version }}-${{ matrix.variant }},enable=${{ matrix.variant == 'aws-cli' }}
+            type=raw,value=${{ matrix.variant }},enable=${{ matrix.variant == 'aws-cli' }}
+      - name: Login to Docker Hub
+        if: ${{ fromJSON(needs.get-version.outputs.deploy) }}
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 #v3.4.0
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ fromJSON(needs.get-version.outputs.deploy) }}
+          provenance: mode=max
+          sbom: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            INSTALL_AWS_CLI=${{ matrix.variant == 'aws-cli' }}
+            JAR_PATH=target/zoom-data-fence-jar-with-dependencies.jar
+      - name: Update repo description
+        uses: peter-evans/dockerhub-description@432a30c9e07499fd01da9f8a49f0faf9e0ca5b77 # v4.0.2
+        if: ${{ fromJSON(needs.get-version.outputs.deploy) && matrix.variant == 'standard' }}
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: zoomvideo/zoom-data-fence
+          short-description: ${{ github.event.repository.description }}
