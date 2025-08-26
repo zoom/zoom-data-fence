@@ -19,7 +19,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import java.util.concurrent.Callable;
 
 @Command(
-        name = "rbac",
+        name = "dfence",
         description = "Database access control.",
         showDefaultValues = true,
         mixinStandardHelpOptions = true,
