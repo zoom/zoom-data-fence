@@ -10,7 +10,21 @@ on:
       - 'pom.xml'
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
   validate-docker:
+    needs: test
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -25,9 +39,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: maven
       
       - name: Build JAR
-        run: mvn --batch-mode --fail-fast -P assembly package
+        run: mvn -B package --file pom.xml
       
       - name: Build Docker image (no push)
         uses: docker/build-push-action@v6
