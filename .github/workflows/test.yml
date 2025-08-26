@@ -88,26 +88,26 @@ jobs:
         if: matrix.variant == 'aws-cli'
         run: |
           echo "Testing AWS CLI installation..."
-          docker run --rm test-image:${{ matrix.variant }} aws --version
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "aws --version"
       
       - name: Validate file permissions
         run: |
           echo "Testing file permissions..."
-          docker run --rm test-image:${{ matrix.variant }} ls -la /app/
-          docker run --rm test-image:${{ matrix.variant }} ls -la /usr/bin/dfence
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "ls -la /app/"
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "ls -la /usr/bin/dfence"
       
       - name: Validate user context
         run: |
           echo "Testing user context..."
-          docker run --rm test-image:${{ matrix.variant }} whoami
-          docker run --rm test-image:${{ matrix.variant }} id
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "whoami"
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "id"
       
       - name: Validate JAR file integrity
         run: |
           echo "Testing JAR file integrity..."
-          docker run --rm test-image:${{ matrix.variant }} java -jar /app/app.jar --help
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "java -jar /app/app.jar --help"
       
       - name: Validate environment variables
         run: |
           echo "Testing environment variables..."
-          docker run --rm test-image:${{ matrix.variant }} env | grep DFENCE
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "env | grep DFENCE"
