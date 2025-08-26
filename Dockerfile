@@ -1,20 +1,20 @@
 FROM amazoncorretto:17 AS runtime
 ARG INSTALL_AWS_CLI=false
 ARG JAR_PATH=target/zoom-data-fence-jar-with-dependencies.jar
-ENV DFENCE_JAR_PATH="/app/app.jar"
+ENV DFENCE_JAR_PATH="/home/app/app.jar"
 COPY ${JAR_PATH} ${DFENCE_JAR_PATH}
 COPY dfence /usr/bin/dfence
 
 # Create app user for backward compatibility
 RUN yum install -y shadow-utils && \
-    useradd -r -s /bin/bash -d /app app && \
-    mkdir -p /app && \
-    chown app:app /app && \
+    useradd -r -s /bin/bash -d /home/app app && \
+    mkdir -p /home/app && \
+    chown app:app /home/app && \
     yum remove -y shadow-utils && \
     yum clean all
 
 # Install AWS CLI if requested
-WORKDIR /app
+WORKDIR /home/app
 RUN if [ "$INSTALL_AWS_CLI" = "true" ]; then \
         yum update -y && yum install -y unzip && \
         ARCH=$(uname -m) && \
