@@ -85,8 +85,6 @@ jobs:
           cat <(echo -e "${{ secrets.OSSRH_GPG_SECRET_KEY }}") | gpg --batch --import
           # Verify gpg secret key
           gpg --list-secret-keys --keyid-format LONG
-      - name: Maven verify (code quality checks)
-        run: mvn -B verify -DskipTests --file pom.xml
       - name: Publish package
         run: mvn -Ppublish --batch-mode -Dgpg.passphrase=${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }} clean deploy
         env:
