@@ -32,6 +32,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+      - name: Maven verify (code quality checks)
+        run: mvn -B verify -DskipTests --file pom.xml
       - name: Build with Maven (regular JAR for unit tests)
         run: mvn -B package --file pom.xml
 
@@ -47,6 +49,8 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+      - name: Maven verify (code quality checks)
+        run: mvn -B verify -DskipTests --file pom.xml
       - name: Build JAR for Docker (assembly profile)
         id: build
         run: |
