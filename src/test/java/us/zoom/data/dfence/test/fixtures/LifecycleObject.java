@@ -1,7 +1,7 @@
 package us.zoom.data.dfence.test.fixtures;
 
 public interface LifecycleObject {
-    void setup();
+  void setup();
 
-    void teardown();
+  void teardown();
 }
