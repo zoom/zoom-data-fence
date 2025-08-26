@@ -82,7 +82,7 @@ jobs:
       - name: Validate dfence command execution
         run: |
           echo "Testing dfence command execution..."
-          docker run --rm test-image:${{ matrix.variant }} dfence --help
+          docker run --rm --entrypoint bash test-image:${{ matrix.variant }} -c "dfence --help"
       
       - name: Validate AWS CLI (aws-cli variant only)
         if: matrix.variant == 'aws-cli'
