@@ -11,6 +11,7 @@ COPY --from=build /build/target/zoom-data-fence-jar-with-dependencies.jar ${DFEN
 COPY dfence /usr/bin/dfence
 
 # Install AWS CLI if requested
+WORKDIR /app
 RUN if [ "$INSTALL_AWS_CLI" = "true" ]; then \
         yum update -y && yum install -y unzip && \
         ARCH=$(uname -m) && \
@@ -28,5 +29,5 @@ RUN if [ "$INSTALL_AWS_CLI" = "true" ]; then \
         aws --version; \
     fi
 
-USER 1000
+USER app
 ENTRYPOINT ["dfence"]
