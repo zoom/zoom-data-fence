@@ -4,7 +4,7 @@ ARG JAR_PATH=target/zoom-data-fence-jar-with-dependencies.jar
 ENV DFENCE_JAR_PATH="/app/app.jar"
 
 # Create app user for backward compatibility
-RUN yum install -y shadow-utils && \
+RUN yum update -y && yum install -y shadow-utils && \
     useradd -r -s /bin/bash -d /home/app app && \
     mkdir -p /home/app && \
     chown app:app /home/app && \
