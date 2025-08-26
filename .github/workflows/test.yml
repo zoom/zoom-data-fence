@@ -32,11 +32,35 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
-      - name: Build with Maven
+      - name: Build with Maven (regular JAR for unit tests)
         run: mvn -B package --file pom.xml
 
+  build-docker-jar:
+    runs-on: ubuntu-latest
+    outputs:
+      jar-path: ${{ steps.build.outputs.jar-path }}
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Set up JDK
+        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      - name: Build JAR for Docker (assembly profile)
+        id: build
+        run: |
+          mvn -B package -P assembly --file pom.xml
+          echo "jar-path=target/zoom-data-fence-jar-with-dependencies.jar" >> $GITHUB_OUTPUT
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: zoom-data-fence-jar
+          path: target/zoom-data-fence-jar-with-dependencies.jar
+          retention-days: 1
+
   docker-test:
-    needs: test
+    needs: build-docker-jar
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -46,15 +70,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       
-      - name: Set up Java
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4
+      - name: Download JAR artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: maven
-      
-      - name: Build JAR
-        run: mvn -B package -P assembly --file pom.xml
+          name: zoom-data-fence-jar
+          path: target/
       
       - name: Verify JAR exists
         run: |
