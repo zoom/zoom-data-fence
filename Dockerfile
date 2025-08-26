@@ -4,7 +4,7 @@ ARG JAR_PATH=target/zoom-data-fence-jar-with-dependencies.jar
 ENV DFENCE_JAR_PATH="/app/app.jar"
 
 # Create app user for backward compatibility
-RUN yum install -y shadow-utils && \
+RUN yum update -y && yum install -y shadow-utils && \
     useradd -r -s /bin/bash -d /home/app app && \
     mkdir -p /home/app && \
     chown app:app /home/app && \
@@ -18,7 +18,7 @@ WORKDIR /app
 COPY ${JAR_PATH} ${DFENCE_JAR_PATH}
 COPY dfence /usr/bin/dfence
 RUN if [ "$INSTALL_AWS_CLI" = "true" ]; then \
-        yum update -y && yum install -y unzip tar && \
+        yum update -y && yum install -y unzip tar gzip && \
         ARCH=$(uname -m) && \
         if [ "$ARCH" = "x86_64" ]; then \
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"; \
