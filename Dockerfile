@@ -5,6 +5,14 @@ ENV DFENCE_JAR_PATH="/app/app.jar"
 COPY ${JAR_PATH} ${DFENCE_JAR_PATH}
 COPY dfence /usr/bin/dfence
 
+# Create app user for backward compatibility
+RUN yum install -y shadow-utils && \
+    useradd -r -s /bin/bash -d /app app && \
+    mkdir -p /app && \
+    chown app:app /app && \
+    yum remove -y shadow-utils && \
+    yum clean all
+
 # Install AWS CLI if requested
 WORKDIR /app
 RUN if [ "$INSTALL_AWS_CLI" = "true" ]; then \

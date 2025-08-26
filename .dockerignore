@@ -1,7 +1,6 @@
 *.env
 .git
 local
-target
 .jekyll-cache
 .idea
 .vscode
