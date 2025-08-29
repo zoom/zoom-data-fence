@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class SnowflakeGrantBuilderOptions {
-    UnsupportedRevokeBehavior unsupportedRevokeBehavior = UnsupportedRevokeBehavior.IGNORE;
-    Boolean suppressErrors = false;
+  UnsupportedRevokeBehavior unsupportedRevokeBehavior = UnsupportedRevokeBehavior.IGNORE;
+  Boolean suppressErrors = false;
 }

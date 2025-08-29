@@ -5,11 +5,11 @@ import lombok.Data;
 @Data
 public class ProfileModel {
 
-    private ProviderName providerName = ProviderName.SNOWFLAKE;
+  private ProviderName providerName = ProviderName.SNOWFLAKE;
 
-    private ProfileProviderModel connection;
+  private ProfileProviderModel connection;
 
-    public enum ProviderName {
-        SNOWFLAKE
-    }
+  public enum ProviderName {
+    SNOWFLAKE
+  }
 }

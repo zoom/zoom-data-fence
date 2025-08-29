@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class SnowflakeProviderConfigModel {
-    private String connectionString;
-    private SnowflakeConnectionProperties connectionProperties;
+  private String connectionString;
+  private SnowflakeConnectionProperties connectionProperties;
 }
