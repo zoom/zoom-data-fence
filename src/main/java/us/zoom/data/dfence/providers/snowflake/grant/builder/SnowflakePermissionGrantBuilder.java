@@ -140,7 +140,7 @@ public class SnowflakePermissionGrantBuilder extends SnowflakeGrantBuilder {
         add(new GrantValidationDefinition(List.of("USAGE"), List.of(SnowflakeObjectType.STREAMLIT)));
         add(new GrantValidationDefinition(List.of("INSTANTIATE", "USAGE"), List.of(SnowflakeObjectType.CLASS)));
         add(new GrantValidationDefinition(List.of("USAGE"), List.of(SnowflakeObjectType.INSTANCE)));
-        add(new GrantValidationDefinition(List.of("USAGE","OWNERSHIP"), List.of(SnowflakeObjectType.VOLUME)));
+        add(new GrantValidationDefinition(List.of("USAGE"), List.of(SnowflakeObjectType.VOLUME)));
         add(new GrantValidationDefinition(List.of("READ"), List.of(SnowflakeObjectType.TAG)));
         add(new GrantValidationDefinition(
                 List.of("MODIFY", "MONITOR", "OPERATE", "USAGE"),
