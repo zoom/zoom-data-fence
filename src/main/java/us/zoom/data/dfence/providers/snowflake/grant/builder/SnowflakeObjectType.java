@@ -61,7 +61,13 @@ public enum SnowflakeObjectType {
     SnowflakeObjectType(Integer qualLevel, String aliasFor) {
         this.qualLevel = qualLevel;
         this.aliasFor = aliasFor;
-        this.objectType = this.name().replace("_", " ");
+        // The object type on snowflake is VOLUME. However SQL queries must reference it as EXTERNAL VOLUME.
+        // eg: SHOW VOLUMES; is incorrect. The query should be SHOW EXTERNAL VOLUMES;
+        if(this.name().equals("VOLUME"))
+            this.objectType = "EXTERNAL VOLUME";
+        else
+            this.objectType = this.name().replace("_", " ");
+
         // Hooked on phonics works for me.
         if (this.objectType.endsWith("Y")) {
             this.objectTypePlural = this.objectType.substring(0, this.objectType.length() - 1) + "IES";
