@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Install As Java Package
+title: Install As Docker Image
 ---
 
 Data Fence can be installed from [Docker Hub](https://github.com/zoom/zoom-data-fence).
