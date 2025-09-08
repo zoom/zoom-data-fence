@@ -2,6 +2,8 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 
 import lombok.Getter;
 
+import java.util.Objects;
+
 public enum SnowflakeObjectType {
     ACCOUNT(0, null),
     ALERT(3, null),
@@ -11,14 +13,14 @@ public enum SnowflakeObjectType {
     DATABASE_ROLE(2, null),
     DIRECTORY_TABLE(3, null),
     EVENT_TABLE(3, null),
-    EXTERNAL_TABLE(3, "TABLE"),
+    EXTERNAL_TABLE(3, null),
     FILE_FORMAT(3, null),
     FUNCTION(3, null),
-    ICEBERG_TABLE(3, "TABLE"),
+    ICEBERG_TABLE(3, null),
     INTEGRATION(1, null),
     INSTANCE(3, null),
     MASKING_POLICY(3, null),
-    MATERIALIZED_VIEW(3, "VIEW"),
+    MATERIALIZED_VIEW(3, null),
     NETWORK_POLICY(1, null),
     NETWORK_RULE(1, null),
     NOTEBOOK(3, null),
@@ -41,7 +43,7 @@ public enum SnowflakeObjectType {
     TASK(3, null),
     USER(1, null),
     VIEW(3, null),
-    VOLUME(1, null),
+    VOLUME(1, "EXTERNAL_VOLUME"),
     WAREHOUSE(1, null),
     COMPUTE_POOL(1, null),
     IMAGE_REPOSITORY(3, null);
@@ -61,12 +63,7 @@ public enum SnowflakeObjectType {
     SnowflakeObjectType(Integer qualLevel, String aliasFor) {
         this.qualLevel = qualLevel;
         this.aliasFor = aliasFor;
-        // The object type on snowflake is VOLUME. However SQL queries must reference it as EXTERNAL VOLUME.
-        // eg: SHOW VOLUMES; is incorrect. The query should be SHOW EXTERNAL VOLUMES;
-        if(this.name().equals("VOLUME"))
-            this.objectType = "EXTERNAL VOLUME";
-        else
-            this.objectType = this.name().replace("_", " ");
+        this.objectType = Objects.requireNonNullElseGet(this.aliasFor, this::name).replace("_", " ");
 
         // Hooked on phonics works for me.
         if (this.objectType.endsWith("Y")) {
