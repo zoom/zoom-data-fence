@@ -13,14 +13,14 @@ public enum SnowflakeObjectType {
     DATABASE_ROLE(2, null),
     DIRECTORY_TABLE(3, null),
     EVENT_TABLE(3, null),
-    EXTERNAL_TABLE(3, null),
+    EXTERNAL_TABLE(3, "TABLE"),
     FILE_FORMAT(3, null),
     FUNCTION(3, null),
-    ICEBERG_TABLE(3, null),
+    ICEBERG_TABLE(3, "TABLE"),
     INTEGRATION(1, null),
     INSTANCE(3, null),
     MASKING_POLICY(3, null),
-    MATERIALIZED_VIEW(3, null),
+    MATERIALIZED_VIEW(3, "TABLE"),
     NETWORK_POLICY(1, null),
     NETWORK_RULE(1, null),
     NOTEBOOK(3, null),
@@ -43,7 +43,7 @@ public enum SnowflakeObjectType {
     TASK(3, null),
     USER(1, null),
     VIEW(3, null),
-    VOLUME(1, "EXTERNAL_VOLUME"),
+    VOLUME(1, null),
     WAREHOUSE(1, null),
     COMPUTE_POOL(1, null),
     IMAGE_REPOSITORY(3, null);
@@ -63,7 +63,7 @@ public enum SnowflakeObjectType {
     SnowflakeObjectType(Integer qualLevel, String aliasFor) {
         this.qualLevel = qualLevel;
         this.aliasFor = aliasFor;
-        this.objectType = Objects.requireNonNullElseGet(this.aliasFor, this::name).replace("_", " ");
+        this.objectType = this.name().replace("_", " ");
 
         // Hooked on phonics works for me.
         if (this.objectType.endsWith("Y")) {
