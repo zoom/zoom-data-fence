@@ -2,8 +2,6 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 
 import lombok.Getter;
 
-import java.util.Objects;
-
 public enum SnowflakeObjectType {
     ACCOUNT(0, null),
     ALERT(3, null),
@@ -20,7 +18,7 @@ public enum SnowflakeObjectType {
     INTEGRATION(1, null),
     INSTANCE(3, null),
     MASKING_POLICY(3, null),
-    MATERIALIZED_VIEW(3, "TABLE"),
+    MATERIALIZED_VIEW(3, "VIEW"),
     NETWORK_POLICY(1, null),
     NETWORK_RULE(1, null),
     NOTEBOOK(3, null),
@@ -64,7 +62,6 @@ public enum SnowflakeObjectType {
         this.qualLevel = qualLevel;
         this.aliasFor = aliasFor;
         this.objectType = this.name().replace("_", " ");
-
         // Hooked on phonics works for me.
         if (this.objectType.endsWith("Y")) {
             this.objectTypePlural = this.objectType.substring(0, this.objectType.length() - 1) + "IES";
