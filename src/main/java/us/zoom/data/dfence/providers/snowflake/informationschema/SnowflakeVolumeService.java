@@ -32,16 +32,20 @@ public class SnowflakeVolumeService {
         log.debug("Finding objects with query: \"{}\"", query);
 
         try (Connection connection = snowflakeConnectionService.connection(SnowflakeRoleType.SYSADMIN)) {
-            Statement statement = connection.createStatement();
-            statement.execute(query);
-            ResultSet resultSet = statement.getResultSet();
-            List<String> objectNames = new ArrayList<>();
-            while (resultSet.next()) {
-                objectNames.add(ObjectName.normalizeObjectName(
-                        resultSet.getString("name")
-                ));
+            try(Statement statement = connection.createStatement()) {
+                statement.execute(query);
+                ResultSet resultSet = statement.getResultSet();
+                List<String> objectNames = new ArrayList<>();
+                while (resultSet.next()) {
+                    objectNames.add(ObjectName.normalizeObjectName(
+                            resultSet.getString("name")
+                    ));
+                }
+                return objectNames;
             }
-            return objectNames;
+            catch (SQLException e) {
+                throw new DatabaseError("Unable to find external volumes in account due to database error.", e);
+            }
         } catch (SQLException e) {
             throw new DatabaseError("Unable to find external volumes in account due to database error.", e);
         }
