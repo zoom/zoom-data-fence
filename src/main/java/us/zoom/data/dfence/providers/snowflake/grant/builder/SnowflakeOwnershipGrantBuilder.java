@@ -52,6 +52,7 @@ public class SnowflakeOwnershipGrantBuilder extends SnowflakeGrantBuilder {
                 SnowflakeObjectType.TASK,
                 SnowflakeObjectType.USER,
                 SnowflakeObjectType.VIEW,
+                SnowflakeObjectType.VOLUME,
                 SnowflakeObjectType.WAREHOUSE)
 
         ));

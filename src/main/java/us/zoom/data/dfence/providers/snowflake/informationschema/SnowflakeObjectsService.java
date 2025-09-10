@@ -33,6 +33,8 @@ public class SnowflakeObjectsService {
 
     private final SnowflakeFunctionObjectService snowflakeFunctionObjectService;
 
+    private final SnowflakeVolumeService snowflakeVolumeService;
+
     public SnowflakeObjectsService(
             SnowflakeConnectionService snowflakeConnectionService) {
         this.snowflakeDefaultObjectService = new SnowflakeDefaultObjectService(snowflakeConnectionService);
@@ -40,6 +42,7 @@ public class SnowflakeObjectsService {
         this.snowflakeStageObjectsService = new SnowflakeStageObjectsService(snowflakeConnectionService);
         this.snowflakeProcedureObjectService = new SnowflakeProcedureObjectService(snowflakeConnectionService);
         this.snowflakeFunctionObjectService = new SnowflakeFunctionObjectService(snowflakeConnectionService);
+        this.snowflakeVolumeService = new SnowflakeVolumeService(snowflakeConnectionService);
     }
 
     public List<String> getContainerObjectQualNames(
@@ -142,6 +145,9 @@ public class SnowflakeObjectsService {
         switch (objectType) {
             case TABLE, VIEW, MATERIALIZED_VIEW, EXTERNAL_TABLE, EVENT_TABLE -> {
                 return snowflakeTableObjectService.getContainerTables(containerName, containerObjectType, objectType);
+            }
+            case VOLUME -> {
+                return snowflakeVolumeService.getExternalVolumesInAccount();
             }
             // We will only consider external stages for now as a patch because internal and external stages allow different types of grants.
             case STAGE -> {
