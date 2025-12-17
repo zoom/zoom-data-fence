@@ -110,11 +110,11 @@ tests:
   - name: "USAGE on AGENT"
     grant:
       privilege: USAGE
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
       role: MOCK_ROLE_A
     expectedPlaybookGrant:
-      objectType: agent
+      objectType: cortex_agent
       objectName: MOCK_AGENT
       schemaName: MOCK_SCHEMA
       databaseName: MOCK_DB
@@ -126,11 +126,11 @@ tests:
   - name: "OWNERSHIP on AGENT"
     grant:
       privilege: OWNERSHIP
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
       role: MOCK_ROLE_A
     expectedPlaybookGrant:
-      objectType: agent
+      objectType: cortex_agent
       objectName: MOCK_AGENT
       schemaName: MOCK_SCHEMA
       databaseName: MOCK_DB
@@ -142,11 +142,11 @@ tests:
   - name: "MODIFY on AGENT"
     grant:
       privilege: MODIFY
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
       role: MOCK_ROLE_A
     expectedPlaybookGrant:
-      objectType: agent
+      objectType: cortex_agent
       objectName: MOCK_AGENT
       schemaName: MOCK_SCHEMA
       databaseName: MOCK_DB
@@ -158,11 +158,11 @@ tests:
   - name: "MONITOR on AGENT"
     grant:
       privilege: MONITOR
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
       role: MOCK_ROLE_A
     expectedPlaybookGrant:
-      objectType: agent
+      objectType: cortex_agent
       objectName: MOCK_AGENT
       schemaName: MOCK_SCHEMA
       databaseName: MOCK_DB

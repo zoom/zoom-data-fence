@@ -40,7 +40,7 @@ public class SnowflakeWildcardAllGrantFilter {
     public static List<SnowflakeGrantBuilder> containerAllGrantBuilders(
             PlaybookPrivilegeGrant playbookPrivilegeGrant,
             String roleName) {
-        SnowflakeObjectType objectType = SnowflakeObjectType.valueOf(playbookPrivilegeGrant.objectType().toUpperCase());
+        SnowflakeObjectType objectType = SnowflakeObjectType.fromString(playbookPrivilegeGrant.objectType().toUpperCase());
         if ("*".equals(playbookPrivilegeGrant.databaseName())) {
             throw new RbacDataError("Database name may not be a wildcard.");
         }

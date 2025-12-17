@@ -11,6 +11,13 @@ tests:
       objectName: FOO.BAR.STAR
       role: MY_ROLE
     expectedBuilder: SnowflakePermissionGrantBuilder
+  - name: "SELECT on TABLE"
+    grant:
+      privilege: select
+      objectType: table
+      objectName: FOO.BAR.STAR
+      role: my_role
+    expectedBuilder: SnowflakePermissionGrantBuilder
 
   - name: "SELECT on TABLE with quoted names"
     grant:
@@ -164,6 +171,14 @@ tests:
   - name: "USAGE on AGENT"
     grant:
       privilege: USAGE
+      objectType: CORTEX_AGENT
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "USAGE on AGENT"
+    grant:
+      privilege: USAGE
       objectType: AGENT
       objectName: FOO.BAR.ZAR
       role: MY_ROLE
@@ -172,7 +187,7 @@ tests:
   - name: "OWNERSHIP on AGENT"
     grant:
       privilege: OWNERSHIP
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: FOO.BAR.ZAR
       role: MY_ROLE
     expectedBuilder: SnowflakeOwnershipGrantBuilder
@@ -180,7 +195,7 @@ tests:
   - name: "MODIFY on AGENT"
     grant:
       privilege: MODIFY
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: FOO.BAR.ZAR
       role: MY_ROLE
     expectedBuilder: SnowflakePermissionGrantBuilder
@@ -188,7 +203,7 @@ tests:
   - name: "MONITOR on AGENT"
     grant:
       privilege: MONITOR
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: FOO.BAR.ZAR
       role: MY_ROLE
     expectedBuilder: SnowflakePermissionGrantBuilder

@@ -2,6 +2,9 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 
 import lombok.Getter;
 
+import java.util.Map;
+import java.util.Objects;
+
 public enum SnowflakeObjectType {
     ACCOUNT(0, null),
     ALERT(3, null),
@@ -51,12 +54,15 @@ public enum SnowflakeObjectType {
     @Getter
     private final Integer qualLevel;
 
+    // objectType is used for SQL statements about the object.
     @Getter
     private final String objectType;
 
+    // objectTypePlural is used for SQL statements about multiple objects.
     @Getter
     private final String objectTypePlural;
 
+    // Alias for is used for considering grants on different object types equivalent for the sake of hashing and comparison.
     private final String aliasFor;
 
     // Main constructor with all parameters - contains the actual logic
@@ -90,4 +96,14 @@ public enum SnowflakeObjectType {
         }
         return this.aliasFor;
     }
+
+    public static SnowflakeObjectType fromString(String objectType) {
+        String normalizedObjectType = objectType.toUpperCase();
+        String overrideValue = overrideObjectTypes.get(normalizedObjectType);
+        return SnowflakeObjectType.valueOf(Objects.requireNonNullElse(overrideValue, normalizedObjectType));
+    }
+
+    public static Map<String, String> overrideObjectTypes = Map.of(
+            "AGENT", "CORTEX_AGENT"
+    );
 }

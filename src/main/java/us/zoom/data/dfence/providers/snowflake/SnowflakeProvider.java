@@ -350,7 +350,7 @@ public class SnowflakeProvider implements Provider {
         try {
             if (!"*".equals(playbookPrivilegeGrant.objectName()) && !"*".equals(playbookPrivilegeGrant.schemaName())) {
                 SnowflakeObjectType snowflakeObjectType
-                        = SnowflakeObjectType.valueOf(playbookPrivilegeGrant.objectType().toUpperCase());
+                        = SnowflakeObjectType.fromString(playbookPrivilegeGrant.objectType().toUpperCase());
                 String objectName = qualifiedObjectName(
                         playbookPrivilegeGrant.databaseName(),
                         playbookPrivilegeGrant.schemaName(),
@@ -407,7 +407,7 @@ public class SnowflakeProvider implements Provider {
                         roleName));
                 return List.of();
             }
-            SnowflakeObjectType objectType = SnowflakeObjectType.valueOf(playbookPrivilegeGrant.objectType()
+            SnowflakeObjectType objectType = SnowflakeObjectType.fromString(playbookPrivilegeGrant.objectType()
                     .toUpperCase());
             List<SnowflakeGrantModel> snowflakeGrantModels = new ArrayList<>();
             if (playbookPrivilegeGrant.includeFuture()) {

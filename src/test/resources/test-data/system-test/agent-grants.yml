@@ -22,7 +22,7 @@ roles:
         privileges:
           - select
           - references
-      - object-type: cortex_agent
+      - object-type: agent
         database-name: ${var.database}
         schema-name: ${var.schema}
         object-name: ${var.agent}

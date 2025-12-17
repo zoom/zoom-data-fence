@@ -194,7 +194,7 @@ tests:
   - name: "OWNERSHIP on AGENT"
     grant:
       privilege: OWNERSHIP
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
       role: MOCK_ROLE_1
     expectedGrantStatement: "GRANT OWNERSHIP ON AGENT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_AGENT\" TO ROLE MOCK_ROLE_1 COPY CURRENT GRANTS;"
@@ -203,7 +203,7 @@ tests:
   - name: "USAGE on AGENT"
     grant:
       privilege: USAGE
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
       role: MOCK_ROLE_1
     expectedGrantStatement: "GRANT USAGE ON AGENT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_AGENT\" TO ROLE MOCK_ROLE_1;"
@@ -212,7 +212,7 @@ tests:
   - name: "MODIFY on AGENT"
     grant:
       privilege: MODIFY
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
       role: MOCK_ROLE_1
     expectedGrantStatement: "GRANT MODIFY ON AGENT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_AGENT\" TO ROLE MOCK_ROLE_1;"
@@ -221,7 +221,7 @@ tests:
   - name: "MONITOR on AGENT"
     grant:
       privilege: MONITOR
-      objectType: AGENT
+      objectType: CORTEX_AGENT
       objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
       role: MOCK_ROLE_1
     expectedGrantStatement: "GRANT MONITOR ON AGENT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_AGENT\" TO ROLE MOCK_ROLE_1;"

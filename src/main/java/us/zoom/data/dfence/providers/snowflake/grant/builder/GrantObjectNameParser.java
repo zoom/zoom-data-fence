@@ -36,7 +36,7 @@ public class GrantObjectNameParser {
                     objectPartPattern.pattern()));
         }
         String objectTypeString = objectPart.substring(1, objectPart.length() - 1);
-        SnowflakeObjectType objectType = SnowflakeObjectType.valueOf(objectTypeString);
+        SnowflakeObjectType objectType = SnowflakeObjectType.fromString(objectTypeString);
         return new ContainerGrantParts(containerObjectTypePlural, shortenedObjectName, objectType);
     }
 }

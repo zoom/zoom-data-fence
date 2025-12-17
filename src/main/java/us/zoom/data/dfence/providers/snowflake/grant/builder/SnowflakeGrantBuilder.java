@@ -74,7 +74,7 @@ public abstract class SnowflakeGrantBuilder {
 
     public PlaybookPrivilegeGrant playbookPrivilegeGrant() {
         List<String> parts = ObjectName.splitObjectName(this.getGrant().name());
-        SnowflakeObjectType snowflakeObjectType = SnowflakeObjectType.valueOf(this.getGrant().grantedOn());
+        SnowflakeObjectType snowflakeObjectType = SnowflakeObjectType.fromString(this.getGrant().grantedOn());
         String databaseName = null;
         String schemaName = null;
         String objectName = null;
@@ -121,7 +121,7 @@ public abstract class SnowflakeGrantBuilder {
         return String.join(
                 "::",
                 getGrant().privilege().toUpperCase(),
-                SnowflakeObjectType.valueOf(getGrant().grantedOn()).getAliasFor(),
+                SnowflakeObjectType.fromString(getGrant().grantedOn()).getAliasFor(),
                 getGrant().name(),
                 getGrant().grantedTo().toUpperCase(),
                 getGrant().granteeName().toUpperCase(),
