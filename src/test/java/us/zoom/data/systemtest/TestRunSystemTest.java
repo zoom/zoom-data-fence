@@ -188,7 +188,7 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
 
         // Snowflake appears to have eventual consistency on this metadata after the ownership change.
         // We need to wait for the metadata to catch up.
-        int timeoutSeconds = 480;
+        int timeoutSeconds = 60;
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime maxTime = now.plusSeconds(timeoutSeconds);
         boolean success = false;
