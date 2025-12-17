@@ -27,30 +27,48 @@ public abstract class SnowflakeGrantBuilder {
             SnowflakeGrantModel grant,
             SnowflakeGrantBuilderOptions options
     ) {
+        SnowflakeObjectType objectType;
+        try {
+            objectType = SnowflakeObjectType.fromString(grant.grantedOn());
+
+        } catch (EnumConstantNotPresentException e) {
+            throw new NoGrantBuilderError(String.format("Invalid object type %s", grant.grantedOn()), e);
+        }
+        // ToDo: We should really convert to object type once and use it in the rest of the app.
+        SnowflakeGrantModel normalizedGrant = new SnowflakeGrantModel(
+                grant.privilege(),
+                objectType.name(),
+                grant.name(),
+                grant.grantedTo(),
+                grant.granteeName(),
+                grant.grantOption(),
+                grant.future(),
+                grant.all()
+        );
         SnowflakeGrantBuilder[] snowflakeGrantBuilders = new SnowflakeGrantBuilder[]{
-                new SnowflakeRoleGrantBuilder(grant, options),
-                new SnowflakePermissionGrantBuilder(grant, options),
-                new SnowflakeOwnershipGrantBuilder(grant, options),
-                new SnowflakeAccountPermissionGrantBuilder(grant, options),
-                new SnowflakeMLPermissionGrantBuilder(grant, options),
-                new SnowflakeCorePermissionGrantBuilder(grant, options),
-                new SnowflakeFuturePermissionGrantBuilder(grant, options),
-                new SnowflakeFutureMLPermissionGrantBuilder(grant, options),
-                new SnowflakeFutureCorePermissionGrantBuilder(grant, options),
-                new SnowflakeFutureOwnershipGrantBuilder(grant, options),
-                new SnowflakeDatabaseRoleGrantBuilder(grant, options),
-                new SnowflakeAllPermissionGrantBuilder(grant, options),
-                new SnowflakeAllOwnershipGrantBuilder(grant, options),
-                new SnowflakeAllMLPermissionGrantBuilder(grant, options),
-                new SnowflakeAllCorePermissionGrantBuilder(grant, options),
-                new SnowflakeApplicationRoleGrantBuilder(grant, options),
-                new SnowflakeUnsupportedOwnershipManagementGrantBuilder(grant, options)};
+                new SnowflakeRoleGrantBuilder(normalizedGrant, options),
+                new SnowflakePermissionGrantBuilder(normalizedGrant, options),
+                new SnowflakeOwnershipGrantBuilder(normalizedGrant, options),
+                new SnowflakeAccountPermissionGrantBuilder(normalizedGrant, options),
+                new SnowflakeMLPermissionGrantBuilder(normalizedGrant, options),
+                new SnowflakeCorePermissionGrantBuilder(normalizedGrant, options),
+                new SnowflakeFuturePermissionGrantBuilder(normalizedGrant, options),
+                new SnowflakeFutureMLPermissionGrantBuilder(normalizedGrant, options),
+                new SnowflakeFutureCorePermissionGrantBuilder(normalizedGrant, options),
+                new SnowflakeFutureOwnershipGrantBuilder(normalizedGrant, options),
+                new SnowflakeDatabaseRoleGrantBuilder(normalizedGrant, options),
+                new SnowflakeAllPermissionGrantBuilder(normalizedGrant, options),
+                new SnowflakeAllOwnershipGrantBuilder(normalizedGrant, options),
+                new SnowflakeAllMLPermissionGrantBuilder(normalizedGrant, options),
+                new SnowflakeAllCorePermissionGrantBuilder(normalizedGrant, options),
+                new SnowflakeApplicationRoleGrantBuilder(normalizedGrant, options),
+                new SnowflakeUnsupportedOwnershipManagementGrantBuilder(normalizedGrant, options)};
         for (SnowflakeGrantBuilder builder : snowflakeGrantBuilders) {
             if (builder.isValid()) {
                 return builder;
             }
         }
-        String msg = String.format("No compatible grant builder found for grant %s", grant);
+        String msg = String.format("No compatible grant builder found for grant %s", normalizedGrant);
         NoGrantBuilderError err = new NoGrantBuilderError(msg);
         if (options.getSuppressErrors()) {
             log.error(msg, err);
