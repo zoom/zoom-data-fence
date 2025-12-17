@@ -216,4 +216,45 @@ cd docs
 jekyll serve
 ```
 
+## Testing
+Before pushing a change request, please make sure that all tests pass locally.
+
+In addition to running the automated tests, if you are adding or modifying a feature it 
+is a good idea to manually run the application and make sure that you are exercising the 
+relevant feature.
+
+### Unit Tests
+Unit tests are run as part of the CI pipeline. Unit tests can be run using JUnit.
+
+```shell
+mvn test
+```
+
+### Integration Tests
+Integration tests require a Snowflake account and a user with 
+SYSADMIN and SECURITYADMIN privileges.
+
+Integration tests are not run as part of the CI pipeline. However, they can be run from
+a personal environment.
+
+If you are using external browser authentication, running integration tests would use the 
+following command.
+```shell
+mvn failsafe:integration-test 
+-Dsnowflake-authenticator=externalbrowser 
+-Dsnowflake-user=<YOUR USER LOGIN NAME> 
+-Dsnowflake-account=<YOUR SNOWFLAKE ACCOUNT>
+```
+
+The following parameters are available.
+
+| Name                         | Required | Description                                                                                                       |
+|------------------------------|----------|-------------------------------------------------------------------------------------------------------------------|
+| snowflake-user               | Yes      | The Snowflake user login name                                                                                     |
+| snowflake-account            | Yes      | The Snowflake account name                                                                                        |
+| snowflake-authenticator      | No       | The Snowflake authenticator to use.                                                                               |
+| snowflake-password           | No       | The Snowflake user password.                                                                                      |
+| snowflake-sysadmin-role      | No       | The Snowflake sysadmin role name used for creating and managing system objects. Defaults to SYSADMIN.             |
+| snowflake-securityadmin-role | No       | The Snowflake securityadmin role name used for creating and managing security objects. Defaults to SECURITYADMIN. |
+
 
