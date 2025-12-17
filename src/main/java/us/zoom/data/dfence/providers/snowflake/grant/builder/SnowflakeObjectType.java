@@ -23,6 +23,7 @@ public enum SnowflakeObjectType {
     INSTANCE(3, null),
     MASKING_POLICY(3, null),
     MATERIALIZED_VIEW(3, "VIEW"),
+    MODEL(3, null),
     NETWORK_POLICY(1, null),
     NETWORK_RULE(1, null),
     NOTEBOOK(3, null),

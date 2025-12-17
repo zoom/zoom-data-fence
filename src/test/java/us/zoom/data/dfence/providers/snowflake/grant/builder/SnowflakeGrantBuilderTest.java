@@ -3,8 +3,10 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import us.zoom.data.dfence.exception.NoGrantBuilderError;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.test.fixtures.GrantTestDataLoader;
 
@@ -14,6 +16,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for SnowflakeGrantBuilder.
@@ -50,6 +53,46 @@ class SnowflakeGrantBuilderTest {
                 false,
                 false);
         SnowflakeGrantBuilder result = SnowflakeGrantBuilder.fromGrant(grantModel, true);
+        assertNull(result);
+    }
+
+    /**
+     * Tests that an invalid object type raises NoGrantBuilderError.
+     */
+    @Test
+    void fromGrantInvalidObjectTypeRaisesNoGrantBuilderError() {
+        SnowflakeGrantModel grantModel = new SnowflakeGrantModel(
+                "SELECT",
+                "INVALID_OBJECT_TYPE",
+                "FOO.BAR.ZAR",
+                "ROLE",
+                "MOCK_ROLE",
+                false,
+                false,
+                false);
+        NoGrantBuilderError error = assertThrows(NoGrantBuilderError.class, () -> {
+            SnowflakeGrantBuilder.fromGrant(grantModel);
+        });
+        assertEquals("Invalid object type INVALID_OBJECT_TYPE", error.getMessage());
+    }
+
+    /**
+     * Tests that when an invalid object type is provided but suppressErrors is true, it returns null.
+     */
+    @Test
+    void fromGrantInvalidObjectTypeWithSuppressErrorsReturnsNull() {
+        SnowflakeGrantModel grantModel = new SnowflakeGrantModel(
+                "SELECT",
+                "INVALID_OBJECT_TYPE",
+                "FOO.BAR.ZAR",
+                "ROLE",
+                "MOCK_ROLE",
+                false,
+                false,
+                false);
+        SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
+        options.setSuppressErrors(true);
+        SnowflakeGrantBuilder result = SnowflakeGrantBuilder.fromGrant(grantModel, options);
         assertNull(result);
     }
 

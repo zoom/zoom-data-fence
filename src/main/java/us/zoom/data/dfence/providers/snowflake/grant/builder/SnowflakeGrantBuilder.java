@@ -31,8 +31,14 @@ public abstract class SnowflakeGrantBuilder {
         try {
             objectType = SnowflakeObjectType.fromString(grant.grantedOn());
 
-        } catch (EnumConstantNotPresentException e) {
-            throw new NoGrantBuilderError(String.format("Invalid object type %s", grant.grantedOn()), e);
+        } catch (IllegalArgumentException e) {
+            String msg = String.format("Invalid object type %s", grant.grantedOn());
+            NoGrantBuilderError err = new NoGrantBuilderError(msg, e);
+            if (options.getSuppressErrors()) {
+                log.error(msg, err);
+                return null;
+            }
+            throw err;
         }
         // ToDo: We should really convert to object type once and use it in the rest of the app.
         SnowflakeGrantModel normalizedGrant = new SnowflakeGrantModel(
