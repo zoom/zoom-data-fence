@@ -44,6 +44,7 @@ public class SnowflakePermissionGrantBuilder extends SnowflakeGrantBuilder {
                         "APPLYBUDGET"), List.of(SnowflakeObjectType.MATERIALIZED_VIEW, SnowflakeObjectType.VIEW)));
         add(new GrantValidationDefinition(
                 List.of("USAGE"), List.of(
+                SnowflakeObjectType.MODEL,
                 SnowflakeObjectType.SEQUENCE,
                 SnowflakeObjectType.FUNCTION,
                 SnowflakeObjectType.PROCEDURE,

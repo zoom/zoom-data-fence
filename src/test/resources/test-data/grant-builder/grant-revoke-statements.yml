@@ -1319,6 +1319,15 @@ tests:
     expectedGrantStatement: "GRANT OWNERSHIP ON DATABASE ROLE \"MOCK_DB\".\"MOCK_ROLE\" TO ROLE MOCK_ROLE_1 COPY CURRENT GRANTS;"
     expectedRevokeStatement: "GRANT OWNERSHIP ON DATABASE ROLE \"MOCK_DB\".\"MOCK_ROLE\" TO ROLE SECURITYADMIN COPY CURRENT GRANTS;"
 
+  - name: "USAGE on DATABASE_ROLE"
+    grant:
+      privilege: USAGE
+      objectType: DATABASE_ROLE
+      objectName: MOCK_DB.MOCK_ROLE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT DATABASE ROLE \"MOCK_DB\".\"MOCK_ROLE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE DATABASE ROLE \"MOCK_DB\".\"MOCK_ROLE\" FROM ROLE MOCK_ROLE_1;"
+
   - name: "OWNERSHIP on DIRECTORY_TABLE"
     grant:
       privilege: OWNERSHIP
@@ -1399,4 +1408,11 @@ tests:
       role: MOCK_ROLE_1
     expectedGrantStatement: "GRANT MONITOR ON USER \"MOCK_USER\" TO ROLE MOCK_ROLE_1;"
     expectedRevokeStatement: "REVOKE MONITOR ON USER \"MOCK_USER\" FROM ROLE MOCK_ROLE_1;"
-
+  - name: USAGE on MODEL
+    grant:
+      privilege: USAGE
+      objectType: MODEL
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_MODEL
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT USAGE ON MODEL \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_MODEL\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE USAGE ON MODEL \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_MODEL\" FROM ROLE MOCK_ROLE_1;"
