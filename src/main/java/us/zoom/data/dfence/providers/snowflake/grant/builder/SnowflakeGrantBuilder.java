@@ -31,7 +31,7 @@ public abstract class SnowflakeGrantBuilder {
         try {
             objectType = SnowflakeObjectType.fromString(grant.grantedOn());
 
-        } catch (EnumConstantNotPresentException e) {
+        } catch (IllegalArgumentException e) {
             throw new NoGrantBuilderError(String.format("Invalid object type %s", grant.grantedOn()), e);
         }
         // ToDo: We should really convert to object type once and use it in the rest of the app.
