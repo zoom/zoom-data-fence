@@ -1,0 +1,238 @@
+# Fixture Grants Tests
+# Tests that the correct grant builder class is selected for different grant types
+# Reference: https://docs.snowflake.com/en/sql-reference/sql/grant-privilege
+
+tests:
+  # Permission Grants - should use SnowflakePermissionGrantBuilder
+  - name: "SELECT on TABLE"
+    grant:
+      privilege: SELECT
+      objectType: TABLE
+      objectName: FOO.BAR.STAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "SELECT on TABLE with quoted names"
+    grant:
+      privilege: SELECT
+      objectType: TABLE
+      objectName: "\"foO\".\"bar-1@\".STAR"
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "SELECT on TABLE with partial quotes"
+    grant:
+      privilege: SELECT
+      objectType: TABLE
+      objectName: "\"foo\".BAR.STAR"
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "USAGE on SCHEMA"
+    grant:
+      privilege: USAGE
+      objectType: SCHEMA
+      objectName: FOO.BAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "USAGE on DATABASE"
+    grant:
+      privilege: USAGE
+      objectType: DATABASE
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "SELECT on EXTERNAL_TABLE"
+    grant:
+      privilege: SELECT
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  # Ownership Grants - should use SnowflakeOwnershipGrantBuilder
+  - name: "OWNERSHIP on SCHEMA"
+    grant:
+      privilege: OWNERSHIP
+      objectType: SCHEMA
+      objectName: FOO.BAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on DATABASE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: DATABASE
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on TABLE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on EXTERNAL_TABLE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on FILE_FORMAT"
+    grant:
+      privilege: OWNERSHIP
+      objectType: FILE_FORMAT
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+      grantOption: true
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on MATERIALIZED_VIEW"
+    grant:
+      privilege: OWNERSHIP
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  # Future Grants - should use SnowflakeFuturePermissionGrantBuilder
+  - name: "SELECT on FUTURE EXTERNAL_TABLE (schema level)"
+    grant:
+      privilege: SELECT
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.<EXTERNAL TABLE>
+      role: MY_ROLE
+      future: true
+    expectedBuilder: SnowflakeFuturePermissionGrantBuilder
+
+  - name: "SELECT on FUTURE EXTERNAL_TABLE (database level)"
+    grant:
+      privilege: SELECT
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.<EXTERNAL TABLE>
+      role: MY_ROLE
+      future: true
+    expectedBuilder: SnowflakeFuturePermissionGrantBuilder
+
+  - name: "SELECT on FUTURE TABLE"
+    grant:
+      privilege: SELECT
+      objectType: TABLE
+      objectName: FOO.BAR.<TABLE>
+      role: MY_ROLE
+      future: true
+    expectedBuilder: SnowflakeFuturePermissionGrantBuilder
+
+  # Future Ownership Grants - should use SnowflakeFutureOwnershipGrantBuilder
+  - name: "OWNERSHIP on FUTURE FILE_FORMAT"
+    grant:
+      privilege: OWNERSHIP
+      objectType: FILE_FORMAT
+      objectName: FOO.BAR.<FILE_FORMAT>
+      role: SYSADMIN
+      grantOption: true
+      future: true
+    expectedBuilder: SnowflakeFutureOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on FUTURE MATERIALIZED_VIEW"
+    grant:
+      privilege: OWNERSHIP
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.<MATERIALIZED_VIEW>
+      role: MY_ROLE
+      future: true
+    expectedBuilder: SnowflakeFutureOwnershipGrantBuilder
+
+  # Account Permission Grants - should use SnowflakeAccountPermissionGrantBuilder
+  - name: "APPLY PACKAGES POLICY on ACCOUNT"
+    grant:
+      privilege: APPLY PACKAGES POLICY
+      objectType: ACCOUNT
+      objectName: JUA64777
+      role: SECURITYADMIN
+      grantOption: true
+    expectedBuilder: SnowflakeAccountPermissionGrantBuilder
+
+  # Agent Grants
+  - name: "USAGE on AGENT"
+    grant:
+      privilege: USAGE
+      objectType: AGENT
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on AGENT"
+    grant:
+      privilege: OWNERSHIP
+      objectType: AGENT
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "MODIFY on AGENT"
+    grant:
+      privilege: MODIFY
+      objectType: AGENT
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "MONITOR on AGENT"
+    grant:
+      privilege: MONITOR
+      objectType: AGENT
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "CREATE AGENT on SCHEMA"
+    grant:
+      privilege: CREATE AGENT
+      objectType: SCHEMA
+      objectName: FOO.BAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  # Semantic View Grants
+  - name: "SELECT on SEMANTIC_VIEW"
+    grant:
+      privilege: SELECT
+      objectType: SEMANTIC_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "REFERENCES on SEMANTIC_VIEW"
+    grant:
+      privilege: REFERENCES
+      objectType: SEMANTIC_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "CREATE SEMANTIC VIEW on SCHEMA"
+    grant:
+      privilege: CREATE SEMANTIC VIEW
+      objectType: SCHEMA
+      objectName: FOO.BAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  # ALL Grants - should use SnowflakeAllPermissionGrantBuilder
+  - name: "SELECT on ALL TABLES"
+    grant:
+      privilege: SELECT
+      objectType: TABLE
+      objectName: FOO.BAR.<TABLE>
+      role: MY_ROLE
+      all: true
+    expectedBuilder: SnowflakeAllPermissionGrantBuilder
+

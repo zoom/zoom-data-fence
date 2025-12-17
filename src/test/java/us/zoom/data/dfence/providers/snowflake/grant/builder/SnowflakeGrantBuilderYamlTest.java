@@ -2,12 +2,15 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import us.zoom.data.dfence.exception.RbacDataError;
+import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.test.fixtures.GrantTestDataLoader;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 /**
  * YAML-driven parameterized tests for SnowflakeGrantBuilder.
@@ -41,8 +44,41 @@ class SnowflakeGrantBuilderYamlTest {
                 "Revoke statement mismatch for: " + testData.name());
     }
 
+    /**
+     * Tests that the correct grant builder class is selected for different grant types.
+     * Test cases are defined in fixture-grants.yml
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("fixtureGrantsTestData")
+    void fromGrant(GrantTestDataLoader.FixtureGrantTestData testData) throws RbacDataError {
+        SnowflakeGrantBuilder builder = SnowflakeGrantBuilder.fromGrant(testData.grantModel());
+        assertInstanceOf(testData.expectedBuilderClass(), builder,
+                "Expected builder class mismatch for: " + testData.name());
+    }
+
+    /**
+     * Tests conversion from SnowflakeGrantModel to PlaybookPrivilegeGrant.
+     * Test cases are defined in playbook-privilege-grants.yml
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("playbookPrivilegeGrantTestData")
+    void playbookPrivilegeGrant(GrantTestDataLoader.PlaybookPrivilegeGrantTestData testData) {
+        SnowflakeGrantBuilder builder = SnowflakeGrantBuilder.fromGrant(testData.grantModel());
+        PlaybookPrivilegeGrant actual = builder.playbookPrivilegeGrant();
+        assertEquals(testData.expectedPlaybookGrant(), actual,
+                "PlaybookPrivilegeGrant mismatch for: " + testData.name());
+    }
+
     static Stream<GrantTestDataLoader.GrantRevokeStatementsTestData> grantRevokeStatementsTestData() {
         return GrantTestDataLoader.loadGrantRevokeStatements();
+    }
+
+    static Stream<GrantTestDataLoader.FixtureGrantTestData> fixtureGrantsTestData() {
+        return GrantTestDataLoader.loadFixtureGrants();
+    }
+
+    static Stream<GrantTestDataLoader.PlaybookPrivilegeGrantTestData> playbookPrivilegeGrantTestData() {
+        return GrantTestDataLoader.loadPlaybookPrivilegeGrants();
     }
 }
 
