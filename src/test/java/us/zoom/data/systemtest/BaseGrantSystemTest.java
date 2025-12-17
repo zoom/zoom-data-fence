@@ -10,7 +10,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Base class for grant system tests providing common functionality.
@@ -34,9 +33,12 @@ public abstract class BaseGrantSystemTest extends SnowflakeSysTestBase {
             ResultSet resultSet = statement.getResultSet();
             List<Grant> grants = new ArrayList<>();
             while (resultSet.next()) {
+                // Normalize granted_on: convert spaces to underscores to match enum naming convention
+                // (e.g., "SEMANTIC VIEW" -> "SEMANTIC_VIEW", "CORTEX AGENT" -> "CORTEX_AGENT")
+                String grantedOn = resultSet.getString("granted_on").toUpperCase().replace(" ", "_");
                 grants.add(new Grant(
                         resultSet.getString("privilege"),
-                        resultSet.getString("granted_on"),
+                        grantedOn,
                         resultSet.getString("name"),
                         resultSet.getString("granted_to"),
                         resultSet.getString("grantee_name")));
@@ -53,18 +55,27 @@ public abstract class BaseGrantSystemTest extends SnowflakeSysTestBase {
      * @param expectedGrants The expected grants
      */
     protected static void assertGrantsMatch(List<Grant> actualGrants, List<Grant> expectedGrants) {
+        // Sort using a deterministic comparator based on grant fields
+        Comparator<Grant> grantComparator = Comparator
+                .comparing(Grant::privilege)
+                .thenComparing(Grant::grantedOn)
+                .thenComparing(Grant::name)
+                .thenComparing(Grant::grantedTo)
+                .thenComparing(Grant::granteeName);
+        
         List<Grant> sortedActual = new ArrayList<>(actualGrants);
-        sortedActual.sort(Comparator.comparing(x -> x.toString().hashCode()));
+        sortedActual.sort(grantComparator);
         
         List<Grant> sortedExpected = new ArrayList<>(expectedGrants);
-        sortedExpected.sort(Comparator.comparing(x -> x.toString().hashCode()));
+        sortedExpected.sort(grantComparator);
 
-        Assert.assertEquals(Set.copyOf(sortedActual), Set.copyOf(sortedExpected));
+        Assert.assertEquals(sortedActual, sortedExpected);
     }
 
     /**
      * Record representing a grant in Snowflake.
-     * Note: The "granted_on" field from SHOW GRANTS uses spaces (e.g., "SEMANTIC VIEW", "AGENT").
+     * Note: The "granted_on" field is normalized to use underscores (e.g., "SEMANTIC_VIEW", "CORTEX_AGENT")
+     * to match the enum naming convention, even though SHOW GRANTS returns spaces.
      */
     public record Grant(String privilege, String grantedOn, String name, String grantedTo, String granteeName) {
         // Constructor that accepts the ResultSet field name
