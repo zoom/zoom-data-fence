@@ -4,6 +4,7 @@ import lombok.Getter;
 
 public enum SnowflakeObjectType {
     ACCOUNT(0, null),
+    AGENT(3, null),
     ALERT(3, null),
     APPLICATION_ROLE(1, null),
     CLASS(1, null),

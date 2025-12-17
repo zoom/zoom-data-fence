@@ -68,6 +68,7 @@ public class SnowflakePermissionGrantBuilder extends SnowflakeGrantBuilder {
                     add("ADD SEARCH OPTIMIZATION");
                     add("APPLYBUDGET");
                     add("CREATE AGGREGATION POLICY");
+                    add("CREATE AGENT");
                     add("CREATE ALERT");
                     add("CREATE AUTHENTICATION POLICY");
                     add("CREATE CLASS");
@@ -147,6 +148,7 @@ public class SnowflakePermissionGrantBuilder extends SnowflakeGrantBuilder {
                 List.of(SnowflakeObjectType.COMPUTE_POOL)));
         add(new GrantValidationDefinition(List.of("READ", "WRITE"), List.of(SnowflakeObjectType.IMAGE_REPOSITORY)));
         add(new GrantValidationDefinition(List.of("SELECT", "REFERENCES"), List.of(SnowflakeObjectType.SEMANTIC_VIEW)));
+        add(new GrantValidationDefinition(List.of("USAGE", "MODIFY", "MONITOR"), List.of(SnowflakeObjectType.AGENT)));
     }});
 
     private SnowflakeGrantModel grant;
