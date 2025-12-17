@@ -236,3 +236,317 @@ tests:
     expectedGrantStatement: "GRANT CREATE AGENT ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"
     expectedRevokeStatement: "REVOKE CREATE AGENT ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
 
+  # Additional Table Privileges
+  - name: "INSERT on TABLE"
+    grant:
+      privilege: INSERT
+      objectType: TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_TABLE_1
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT INSERT ON TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TABLE_1\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE INSERT ON TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TABLE_1\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "UPDATE on TABLE"
+    grant:
+      privilege: UPDATE
+      objectType: TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_TABLE_1
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT UPDATE ON TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TABLE_1\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE UPDATE ON TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TABLE_1\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "DELETE on TABLE"
+    grant:
+      privilege: DELETE
+      objectType: TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_TABLE_1
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT DELETE ON TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TABLE_1\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE DELETE ON TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TABLE_1\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "TRUNCATE on TABLE"
+    grant:
+      privilege: TRUNCATE
+      objectType: TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_TABLE_1
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT TRUNCATE ON TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TABLE_1\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE TRUNCATE ON TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TABLE_1\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "REFERENCES on TABLE"
+    grant:
+      privilege: REFERENCES
+      objectType: TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_TABLE_1
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT REFERENCES ON TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TABLE_1\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE REFERENCES ON TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TABLE_1\" FROM ROLE MOCK_ROLE_1;"
+
+  # View Privileges
+  - name: "SELECT on VIEW"
+    grant:
+      privilege: SELECT
+      objectType: VIEW
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_VIEW
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT SELECT ON VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE SELECT ON VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "OWNERSHIP on VIEW"
+    grant:
+      privilege: OWNERSHIP
+      objectType: VIEW
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_VIEW
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT OWNERSHIP ON VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" TO ROLE MOCK_ROLE_1 COPY CURRENT GRANTS;"
+    expectedRevokeStatement: "GRANT OWNERSHIP ON VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" TO ROLE SECURITYADMIN COPY CURRENT GRANTS;"
+
+  # Schema-Level CREATE Privileges
+  - name: "CREATE TABLE on SCHEMA"
+    grant:
+      privilege: CREATE TABLE
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT CREATE TABLE ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE CREATE TABLE ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "CREATE VIEW on SCHEMA"
+    grant:
+      privilege: CREATE VIEW
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT CREATE VIEW ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE CREATE VIEW ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "CREATE STAGE on SCHEMA"
+    grant:
+      privilege: CREATE STAGE
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT CREATE STAGE ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE CREATE STAGE ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "CREATE FUNCTION on SCHEMA"
+    grant:
+      privilege: CREATE FUNCTION
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT CREATE FUNCTION ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE CREATE FUNCTION ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "CREATE PROCEDURE on SCHEMA"
+    grant:
+      privilege: CREATE PROCEDURE
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT CREATE PROCEDURE ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE CREATE PROCEDURE ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "CREATE SEQUENCE on SCHEMA"
+    grant:
+      privilege: CREATE SEQUENCE
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT CREATE SEQUENCE ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE CREATE SEQUENCE ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "CREATE MATERIALIZED VIEW on SCHEMA"
+    grant:
+      privilege: CREATE MATERIALIZED VIEW
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT CREATE MATERIALIZED VIEW ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE CREATE MATERIALIZED VIEW ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
+
+  # Object-Level Privileges
+  - name: "USAGE on FUNCTION"
+    grant:
+      privilege: USAGE
+      objectType: FUNCTION
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_FUNCTION
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT USAGE ON FUNCTION \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_FUNCTION\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE USAGE ON FUNCTION \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_FUNCTION\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "USAGE on PROCEDURE"
+    grant:
+      privilege: USAGE
+      objectType: PROCEDURE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_PROCEDURE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT USAGE ON PROCEDURE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_PROCEDURE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE USAGE ON PROCEDURE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_PROCEDURE\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "USAGE on STAGE"
+    grant:
+      privilege: USAGE
+      objectType: STAGE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_STAGE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT USAGE ON STAGE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_STAGE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE USAGE ON STAGE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_STAGE\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "READ on STAGE"
+    grant:
+      privilege: READ
+      objectType: STAGE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_STAGE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT READ ON STAGE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_STAGE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE READ ON STAGE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_STAGE\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "WRITE on STAGE"
+    grant:
+      privilege: WRITE
+      objectType: STAGE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_STAGE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT WRITE ON STAGE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_STAGE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE WRITE ON STAGE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_STAGE\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "USAGE on SEQUENCE"
+    grant:
+      privilege: USAGE
+      objectType: SEQUENCE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_SEQUENCE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT USAGE ON SEQUENCE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_SEQUENCE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE USAGE ON SEQUENCE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_SEQUENCE\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "USAGE on FILE_FORMAT"
+    grant:
+      privilege: USAGE
+      objectType: FILE_FORMAT
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_FILE_FORMAT
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT USAGE ON FILE FORMAT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_FILE_FORMAT\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE USAGE ON FILE FORMAT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_FILE_FORMAT\" FROM ROLE MOCK_ROLE_1;"
+
+  # Database-Level Privileges
+  - name: "CREATE SCHEMA on DATABASE"
+    grant:
+      privilege: CREATE SCHEMA
+      objectType: DATABASE
+      objectName: MOCK_DB
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT CREATE SCHEMA ON DATABASE \"MOCK_DB\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE CREATE SCHEMA ON DATABASE \"MOCK_DB\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "MODIFY on DATABASE"
+    grant:
+      privilege: MODIFY
+      objectType: DATABASE
+      objectName: MOCK_DB
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT MODIFY ON DATABASE \"MOCK_DB\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE MODIFY ON DATABASE \"MOCK_DB\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "MONITOR on DATABASE"
+    grant:
+      privilege: MONITOR
+      objectType: DATABASE
+      objectName: MOCK_DB
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT MONITOR ON DATABASE \"MOCK_DB\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE MONITOR ON DATABASE \"MOCK_DB\" FROM ROLE MOCK_ROLE_1;"
+
+  # Warehouse Privileges
+  - name: "USAGE on WAREHOUSE"
+    grant:
+      privilege: USAGE
+      objectType: WAREHOUSE
+      objectName: MOCK_WAREHOUSE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT USAGE ON WAREHOUSE \"MOCK_WAREHOUSE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE USAGE ON WAREHOUSE \"MOCK_WAREHOUSE\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "OPERATE on WAREHOUSE"
+    grant:
+      privilege: OPERATE
+      objectType: WAREHOUSE
+      objectName: MOCK_WAREHOUSE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT OPERATE ON WAREHOUSE \"MOCK_WAREHOUSE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE OPERATE ON WAREHOUSE \"MOCK_WAREHOUSE\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "MODIFY on WAREHOUSE"
+    grant:
+      privilege: MODIFY
+      objectType: WAREHOUSE
+      objectName: MOCK_WAREHOUSE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT MODIFY ON WAREHOUSE \"MOCK_WAREHOUSE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE MODIFY ON WAREHOUSE \"MOCK_WAREHOUSE\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "MONITOR on WAREHOUSE"
+    grant:
+      privilege: MONITOR
+      objectType: WAREHOUSE
+      objectName: MOCK_WAREHOUSE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT MONITOR ON WAREHOUSE \"MOCK_WAREHOUSE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE MONITOR ON WAREHOUSE \"MOCK_WAREHOUSE\" FROM ROLE MOCK_ROLE_1;"
+
+  # Integration Privileges
+  - name: "USAGE on INTEGRATION"
+    grant:
+      privilege: USAGE
+      objectType: INTEGRATION
+      objectName: MOCK_INTEGRATION
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT USAGE ON INTEGRATION \"MOCK_INTEGRATION\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE USAGE ON INTEGRATION \"MOCK_INTEGRATION\" FROM ROLE MOCK_ROLE_1;"
+
+  # Stream and Task Privileges
+  - name: "SELECT on STREAM"
+    grant:
+      privilege: SELECT
+      objectType: STREAM
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_STREAM
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT SELECT ON STREAM \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_STREAM\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE SELECT ON STREAM \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_STREAM\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "MONITOR on TASK"
+    grant:
+      privilege: MONITOR
+      objectType: TASK
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_TASK
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT MONITOR ON TASK \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TASK\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE MONITOR ON TASK \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TASK\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "OPERATE on TASK"
+    grant:
+      privilege: OPERATE
+      objectType: TASK
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_TASK
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT OPERATE ON TASK \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TASK\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE OPERATE ON TASK \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_TASK\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "MONITOR on PIPE"
+    grant:
+      privilege: MONITOR
+      objectType: PIPE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_PIPE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT MONITOR ON PIPE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_PIPE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE MONITOR ON PIPE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_PIPE\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "OPERATE on PIPE"
+    grant:
+      privilege: OPERATE
+      objectType: PIPE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_PIPE
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT OPERATE ON PIPE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_PIPE\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE OPERATE ON PIPE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_PIPE\" FROM ROLE MOCK_ROLE_1;"
+

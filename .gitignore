@@ -188,3 +188,5 @@ local
 .jekyll-cache/
 .java-version
 .DS_Store
+
+.cursor
