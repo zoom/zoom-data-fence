@@ -211,6 +211,36 @@ class SnowflakeGrantBuilderTest {
                         SnowflakePermissionGrantBuilder.class), new GrantModelExpectedBuilder(
                         new SnowflakeGrantModel(
                                 "SELECT",
+                                "SEMANTIC_VIEW",
+                                "FOO.BAR.ZAR",
+                                "ROLE",
+                                "MY_ROLE",
+                                false,
+                                false,
+                                false),
+                        SnowflakePermissionGrantBuilder.class), new GrantModelExpectedBuilder(
+                        new SnowflakeGrantModel(
+                                "REFERENCES",
+                                "SEMANTIC_VIEW",
+                                "FOO.BAR.ZAR",
+                                "ROLE",
+                                "MY_ROLE",
+                                false,
+                                false,
+                                false),
+                        SnowflakePermissionGrantBuilder.class), new GrantModelExpectedBuilder(
+                        new SnowflakeGrantModel(
+                                "CREATE SEMANTIC VIEW",
+                                "SCHEMA",
+                                "FOO.BAR",
+                                "ROLE",
+                                "MY_ROLE",
+                                false,
+                                false,
+                                false),
+                        SnowflakePermissionGrantBuilder.class), new GrantModelExpectedBuilder(
+                        new SnowflakeGrantModel(
+                                "SELECT",
                                 "TABLE",
                                 "FOO.BAR.<TABLE>",
                                 "ROLE",
@@ -426,6 +456,32 @@ class SnowflakeGrantBuilderTest {
                                 false),
                         List.of("GRANT SELECT ON SEMANTIC VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" TO ROLE MOCK_ROLE_1;"),
                         List.of("REVOKE SELECT ON SEMANTIC VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" FROM ROLE MOCK_ROLE_1;")
+                ),
+                new GrantRevokeStatementsParams(
+                        new SnowflakeGrantModel(
+                                "REFERENCES",
+                                "SEMANTIC_VIEW",
+                                "MOCK_DB.MOCK_SCHEMA.MOCK_VIEW",
+                                "ROLE",
+                                "MOCK_ROLE_1",
+                                false,
+                                false,
+                                false),
+                        List.of("GRANT REFERENCES ON SEMANTIC VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" TO ROLE MOCK_ROLE_1;"),
+                        List.of("REVOKE REFERENCES ON SEMANTIC VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" FROM ROLE MOCK_ROLE_1;")
+                ),
+                new GrantRevokeStatementsParams(
+                        new SnowflakeGrantModel(
+                                "CREATE SEMANTIC VIEW",
+                                "SCHEMA",
+                                "MOCK_DB.MOCK_SCHEMA",
+                                "ROLE",
+                                "MOCK_ROLE_1",
+                                false,
+                                false,
+                                false),
+                        List.of("GRANT CREATE SEMANTIC VIEW ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"),
+                        List.of("REVOKE CREATE SEMANTIC VIEW ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;")
                 ),
                 new GrantRevokeStatementsParams(
                         new SnowflakeGrantModel(
@@ -664,6 +720,60 @@ class SnowflakeGrantBuilderTest {
                                 "MOCK_SCHEMA",
                                 "MOCK_DB",
                                 List.of("create agent"),
+                                false,
+                                false)),
+                new PlaybookPrivilegeGrantTestParams(
+                        new SnowflakeGrantModel(
+                                "SELECT",
+                                "SEMANTIC_VIEW",
+                                "MOCK_DB.MOCK_SCHEMA.MOCK_VIEW",
+                                "ROLE",
+                                "MOCK_ROLE_A",
+                                false,
+                                false,
+                                false),
+                        new PlaybookPrivilegeGrant(
+                                "semantic_view",
+                                "MOCK_VIEW",
+                                "MOCK_SCHEMA",
+                                "MOCK_DB",
+                                List.of("select"),
+                                false,
+                                false)),
+                new PlaybookPrivilegeGrantTestParams(
+                        new SnowflakeGrantModel(
+                                "REFERENCES",
+                                "SEMANTIC_VIEW",
+                                "MOCK_DB.MOCK_SCHEMA.MOCK_VIEW",
+                                "ROLE",
+                                "MOCK_ROLE_A",
+                                false,
+                                false,
+                                false),
+                        new PlaybookPrivilegeGrant(
+                                "semantic_view",
+                                "MOCK_VIEW",
+                                "MOCK_SCHEMA",
+                                "MOCK_DB",
+                                List.of("references"),
+                                false,
+                                false)),
+                new PlaybookPrivilegeGrantTestParams(
+                        new SnowflakeGrantModel(
+                                "CREATE SEMANTIC VIEW",
+                                "SCHEMA",
+                                "MOCK_DB.MOCK_SCHEMA",
+                                "ROLE",
+                                "MOCK_ROLE_A",
+                                false,
+                                false,
+                                false),
+                        new PlaybookPrivilegeGrant(
+                                "schema",
+                                null,
+                                "MOCK_SCHEMA",
+                                "MOCK_DB",
+                                List.of("create semantic view"),
                                 false,
                                 false)));
     }
