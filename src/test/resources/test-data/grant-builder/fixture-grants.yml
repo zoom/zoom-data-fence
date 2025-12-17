@@ -516,3 +516,760 @@ tests:
       role: MY_ROLE
     expectedBuilder: SnowflakePermissionGrantBuilder
 
+  # Additional Table Privileges
+  - name: "REBUILD on TABLE"
+    grant:
+      privilege: REBUILD
+      objectType: TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "EVOLVE SCHEMA on TABLE"
+    grant:
+      privilege: EVOLVE SCHEMA
+      objectType: TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "APPLYBUDGET on TABLE"
+    grant:
+      privilege: APPLYBUDGET
+      objectType: TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  # External Table Additional Privileges
+  - name: "INSERT on EXTERNAL_TABLE"
+    grant:
+      privilege: INSERT
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "UPDATE on EXTERNAL_TABLE"
+    grant:
+      privilege: UPDATE
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "DELETE on EXTERNAL_TABLE"
+    grant:
+      privilege: DELETE
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "TRUNCATE on EXTERNAL_TABLE"
+    grant:
+      privilege: TRUNCATE
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "REFERENCES on EXTERNAL_TABLE"
+    grant:
+      privilege: REFERENCES
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "REBUILD on EXTERNAL_TABLE"
+    grant:
+      privilege: REBUILD
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "EVOLVE SCHEMA on EXTERNAL_TABLE"
+    grant:
+      privilege: EVOLVE SCHEMA
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "APPLYBUDGET on EXTERNAL_TABLE"
+    grant:
+      privilege: APPLYBUDGET
+      objectType: EXTERNAL_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  # Iceberg Table Privileges
+  - name: "SELECT on ICEBERG_TABLE"
+    grant:
+      privilege: SELECT
+      objectType: ICEBERG_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "INSERT on ICEBERG_TABLE"
+    grant:
+      privilege: INSERT
+      objectType: ICEBERG_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "UPDATE on ICEBERG_TABLE"
+    grant:
+      privilege: UPDATE
+      objectType: ICEBERG_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "DELETE on ICEBERG_TABLE"
+    grant:
+      privilege: DELETE
+      objectType: ICEBERG_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "TRUNCATE on ICEBERG_TABLE"
+    grant:
+      privilege: TRUNCATE
+      objectType: ICEBERG_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "REFERENCES on ICEBERG_TABLE"
+    grant:
+      privilege: REFERENCES
+      objectType: ICEBERG_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "REBUILD on ICEBERG_TABLE"
+    grant:
+      privilege: REBUILD
+      objectType: ICEBERG_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "EVOLVE SCHEMA on ICEBERG_TABLE"
+    grant:
+      privilege: EVOLVE SCHEMA
+      objectType: ICEBERG_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "APPLYBUDGET on ICEBERG_TABLE"
+    grant:
+      privilege: APPLYBUDGET
+      objectType: ICEBERG_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on ICEBERG_TABLE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: ICEBERG_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  # Event Table Privileges
+  - name: "SELECT on EVENT_TABLE"
+    grant:
+      privilege: SELECT
+      objectType: EVENT_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "INSERT on EVENT_TABLE"
+    grant:
+      privilege: INSERT
+      objectType: EVENT_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on EVENT_TABLE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: EVENT_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  # View Additional Privileges
+  - name: "INSERT on VIEW"
+    grant:
+      privilege: INSERT
+      objectType: VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "UPDATE on VIEW"
+    grant:
+      privilege: UPDATE
+      objectType: VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "DELETE on VIEW"
+    grant:
+      privilege: DELETE
+      objectType: VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "TRUNCATE on VIEW"
+    grant:
+      privilege: TRUNCATE
+      objectType: VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "REFERENCES on VIEW"
+    grant:
+      privilege: REFERENCES
+      objectType: VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "REBUILD on VIEW"
+    grant:
+      privilege: REBUILD
+      objectType: VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "EVOLVE SCHEMA on VIEW"
+    grant:
+      privilege: EVOLVE SCHEMA
+      objectType: VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "APPLYBUDGET on VIEW"
+    grant:
+      privilege: APPLYBUDGET
+      objectType: VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  # Materialized View Privileges
+  - name: "SELECT on MATERIALIZED_VIEW"
+    grant:
+      privilege: SELECT
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "INSERT on MATERIALIZED_VIEW"
+    grant:
+      privilege: INSERT
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "UPDATE on MATERIALIZED_VIEW"
+    grant:
+      privilege: UPDATE
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "DELETE on MATERIALIZED_VIEW"
+    grant:
+      privilege: DELETE
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "TRUNCATE on MATERIALIZED_VIEW"
+    grant:
+      privilege: TRUNCATE
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "REFERENCES on MATERIALIZED_VIEW"
+    grant:
+      privilege: REFERENCES
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "REBUILD on MATERIALIZED_VIEW"
+    grant:
+      privilege: REBUILD
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "EVOLVE SCHEMA on MATERIALIZED_VIEW"
+    grant:
+      privilege: EVOLVE SCHEMA
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "APPLYBUDGET on MATERIALIZED_VIEW"
+    grant:
+      privilege: APPLYBUDGET
+      objectType: MATERIALIZED_VIEW
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  # Schema Additional CREATE Privileges
+  - name: "CREATE FILE FORMAT on SCHEMA"
+    grant:
+      privilege: CREATE FILE FORMAT
+      objectType: SCHEMA
+      objectName: FOO.BAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "CREATE STREAM on SCHEMA"
+    grant:
+      privilege: CREATE STREAM
+      objectType: SCHEMA
+      objectName: FOO.BAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "CREATE TASK on SCHEMA"
+    grant:
+      privilege: CREATE TASK
+      objectType: SCHEMA
+      objectName: FOO.BAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  # Database Additional Privileges
+  - name: "CREATE DATABASE ROLE on DATABASE"
+    grant:
+      privilege: CREATE DATABASE ROLE
+      objectType: DATABASE
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "IMPORTED PRIVILEGES on DATABASE"
+    grant:
+      privilege: IMPORTED PRIVILEGES
+      objectType: DATABASE
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "REFERENCE_USAGE on DATABASE"
+    grant:
+      privilege: REFERENCE_USAGE
+      objectType: DATABASE
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  # Integration Additional Privileges
+  - name: "USE_ANY_ROLE on INTEGRATION"
+    grant:
+      privilege: USE_ANY_ROLE
+      objectType: INTEGRATION
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on INTEGRATION"
+    grant:
+      privilege: OWNERSHIP
+      objectType: INTEGRATION
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  # Additional Object Ownership Grants
+  - name: "OWNERSHIP on FUNCTION"
+    grant:
+      privilege: OWNERSHIP
+      objectType: FUNCTION
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on STAGE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: STAGE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on SEQUENCE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: SEQUENCE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on STREAM"
+    grant:
+      privilege: OWNERSHIP
+      objectType: STREAM
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on TASK"
+    grant:
+      privilege: OWNERSHIP
+      objectType: TASK
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on PIPE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: PIPE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on WAREHOUSE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: WAREHOUSE
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  # Additional Object Privileges
+  - name: "USAGE on SECRET"
+    grant:
+      privilege: USAGE
+      objectType: SECRET
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on SECRET"
+    grant:
+      privilege: OWNERSHIP
+      objectType: SECRET
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "USAGE on STREAMLIT"
+    grant:
+      privilege: USAGE
+      objectType: STREAMLIT
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "USAGE on VOLUME"
+    grant:
+      privilege: USAGE
+      objectType: VOLUME
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on VOLUME"
+    grant:
+      privilege: OWNERSHIP
+      objectType: VOLUME
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "USAGE on INSTANCE"
+    grant:
+      privilege: USAGE
+      objectType: INSTANCE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on INSTANCE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: INSTANCE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  # Policy Privileges
+  - name: "APPLY on MASKING_POLICY"
+    grant:
+      privilege: APPLY
+      objectType: MASKING_POLICY
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on MASKING_POLICY"
+    grant:
+      privilege: OWNERSHIP
+      objectType: MASKING_POLICY
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "APPLY on PASSWORD_POLICY"
+    grant:
+      privilege: APPLY
+      objectType: PASSWORD_POLICY
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on PASSWORD_POLICY"
+    grant:
+      privilege: OWNERSHIP
+      objectType: PASSWORD_POLICY
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "APPLY on ROW_ACCESS_POLICY"
+    grant:
+      privilege: APPLY
+      objectType: ROW_ACCESS_POLICY
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on ROW_ACCESS_POLICY"
+    grant:
+      privilege: OWNERSHIP
+      objectType: ROW_ACCESS_POLICY
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "APPLY on SESSION_POLICY"
+    grant:
+      privilege: APPLY
+      objectType: SESSION_POLICY
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on SESSION_POLICY"
+    grant:
+      privilege: OWNERSHIP
+      objectType: SESSION_POLICY
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "APPLY on TAG"
+    grant:
+      privilege: APPLY
+      objectType: TAG
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "READ on TAG"
+    grant:
+      privilege: READ
+      objectType: TAG
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on TAG"
+    grant:
+      privilege: OWNERSHIP
+      objectType: TAG
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  # Additional Object Types
+  - name: "OPERATE on ALERT"
+    grant:
+      privilege: OPERATE
+      objectType: ALERT
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on ALERT"
+    grant:
+      privilege: OWNERSHIP
+      objectType: ALERT
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "INSTANTIATE on CLASS"
+    grant:
+      privilege: INSTANTIATE
+      objectType: CLASS
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "USAGE on CLASS"
+    grant:
+      privilege: USAGE
+      objectType: CLASS
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "MODIFY on COMPUTE_POOL"
+    grant:
+      privilege: MODIFY
+      objectType: COMPUTE_POOL
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "MONITOR on COMPUTE_POOL"
+    grant:
+      privilege: MONITOR
+      objectType: COMPUTE_POOL
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OPERATE on COMPUTE_POOL"
+    grant:
+      privilege: OPERATE
+      objectType: COMPUTE_POOL
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "USAGE on COMPUTE_POOL"
+    grant:
+      privilege: USAGE
+      objectType: COMPUTE_POOL
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on COMPUTE_POOL"
+    grant:
+      privilege: OWNERSHIP
+      objectType: COMPUTE_POOL
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on DATABASE_ROLE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: DATABASE_ROLE
+      objectName: FOO.BAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on DIRECTORY_TABLE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: DIRECTORY_TABLE
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "READ on IMAGE_REPOSITORY"
+    grant:
+      privilege: READ
+      objectType: IMAGE_REPOSITORY
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "WRITE on IMAGE_REPOSITORY"
+    grant:
+      privilege: WRITE
+      objectType: IMAGE_REPOSITORY
+      objectName: FOO.BAR.ZAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on NETWORK_POLICY"
+    grant:
+      privilege: OWNERSHIP
+      objectType: NETWORK_POLICY
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "OWNERSHIP on NETWORK_RULE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: NETWORK_RULE
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "MONITOR on RESOURCE_MONITOR"
+    grant:
+      privilege: MONITOR
+      objectType: RESOURCE_MONITOR
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "MODIFY on RESOURCE_MONITOR"
+    grant:
+      privilege: MODIFY
+      objectType: RESOURCE_MONITOR
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
+  - name: "OWNERSHIP on ROLE"
+    grant:
+      privilege: OWNERSHIP
+      objectType: ROLE
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakeOwnershipGrantBuilder
+
+  - name: "MONITOR on USER"
+    grant:
+      privilege: MONITOR
+      objectType: USER
+      objectName: FOO
+      role: MY_ROLE
+    expectedBuilder: SnowflakePermissionGrantBuilder
+
