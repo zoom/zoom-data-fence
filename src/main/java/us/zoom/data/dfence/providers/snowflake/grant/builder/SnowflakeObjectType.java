@@ -2,11 +2,15 @@ package us.zoom.data.dfence.providers.snowflake.grant.builder;
 
 import lombok.Getter;
 
+import java.util.Map;
+import java.util.Objects;
+
 public enum SnowflakeObjectType {
     ACCOUNT(0, null),
     ALERT(3, null),
     APPLICATION_ROLE(1, null),
     CLASS(1, null),
+    CORTEX_AGENT(3, null, "AGENT", "AGENTS"),
     DATABASE(1, null),
     DATABASE_ROLE(2, null),
     DIRECTORY_TABLE(3, null),
@@ -50,24 +54,40 @@ public enum SnowflakeObjectType {
     @Getter
     private final Integer qualLevel;
 
+    // objectType is used for SQL statements about the object.
     @Getter
     private final String objectType;
 
+    // objectTypePlural is used for SQL statements about multiple objects.
     @Getter
     private final String objectTypePlural;
 
+    // Alias for is used for considering grants on different object types equivalent for the sake of hashing and comparison.
     private final String aliasFor;
 
-    SnowflakeObjectType(Integer qualLevel, String aliasFor) {
+    // Main constructor with all parameters - contains the actual logic
+    SnowflakeObjectType(Integer qualLevel, String aliasFor, String objectType, String objectTypePlural) {
         this.qualLevel = qualLevel;
         this.aliasFor = aliasFor;
-        this.objectType = this.name().replace("_", " ");
-        // Hooked on phonics works for me.
-        if (this.objectType.endsWith("Y")) {
-            this.objectTypePlural = this.objectType.substring(0, this.objectType.length() - 1) + "IES";
+        // If objectType is provided, use it; otherwise infer from enum name
+        String computedObjectType = (objectType != null) ? objectType : this.name().replace("_", " ");
+        this.objectType = computedObjectType;
+        // If objectTypePlural is provided, use it; otherwise infer from objectType
+        if (objectTypePlural != null) {
+            this.objectTypePlural = objectTypePlural;
         } else {
-            this.objectTypePlural = this.objectType + "S";
+            // Hooked on phonics works for me.
+            if (computedObjectType.endsWith("Y")) {
+                this.objectTypePlural = computedObjectType.substring(0, computedObjectType.length() - 1) + "IES";
+            } else {
+                this.objectTypePlural = computedObjectType + "S";
+            }
         }
+    }
+
+    // Constructor that infers objectType and objectTypePlural from enum name
+    SnowflakeObjectType(Integer qualLevel, String aliasFor) {
+        this(qualLevel, aliasFor, null, null);
     }
 
     public String getAliasFor() {
@@ -76,4 +96,14 @@ public enum SnowflakeObjectType {
         }
         return this.aliasFor;
     }
+
+    public static SnowflakeObjectType fromString(String objectType) {
+        String normalizedObjectType = objectType.toUpperCase();
+        String overrideValue = overrideObjectTypes.get(normalizedObjectType);
+        return SnowflakeObjectType.valueOf(Objects.requireNonNullElse(overrideValue, normalizedObjectType));
+    }
+
+    public static Map<String, String> overrideObjectTypes = Map.of(
+            "AGENT", "CORTEX_AGENT"
+    );
 }

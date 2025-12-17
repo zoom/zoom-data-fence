@@ -1,0 +1,468 @@
+# Playbook Privilege Grant Tests
+# Tests conversion from SnowflakeGrantModel to PlaybookPrivilegeGrant
+# Reference: https://docs.snowflake.com/en/sql-reference/sql/grant-privilege
+
+tests:
+  # Database Grants
+  - name: "USAGE on DATABASE"
+    grant:
+      privilege: USAGE
+      objectType: DATABASE
+      objectName: MOCK_DB_A
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: database
+      objectName: null
+      schemaName: null
+      databaseName: MOCK_DB_A
+      privileges:
+        - usage
+      includeFuture: false
+      includeAll: false
+
+  # Schema Grants
+  - name: "USAGE on FUTURE SCHEMAS"
+    grant:
+      privilege: USAGE
+      objectType: SCHEMA
+      objectName: MOCK_DB_A.<SCHEMA>
+      role: MOCK_ROLE_A
+      future: true
+    expectedPlaybookGrant:
+      objectType: schema
+      objectName: null
+      schemaName: "*"
+      databaseName: MOCK_DB_A
+      privileges:
+        - usage
+      includeFuture: true
+      includeAll: false
+
+  - name: "USAGE on FUTURE SCHEMAS with quoted database"
+    grant:
+      privilege: USAGE
+      objectType: SCHEMA
+      objectName: "\"MOCK_DB_a\".<SCHEMA>"
+      role: MOCK_ROLE_A
+      future: true
+    expectedPlaybookGrant:
+      objectType: schema
+      objectName: null
+      schemaName: "*"
+      databaseName: "\"MOCK_DB_a\""
+      privileges:
+        - usage
+      includeFuture: true
+      includeAll: false
+
+  # Account Grants
+  - name: "MONITOR on ACCOUNT"
+    grant:
+      privilege: MONITOR
+      objectType: ACCOUNT
+      objectName: ""
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: account
+      objectName: null
+      schemaName: null
+      databaseName: null
+      privileges:
+        - monitor
+      includeFuture: false
+      includeAll: false
+
+  # Role Grants
+  - name: "USAGE on ROLE"
+    grant:
+      privilege: USAGE
+      objectType: ROLE
+      objectName: MOCK_ROLE
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: role
+      objectName: MOCK_ROLE
+      schemaName: null
+      databaseName: null
+      privileges:
+        - usage
+      includeFuture: false
+      includeAll: false
+
+  # User Grants
+  - name: "OWNERSHIP on USER"
+    grant:
+      privilege: OWNERSHIP
+      objectType: USER
+      objectName: "MOCK_USER abc"
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: user
+      objectName: "\"MOCK_USER abc\""
+      schemaName: null
+      databaseName: null
+      privileges:
+        - ownership
+      includeFuture: false
+      includeAll: false
+
+  # Agent Grants
+  - name: "USAGE on AGENT"
+    grant:
+      privilege: USAGE
+      objectType: CORTEX_AGENT
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: cortex_agent
+      objectName: MOCK_AGENT
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - usage
+      includeFuture: false
+      includeAll: false
+
+  - name: "OWNERSHIP on AGENT"
+    grant:
+      privilege: OWNERSHIP
+      objectType: CORTEX_AGENT
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: cortex_agent
+      objectName: MOCK_AGENT
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - ownership
+      includeFuture: false
+      includeAll: false
+
+  - name: "MODIFY on AGENT"
+    grant:
+      privilege: MODIFY
+      objectType: CORTEX_AGENT
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: cortex_agent
+      objectName: MOCK_AGENT
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - modify
+      includeFuture: false
+      includeAll: false
+
+  - name: "MONITOR on AGENT"
+    grant:
+      privilege: MONITOR
+      objectType: CORTEX_AGENT
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_AGENT
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: cortex_agent
+      objectName: MOCK_AGENT
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - monitor
+      includeFuture: false
+      includeAll: false
+
+  - name: "CREATE AGENT on SCHEMA"
+    grant:
+      privilege: CREATE AGENT
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: schema
+      objectName: null
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - create agent
+      includeFuture: false
+      includeAll: false
+
+  # Semantic View Grants
+  - name: "SELECT on SEMANTIC_VIEW"
+    grant:
+      privilege: SELECT
+      objectType: SEMANTIC_VIEW
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_VIEW
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: semantic_view
+      objectName: MOCK_VIEW
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - select
+      includeFuture: false
+      includeAll: false
+
+  - name: "REFERENCES on SEMANTIC_VIEW"
+    grant:
+      privilege: REFERENCES
+      objectType: SEMANTIC_VIEW
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_VIEW
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: semantic_view
+      objectName: MOCK_VIEW
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - references
+      includeFuture: false
+      includeAll: false
+
+  - name: "CREATE SEMANTIC VIEW on SCHEMA"
+    grant:
+      privilege: CREATE SEMANTIC VIEW
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: schema
+      objectName: null
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - create semantic view
+      includeFuture: false
+      includeAll: false
+
+  # Additional Table Privileges
+  - name: "INSERT on TABLE"
+    grant:
+      privilege: INSERT
+      objectType: TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_TABLE
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: table
+      objectName: MOCK_TABLE
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - insert
+      includeFuture: false
+      includeAll: false
+
+  - name: "UPDATE on TABLE"
+    grant:
+      privilege: UPDATE
+      objectType: TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_TABLE
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: table
+      objectName: MOCK_TABLE
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - update
+      includeFuture: false
+      includeAll: false
+
+  - name: "DELETE on TABLE"
+    grant:
+      privilege: DELETE
+      objectType: TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_TABLE
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: table
+      objectName: MOCK_TABLE
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - delete
+      includeFuture: false
+      includeAll: false
+
+  # View Grants
+  - name: "SELECT on VIEW"
+    grant:
+      privilege: SELECT
+      objectType: VIEW
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_VIEW
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: view
+      objectName: MOCK_VIEW
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - select
+      includeFuture: false
+      includeAll: false
+
+  # Schema CREATE Privileges
+  - name: "CREATE TABLE on SCHEMA"
+    grant:
+      privilege: CREATE TABLE
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: schema
+      objectName: null
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - create table
+      includeFuture: false
+      includeAll: false
+
+  - name: "CREATE VIEW on SCHEMA"
+    grant:
+      privilege: CREATE VIEW
+      objectType: SCHEMA
+      objectName: MOCK_DB.MOCK_SCHEMA
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: schema
+      objectName: null
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - create view
+      includeFuture: false
+      includeAll: false
+
+  # Object-Level Privileges
+  - name: "USAGE on FUNCTION"
+    grant:
+      privilege: USAGE
+      objectType: FUNCTION
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_FUNCTION
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: function
+      objectName: MOCK_FUNCTION
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - usage
+      includeFuture: false
+      includeAll: false
+
+  - name: "USAGE on PROCEDURE"
+    grant:
+      privilege: USAGE
+      objectType: PROCEDURE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_PROCEDURE
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: procedure
+      objectName: MOCK_PROCEDURE
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - usage
+      includeFuture: false
+      includeAll: false
+
+  - name: "USAGE on STAGE"
+    grant:
+      privilege: USAGE
+      objectType: STAGE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_STAGE
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: stage
+      objectName: MOCK_STAGE
+      schemaName: MOCK_SCHEMA
+      databaseName: MOCK_DB
+      privileges:
+        - usage
+      includeFuture: false
+      includeAll: false
+
+  # Database-Level Privileges
+  - name: "CREATE SCHEMA on DATABASE"
+    grant:
+      privilege: CREATE SCHEMA
+      objectType: DATABASE
+      objectName: MOCK_DB
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: database
+      objectName: null
+      schemaName: null
+      databaseName: MOCK_DB
+      privileges:
+        - create schema
+      includeFuture: false
+      includeAll: false
+
+  - name: "MODIFY on DATABASE"
+    grant:
+      privilege: MODIFY
+      objectType: DATABASE
+      objectName: MOCK_DB
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: database
+      objectName: null
+      schemaName: null
+      databaseName: MOCK_DB
+      privileges:
+        - modify
+      includeFuture: false
+      includeAll: false
+
+  - name: "MONITOR on DATABASE"
+    grant:
+      privilege: MONITOR
+      objectType: DATABASE
+      objectName: MOCK_DB
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: database
+      objectName: null
+      schemaName: null
+      databaseName: MOCK_DB
+      privileges:
+        - monitor
+      includeFuture: false
+      includeAll: false
+
+  # Warehouse Privileges
+  - name: "USAGE on WAREHOUSE"
+    grant:
+      privilege: USAGE
+      objectType: WAREHOUSE
+      objectName: MOCK_WAREHOUSE
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: warehouse
+      objectName: MOCK_WAREHOUSE
+      schemaName: null
+      databaseName: null
+      privileges:
+        - usage
+      includeFuture: false
+      includeAll: false
+
+  - name: "OPERATE on WAREHOUSE"
+    grant:
+      privilege: OPERATE
+      objectType: WAREHOUSE
+      objectName: MOCK_WAREHOUSE
+      role: MOCK_ROLE_A
+    expectedPlaybookGrant:
+      objectType: warehouse
+      objectName: MOCK_WAREHOUSE
+      schemaName: null
+      databaseName: null
+      privileges:
+        - operate
+      includeFuture: false
+      includeAll: false
+

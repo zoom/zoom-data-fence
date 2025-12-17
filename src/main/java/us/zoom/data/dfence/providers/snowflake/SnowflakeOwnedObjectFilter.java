@@ -45,7 +45,7 @@ public class SnowflakeOwnedObjectFilter {
                         grant.databaseName(),
                         grant.schemaName(),
                         grant.objectName(),
-                        SnowflakeObjectType.valueOf(grant.objectType().toUpperCase()),
+                        SnowflakeObjectType.fromString(grant.objectType()),
                         role.name()))).toList();
     }
 
@@ -69,7 +69,7 @@ public class SnowflakeOwnedObjectFilter {
                 roleName) || snowflakeGrantModel.future() || snowflakeGrantModel.all()) {
             return true;
         }
-        SnowflakeObjectType grantObjectType = SnowflakeObjectType.valueOf(snowflakeGrantModel.grantedOn());
+        SnowflakeObjectType grantObjectType = SnowflakeObjectType.fromString(snowflakeGrantModel.grantedOn());
         if (!grantObjectType.equals(snowflakeObjectType)) {
             return true;
         }

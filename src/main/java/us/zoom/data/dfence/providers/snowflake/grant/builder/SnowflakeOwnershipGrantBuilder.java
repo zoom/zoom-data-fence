@@ -19,6 +19,7 @@ public class SnowflakeOwnershipGrantBuilder extends SnowflakeGrantBuilder {
     private static final List<GrantValidationDefinition> validCombinations = ImmutableList.copyOf(new ArrayList<>() {{
         add(new GrantValidationDefinition(
                 List.of("OWNERSHIP"), List.of(
+                SnowflakeObjectType.CORTEX_AGENT,
                 SnowflakeObjectType.ALERT,
                 SnowflakeObjectType.COMPUTE_POOL,
                 SnowflakeObjectType.DATABASE,
@@ -73,7 +74,7 @@ public class SnowflakeOwnershipGrantBuilder extends SnowflakeGrantBuilder {
         }
         return List.of(String.format(
                 "GRANT OWNERSHIP ON %s %s TO ROLE %s COPY CURRENT GRANTS;",
-                SnowflakeObjectType.valueOf(grant.grantedOn()).getObjectType(),
+                SnowflakeObjectType.fromString(grant.grantedOn()).getObjectType(),
                 this.grant.getEscapedName(),
                 this.grant.granteeName()));
     }
@@ -85,7 +86,7 @@ public class SnowflakeOwnershipGrantBuilder extends SnowflakeGrantBuilder {
         }
         return List.of(String.format(
                 "GRANT OWNERSHIP ON %s %s TO ROLE SECURITYADMIN COPY CURRENT GRANTS;",
-                SnowflakeObjectType.valueOf(grant.grantedOn()).getObjectType(),
+                SnowflakeObjectType.fromString(grant.grantedOn()).getObjectType(),
                 this.grant.getEscapedName()));
     }
 

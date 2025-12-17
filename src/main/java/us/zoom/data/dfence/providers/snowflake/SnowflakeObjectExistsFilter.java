@@ -65,7 +65,7 @@ public class SnowflakeObjectExistsFilter {
             }
         } else {
             objectName = ObjectName.normalizeObjectName(snowflakeGrantModel.name());
-            snowflakeObjectType = SnowflakeObjectType.valueOf(snowflakeGrantModel.grantedOn());
+            snowflakeObjectType = SnowflakeObjectType.fromString(snowflakeGrantModel.grantedOn());
         }
         Boolean ret;
         try {

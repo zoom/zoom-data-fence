@@ -8,8 +8,8 @@ import org.testng.annotations.*;
 import us.zoom.data.dfence.ChangesSummary;
 import us.zoom.data.dfence.playbook.PlaybookService;
 import us.zoom.data.dfence.playbook.PlaybookServiceBuilder;
-import us.zoom.data.dfence.test.fixtures.TestRunFixture;
-import us.zoom.data.dfence.test.fixtures.TestRunFixtureBuilder;
+import us.zoom.data.dfence.test.fixtures.AgentTestFixture;
+import us.zoom.data.dfence.test.fixtures.AgentTestFixtureBuilder;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -19,50 +19,13 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * System test for table and procedure grants.
- * Uses unique naming to avoid collisions with other tests.
+ * System test for agent and semantic view grants.
+ * Uses unique naming (AGENT_TEST_*) to avoid collisions with other tests.
  */
 @Slf4j
-public class TestRunSystemTest extends BaseGrantSystemTest {
+public class AgentGrantSystemTest extends BaseGrantSystemTest {
 
-    private TestRunFixture fixture;
-
-    @BeforeGroups(groups = {"a"})
-    public void beforeGroupsA() {
-        fixture = new TestRunFixtureBuilder(
-                sysadminSnowflakeConnectionProvider,
-                securityadminSnowflakeConnectionProvider)
-                .withDatabase()
-                .withSchema()
-                .withTable()
-                .withRoles()
-                .withProcedures()
-                .build();
-        log.info("Test fixture setup complete for {}", this.getClass().getSimpleName());
-    }
-
-    @AfterGroups(groups = {"a"})
-    public void afterGroupsA() throws SQLException {
-        if (fixture == null) {
-            return; // Nothing to clean up
-        }
-        
-        // Transfer ownership back to SYSADMIN before teardown
-        try (Connection connection = securityadminSnowflakeConnectionProvider.getConnection()) {
-            connection.createStatement().execute(
-                    String.format("GRANT OWNERSHIP ON ALL TABLES IN DATABASE %s TO ROLE %S REVOKE CURRENT GRANTS",
-                            fixture.databaseName(), snowflakeSysadminRole)
-            );
-            connection.createStatement().execute(
-                    String.format("GRANT OWNERSHIP ON ALL PROCEDURES IN DATABASE %s TO ROLE %S REVOKE CURRENT GRANTS",
-                            fixture.databaseName(), snowflakeSysadminRole)
-            );
-        }
-        
-        log.info("Tearing down lifecycleManager for {}", this.getClass().getSimpleName());
-        fixture.lifecycleManager().teardown();
-    }
-
+    private AgentTestFixture fixture;
 
     // Test state - stored as instance variables instead of ITestContext
     private ChangesSummary changes;
@@ -71,7 +34,44 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
     private ChangesSummary revokeChanges;
     private PlaybookService revokePlaybookService;
 
-    @Test(groups = {"a"})
+    @BeforeGroups(groups = {"agent"})
+    public void beforeGroupsAgent() {
+        fixture = new AgentTestFixtureBuilder(
+                sysadminSnowflakeConnectionProvider,
+                securityadminSnowflakeConnectionProvider)
+                .withDatabase()
+                .withSchema()
+                .withTable()
+                .withSemanticView()
+                .withAgent()
+                .withRoles()
+                .build();
+        log.info("Agent test fixture setup complete for {}", this.getClass().getSimpleName());
+    }
+
+    @AfterGroups(groups = {"agent"})
+    public void afterGroupsAgent() throws SQLException {
+        if (fixture == null) {
+            return; // Nothing to clean up
+        }
+
+        // Transfer ownership back to SYSADMIN before teardown
+        try (Connection connection = securityadminSnowflakeConnectionProvider.getConnection()) {
+            connection.createStatement().execute(
+                    String.format("GRANT OWNERSHIP ON ALL AGENTS IN DATABASE %s TO ROLE %S REVOKE CURRENT GRANTS",
+                            fixture.databaseName(), snowflakeSysadminRole)
+            );
+            connection.createStatement().execute(
+                    String.format("GRANT OWNERSHIP ON ALL SEMANTIC VIEWS IN DATABASE %s TO ROLE %S REVOKE CURRENT GRANTS",
+                            fixture.databaseName(), snowflakeSysadminRole)
+            );
+        }
+
+        log.info("Tearing down lifecycleManager for {}", this.getClass().getSimpleName());
+        fixture.lifecycleManager().teardown();
+    }
+
+    @Test(groups = {"agent"})
     public void testCompile() throws URISyntaxException {
         // Grant permissions to SYSADMIN role for the test objects
         try (Connection connection = securityadminSnowflakeConnectionProvider.getConnection()) {
@@ -88,7 +88,7 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         }
 
         File rolesFile = new File(Objects.requireNonNull(this.getClass().getClassLoader()
-                .getResource("test-data/system-test/roles.yml")).toURI());
+                .getResource("test-data/system-test/agent-grants.yml")).toURI());
         File profilesFile = new File(Objects.requireNonNull(this.getClass().getClassLoader()
                 .getResource("test-data/system-test/profiles.yml")).toURI());
 
@@ -105,10 +105,10 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         Map<String, String> vars = new HashMap<>();
         vars.put("database", fixture.databaseName());
         vars.put("schema", fixture.schemaName());
-        vars.put("table", fixture.tableName());
+        vars.put("semantic-view", fixture.semanticViewName());
+        vars.put("agent", fixture.agentName());
         vars.put("role", fixture.roleName());
         vars.put("role2", fixture.roleName2());
-        vars.put("procedure", fixture.procedureName());
         vars.put("snowflake-user", snowflakeUser);
         vars.put("snowflake-account", snowflakeAccount);
         vars.put("snowflake-password", String.valueOf(snowflakePassword));
@@ -118,7 +118,7 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         return vars;
     }
 
-    @Test(dependsOnMethods = {"testCompile"}, groups = {"a"})
+    @Test(dependsOnMethods = {"testCompile"}, groups = {"agent"})
     public void testApply() throws SQLException {
         playbookService.applyChanges(changes.changes());
 
@@ -133,21 +133,20 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
                 new Grant("USAGE", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
                 new Grant("MONITOR", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
                 new Grant("CREATE SEMANTIC VIEW", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
-                new Grant("SELECT", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName()),
-                new Grant("OWNERSHIP", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName()),
-                new Grant("USAGE", "APPLICATION_ROLE", "SNOWFLAKE.TRUST_CENTER_VIEWER", "ROLE", fixture.roleName()),
-                new Grant("USAGE", "PROCEDURE", fixture.procedureNameShowGrantsQual(), "ROLE", fixture.roleName()),
-                new Grant("USAGE", "PROCEDURE", fixture.procedureNameNoArgsShowGrantsQual(), "ROLE", fixture.roleName()),
-                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameShowGrantsQual(), "ROLE", fixture.roleName()),
-                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameNoArgsShowGrantsQual(), "ROLE", fixture.roleName())
+                new Grant("CREATE AGENT", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
+                new Grant("SELECT", "SEMANTIC_VIEW", fixture.qualifiedSemanticViewName(), "ROLE", fixture.roleName()),
+                new Grant("REFERENCES", "SEMANTIC_VIEW", fixture.qualifiedSemanticViewName(), "ROLE", fixture.roleName()),
+                new Grant("USAGE", "CORTEX_AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName()),
+                new Grant("MODIFY", "CORTEX_AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName()),
+                new Grant("MONITOR", "CORTEX_AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName()),
+                new Grant("OWNERSHIP", "CORTEX_AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName())
         ));
-        grantsExpected.sort(Comparator.comparing(x -> x.toString().hashCode()));
 
         List<Grant> grants = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
         assertGrantsMatch(grants, grantsExpected);
     }
 
-    @Test(dependsOnMethods = {"testApply"}, groups = {"a"})
+    @Test(dependsOnMethods = {"testApply"}, groups = {"agent"})
     public void testCompileRevoke() throws SQLException, URISyntaxException {
         // Grant the test role to SYSADMIN so it can revoke grants
         try (Connection connection = securityadminSnowflakeConnectionProvider.getConnection()) {
@@ -155,12 +154,12 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
                     String.format("GRANT ROLE %s TO ROLE %s", fixture.roleName(), snowflakeSysadminRole)
             );
         }
-        
+
         File rolesFile = new File(Objects.requireNonNull(this.getClass().getClassLoader()
-                .getResource("test-data/system-test/roles_no_grants.yml")).toURI());
+                .getResource("test-data/system-test/agent-grants-no-grants.yml")).toURI());
         File profilesFile = new File(Objects.requireNonNull(this.getClass().getClassLoader()
                 .getResource("test-data/system-test/profiles.yml")).toURI());
-        
+
         revokePlaybookService = new PlaybookServiceBuilder()
                 .setPlaybookYamlStrings(rolesFile)
                 .putAllVariables(variables)
@@ -170,38 +169,26 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         Assert.assertFalse(revokeChanges.changes().isEmpty(), "No changes found. Revokes are expected.");
     }
 
-    @Test(dependsOnMethods = {"testCompileRevoke"}, groups = {"a"})
+    @Test(dependsOnMethods = {"testCompileRevoke"}, groups = {"agent"})
     public void testApplyRevoke() throws SQLException, InterruptedException, JsonProcessingException {
         revokePlaybookService.applyChanges(revokeChanges.changes());
 
         // Validate that role1 has no grants (all revoked)
+        // Note: Ownership will be transferred back to the original owner (SYSADMIN) or revoked
         List<Grant> grantsExpectedRole1 = new ArrayList<>(List.of());
-        grantsExpectedRole1.sort(Comparator.comparing(x -> x.toString().hashCode()));
-
-        // Validate that role2 has ownership grants (transferred from role1)
-        List<Grant> grantsExpectedRole2 = new ArrayList<>(List.of(
-                new Grant("OWNERSHIP", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName2()),
-                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameShowGrantsQual(), "ROLE", fixture.roleName2()),
-                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameNoArgsShowGrantsQual(), "ROLE", fixture.roleName2())
-        ));
-        grantsExpectedRole2.sort(Comparator.comparing(x -> x.toString().hashCode()));
 
         // Snowflake appears to have eventual consistency on this metadata after the ownership change.
         // We need to wait for the metadata to catch up.
-        int timeoutSeconds = 480;
+        int timeoutSeconds = 60;
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime maxTime = now.plusSeconds(timeoutSeconds);
         boolean success = false;
         while (LocalDateTime.now().isBefore(maxTime.plusSeconds(10)) && !success) {
             try {
-                // Verify role1 has no grants
+                // Verify role1 has no grants (all revoked)
                 List<Grant> grantsRole1 = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
                 assertGrantsMatch(grantsRole1, grantsExpectedRole1);
 
-                // Verify role2 has ownership grants
-                List<Grant> grantsRole2 = getRoleGrants(fixture.roleName2(), securityadminSnowflakeConnectionProvider);
-                assertGrantsMatch(grantsRole2, grantsExpectedRole2);
-                
                 success = true;
             } catch (AssertionError e) {
                 if (LocalDateTime.now().isAfter(maxTime)) {
@@ -215,3 +202,4 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         }
     }
 }
+

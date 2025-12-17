@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Set root logger level to WARN to reduce noise -->
+    <root level="WARN">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+    <!-- Set Snowflake JDBC driver logging to WARN to reduce debug noise -->
+    <logger name="net.snowflake.client" level="WARN" />
+    
+    <!-- Keep application logging at INFO level -->
+    <logger name="us.zoom.data.dfence" level="INFO" />
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+</configuration>
+

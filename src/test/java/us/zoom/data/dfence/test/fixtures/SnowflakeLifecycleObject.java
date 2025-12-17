@@ -84,6 +84,68 @@ public class SnowflakeLifecycleObject implements LifecycleObject {
         );
     }
 
+    public static LifecycleObject semanticView(
+            SnowflakeConnectionProvider snowflakeConnectionProvider,
+            String databaseName,
+            String schemaName,
+            String viewName,
+            String tableName) {
+        String qualName = String.format("\"%s\".\"%s\".\"%s\"", databaseName, schemaName, viewName);
+        String tableQual = String.format("\"%s\".\"%s\".\"%s\"", databaseName, schemaName, tableName);
+        // Create a semantic view with proper syntax per Snowflake documentation
+        // Requires TABLES clause and at least one DIMENSION or METRIC
+        // See: https://docs.snowflake.com/en/sql-reference/sql/create-semantic-view
+        return new SnowflakeLifecycleObject(
+                snowflakeConnectionProvider,
+                String.format(
+                        """
+                        CREATE SEMANTIC VIEW %s
+                          TABLES (
+                            t1 AS %s PRIMARY KEY ("COL_1")
+                          )
+                          DIMENSIONS (
+                            t1.dim1 AS t1."COL_1"
+                          )
+                        """, qualName, tableQual),
+                String.format("DROP SEMANTIC VIEW IF EXISTS %s", qualName)
+        );
+    }
+
+    public static LifecycleObject agent(
+            SnowflakeConnectionProvider snowflakeConnectionProvider,
+            String databaseName,
+            String schemaName,
+            String agentName,
+            String semanticViewName) {
+        String qualName = String.format("\"%s\".\"%s\".\"%s\"", databaseName, schemaName, agentName);
+        // For YAML specification, use unquoted qualified name
+        String semanticViewQualForYaml = String.format("%s.%s.%s", databaseName, schemaName, semanticViewName);
+        // Create an agent with a semantic view as a tool
+        // Per Snowflake documentation: https://docs.snowflake.com/en/sql-reference/sql/create-agent
+        // The specification must be YAML format with tools and tool_resources
+        return new SnowflakeLifecycleObject(
+                snowflakeConnectionProvider,
+                String.format(
+                        """
+                        CREATE OR REPLACE AGENT %s
+                        COMMENT = 'Test agent for grant testing'
+                        FROM SPECIFICATION
+                        $$
+                        tools:
+                          - tool_spec:
+                              type: "cortex_analyst_text_to_sql"
+                              name: "Analyst1"
+                              description: "Converts natural language to SQL queries using the semantic view"
+                        
+                        tool_resources:
+                          Analyst1:
+                            semantic_view: "%s"
+                        $$
+                        """, qualName, semanticViewQualForYaml),
+                String.format("DROP AGENT IF EXISTS %s", qualName)
+        );
+    }
+
     @Override
     public void setup() {
         try (Connection snowflakeConnection = snowflakeConnectionProvider.getConnection()) {
