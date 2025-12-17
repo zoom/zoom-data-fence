@@ -19,7 +19,7 @@ public class SnowflakeOwnershipGrantBuilder extends SnowflakeGrantBuilder {
     private static final List<GrantValidationDefinition> validCombinations = ImmutableList.copyOf(new ArrayList<>() {{
         add(new GrantValidationDefinition(
                 List.of("OWNERSHIP"), List.of(
-                SnowflakeObjectType.AGENT,
+                SnowflakeObjectType.CORTEX_AGENT,
                 SnowflakeObjectType.ALERT,
                 SnowflakeObjectType.COMPUTE_POOL,
                 SnowflakeObjectType.DATABASE,

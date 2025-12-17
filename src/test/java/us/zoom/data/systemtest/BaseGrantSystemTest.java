@@ -51,16 +51,15 @@ public abstract class BaseGrantSystemTest extends SnowflakeSysTestBase {
      * 
      * @param actualGrants The actual grants from Snowflake
      * @param expectedGrants The expected grants
-     * @param message Optional message to include in assertion failure
      */
-    protected static void assertGrantsMatch(List<Grant> actualGrants, List<Grant> expectedGrants, String message) {
+    protected static void assertGrantsMatch(List<Grant> actualGrants, List<Grant> expectedGrants) {
         List<Grant> sortedActual = new ArrayList<>(actualGrants);
         sortedActual.sort(Comparator.comparing(x -> x.toString().hashCode()));
         
         List<Grant> sortedExpected = new ArrayList<>(expectedGrants);
         sortedExpected.sort(Comparator.comparing(x -> x.toString().hashCode()));
-        
-        Assert.assertEquals(Set.copyOf(sortedActual), Set.copyOf(sortedExpected), message);
+
+        Assert.assertEquals(Set.copyOf(sortedActual), Set.copyOf(sortedExpected));
     }
 
     /**

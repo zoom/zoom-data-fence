@@ -136,14 +136,14 @@ public class AgentGrantSystemTest extends BaseGrantSystemTest {
                 new Grant("CREATE AGENT", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
                 new Grant("SELECT", "SEMANTIC VIEW", fixture.qualifiedSemanticViewName(), "ROLE", fixture.roleName()),
                 new Grant("REFERENCES", "SEMANTIC VIEW", fixture.qualifiedSemanticViewName(), "ROLE", fixture.roleName()),
-                new Grant("USAGE", "AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName()),
-                new Grant("MODIFY", "AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName()),
-                new Grant("MONITOR", "AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName()),
-                new Grant("OWNERSHIP", "AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName())
+                new Grant("USAGE", "CORTEX_AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName()),
+                new Grant("MODIFY", "CORTEX_AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName()),
+                new Grant("MONITOR", "CORTEX_AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName()),
+                new Grant("OWNERSHIP", "CORTEX_AGENT", fixture.qualifiedAgentName(), "ROLE", fixture.roleName())
         ));
 
         List<Grant> grants = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
-        assertGrantsMatch(grants, grantsExpected, "AgentGrantSystemTest: Grants should match after apply");
+        assertGrantsMatch(grants, grantsExpected);
     }
 
     @Test(dependsOnMethods = {"testApply"}, groups = {"agent"})
@@ -187,8 +187,7 @@ public class AgentGrantSystemTest extends BaseGrantSystemTest {
             try {
                 // Verify role1 has no grants (all revoked)
                 List<Grant> grantsRole1 = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
-                assertGrantsMatch(grantsRole1, grantsExpectedRole1,
-                        "AgentGrantSystemTest: Role1 should have no grants after revoke");
+                assertGrantsMatch(grantsRole1, grantsExpectedRole1);
 
                 success = true;
             } catch (AssertionError e) {

@@ -144,7 +144,7 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         grantsExpected.sort(Comparator.comparing(x -> x.toString().hashCode()));
 
         List<Grant> grants = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
-        assertGrantsMatch(grants, grantsExpected, "TestRunSystemTest: Grants should match after apply");
+        assertGrantsMatch(grants, grantsExpected);
     }
 
     @Test(dependsOnMethods = {"testApply"}, groups = {"a"})
@@ -196,13 +196,11 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
             try {
                 // Verify role1 has no grants
                 List<Grant> grantsRole1 = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
-                assertGrantsMatch(grantsRole1, grantsExpectedRole1,
-                        "TestRunSystemTest: Role1 should have no grants after revoke");
+                assertGrantsMatch(grantsRole1, grantsExpectedRole1);
 
                 // Verify role2 has ownership grants
                 List<Grant> grantsRole2 = getRoleGrants(fixture.roleName2(), securityadminSnowflakeConnectionProvider);
-                assertGrantsMatch(grantsRole2, grantsExpectedRole2,
-                        "TestRunSystemTest: Role2 should have ownership grants");
+                assertGrantsMatch(grantsRole2, grantsExpectedRole2);
                 
                 success = true;
             } catch (AssertionError e) {

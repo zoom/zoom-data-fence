@@ -148,7 +148,7 @@ public class SnowflakePermissionGrantBuilder extends SnowflakeGrantBuilder {
                 List.of(SnowflakeObjectType.COMPUTE_POOL)));
         add(new GrantValidationDefinition(List.of("READ", "WRITE"), List.of(SnowflakeObjectType.IMAGE_REPOSITORY)));
         add(new GrantValidationDefinition(List.of("SELECT", "REFERENCES"), List.of(SnowflakeObjectType.SEMANTIC_VIEW)));
-        add(new GrantValidationDefinition(List.of("USAGE", "MODIFY", "MONITOR"), List.of(SnowflakeObjectType.AGENT)));
+        add(new GrantValidationDefinition(List.of("USAGE", "MODIFY", "MONITOR"), List.of(SnowflakeObjectType.CORTEX_AGENT)));
     }});
 
     private SnowflakeGrantModel grant;
