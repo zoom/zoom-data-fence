@@ -8,40 +8,24 @@ import org.testng.annotations.*;
 import us.zoom.data.dfence.ChangesSummary;
 import us.zoom.data.dfence.playbook.PlaybookService;
 import us.zoom.data.dfence.playbook.PlaybookServiceBuilder;
-import us.zoom.data.dfence.test.fixtures.SnowflakeConnectionProvider;
+import us.zoom.data.dfence.test.fixtures.TestRunFixture;
+import us.zoom.data.dfence.test.fixtures.TestRunFixtureBuilder;
 
 import java.io.File;
 import java.net.URISyntaxException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * System test for table and procedure grants.
+ * Uses unique naming to avoid collisions with other tests.
+ */
 @Slf4j
-public class TestRunSystemTest extends SnowflakeSysTestBase {
+public class TestRunSystemTest extends BaseGrantSystemTest {
 
     private TestRunFixture fixture;
-
-    public static List<Grant> getRoleGrants(String roleName, SnowflakeConnectionProvider connectionProvider)
-            throws SQLException {
-        try (Connection connection = connectionProvider.getConnection()) {
-            Statement statement = connection.createStatement();
-            statement.execute(String.format("SHOW GRANTS TO ROLE %s", roleName));
-            ResultSet resultSet = statement.getResultSet();
-            List<Grant> grants = new ArrayList<>();
-            while (resultSet.next()) {
-                grants.add(new Grant(
-                        resultSet.getString("privilege"),
-                        resultSet.getString("granted_on"),
-                        resultSet.getString("name"),
-                        resultSet.getString("granted_to"),
-                        resultSet.getString("grantee_name")));
-            }
-            return grants;
-        }
-    }
 
     @BeforeGroups(groups = {"a"})
     public void beforeGroupsA() {
@@ -160,9 +144,7 @@ public class TestRunSystemTest extends SnowflakeSysTestBase {
         grantsExpected.sort(Comparator.comparing(x -> x.toString().hashCode()));
 
         List<Grant> grants = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
-        grants.sort(Comparator.comparing(x -> x.toString().hashCode()));
-
-        Assert.assertEquals(Set.copyOf(grants), Set.copyOf(grantsExpected));
+        assertGrantsMatch(grants, grantsExpected, "TestRunSystemTest: Grants should match after apply");
     }
 
     @Test(dependsOnMethods = {"testApply"}, groups = {"a"})
@@ -214,15 +196,13 @@ public class TestRunSystemTest extends SnowflakeSysTestBase {
             try {
                 // Verify role1 has no grants
                 List<Grant> grantsRole1 = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
-                grantsRole1.sort(Comparator.comparing(x -> x.toString().hashCode()));
-                Assert.assertEquals(Set.copyOf(grantsRole1), Set.copyOf(grantsExpectedRole1),
-                        "Role1 should have no grants after revoke");
+                assertGrantsMatch(grantsRole1, grantsExpectedRole1,
+                        "TestRunSystemTest: Role1 should have no grants after revoke");
 
                 // Verify role2 has ownership grants
                 List<Grant> grantsRole2 = getRoleGrants(fixture.roleName2(), securityadminSnowflakeConnectionProvider);
-                grantsRole2.sort(Comparator.comparing(x -> x.toString().hashCode()));
-                Assert.assertEquals(Set.copyOf(grantsRole2), Set.copyOf(grantsExpectedRole2),
-                        "Role2 should have ownership grants");
+                assertGrantsMatch(grantsRole2, grantsExpectedRole2,
+                        "TestRunSystemTest: Role2 should have ownership grants");
                 
                 success = true;
             } catch (AssertionError e) {
@@ -236,10 +216,4 @@ public class TestRunSystemTest extends SnowflakeSysTestBase {
             }
         }
     }
-
-
-
-    public record Grant(String privilege, String grantedOn, String name, String grantedTo, String granteeName) {
-    }
-
 }
