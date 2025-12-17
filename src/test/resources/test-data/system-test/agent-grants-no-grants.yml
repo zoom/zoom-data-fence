@@ -1,0 +1,5 @@
+roles:
+  role_1:
+    name: ${var.role}
+    grants: []
+

@@ -1,0 +1,34 @@
+roles:
+  role_1:
+    name: ${var.role}
+    grants:
+      - object-type: database
+        database-name: ${var.database}
+        privileges:
+          - usage
+          - monitor
+      - object-type: schema
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        privileges:
+          - usage
+          - monitor
+          - create semantic view
+          - create agent
+      - object-type: semantic_view
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: ${var.semantic-view}
+        privileges:
+          - select
+          - references
+      - object-type: agent
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: ${var.agent}
+        privileges:
+          - usage
+          - modify
+          - monitor
+          - ownership
+
