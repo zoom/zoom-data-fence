@@ -168,7 +168,7 @@ class SnowflakeGrantBuilderTest {
                                 false,
                                 false,
                                 false),
-                        SnowflakePermissionGrantBuilder.class), new GrantModelExpectedBuilder(
+                        SnowflakePermissionGrantBuilder.class                ), new GrantModelExpectedBuilder(
                         new SnowflakeGrantModel(
                                 "OWNERSHIP",
                                 "AGENT",
@@ -179,6 +179,36 @@ class SnowflakeGrantBuilderTest {
                                 false,
                                 false),
                         SnowflakeOwnershipGrantBuilder.class), new GrantModelExpectedBuilder(
+                        new SnowflakeGrantModel(
+                                "MODIFY",
+                                "AGENT",
+                                "FOO.BAR.ZAR",
+                                "ROLE",
+                                "MY_ROLE",
+                                false,
+                                false,
+                                false),
+                        SnowflakePermissionGrantBuilder.class), new GrantModelExpectedBuilder(
+                        new SnowflakeGrantModel(
+                                "MONITOR",
+                                "AGENT",
+                                "FOO.BAR.ZAR",
+                                "ROLE",
+                                "MY_ROLE",
+                                false,
+                                false,
+                                false),
+                        SnowflakePermissionGrantBuilder.class), new GrantModelExpectedBuilder(
+                        new SnowflakeGrantModel(
+                                "CREATE AGENT",
+                                "SCHEMA",
+                                "FOO.BAR",
+                                "ROLE",
+                                "MY_ROLE",
+                                false,
+                                false,
+                                false),
+                        SnowflakePermissionGrantBuilder.class), new GrantModelExpectedBuilder(
                         new SnowflakeGrantModel(
                                 "SELECT",
                                 "TABLE",
@@ -422,6 +452,45 @@ class SnowflakeGrantBuilderTest {
                                 false),
                         List.of("GRANT USAGE ON AGENT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_AGENT\" TO ROLE MOCK_ROLE_1;"),
                         List.of("REVOKE USAGE ON AGENT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_AGENT\" FROM ROLE MOCK_ROLE_1;")
+                ),
+                new GrantRevokeStatementsParams(
+                        new SnowflakeGrantModel(
+                                "MODIFY",
+                                "AGENT",
+                                "MOCK_DB.MOCK_SCHEMA.MOCK_AGENT",
+                                "ROLE",
+                                "MOCK_ROLE_1",
+                                false,
+                                false,
+                                false),
+                        List.of("GRANT MODIFY ON AGENT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_AGENT\" TO ROLE MOCK_ROLE_1;"),
+                        List.of("REVOKE MODIFY ON AGENT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_AGENT\" FROM ROLE MOCK_ROLE_1;")
+                ),
+                new GrantRevokeStatementsParams(
+                        new SnowflakeGrantModel(
+                                "MONITOR",
+                                "AGENT",
+                                "MOCK_DB.MOCK_SCHEMA.MOCK_AGENT",
+                                "ROLE",
+                                "MOCK_ROLE_1",
+                                false,
+                                false,
+                                false),
+                        List.of("GRANT MONITOR ON AGENT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_AGENT\" TO ROLE MOCK_ROLE_1;"),
+                        List.of("REVOKE MONITOR ON AGENT \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_AGENT\" FROM ROLE MOCK_ROLE_1;")
+                ),
+                new GrantRevokeStatementsParams(
+                        new SnowflakeGrantModel(
+                                "CREATE AGENT",
+                                "SCHEMA",
+                                "MOCK_DB.MOCK_SCHEMA",
+                                "ROLE",
+                                "MOCK_ROLE_1",
+                                false,
+                                false,
+                                false),
+                        List.of("GRANT CREATE AGENT ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"),
+                        List.of("REVOKE CREATE AGENT ON SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;")
                 )
         );
     }
@@ -541,6 +610,60 @@ class SnowflakeGrantBuilderTest {
                                 "MOCK_SCHEMA",
                                 "MOCK_DB",
                                 List.of("ownership"),
+                                false,
+                                false)),
+                new PlaybookPrivilegeGrantTestParams(
+                        new SnowflakeGrantModel(
+                                "MODIFY",
+                                "AGENT",
+                                "MOCK_DB.MOCK_SCHEMA.MOCK_AGENT",
+                                "ROLE",
+                                "MOCK_ROLE_A",
+                                false,
+                                false,
+                                false),
+                        new PlaybookPrivilegeGrant(
+                                "agent",
+                                "MOCK_AGENT",
+                                "MOCK_SCHEMA",
+                                "MOCK_DB",
+                                List.of("modify"),
+                                false,
+                                false)),
+                new PlaybookPrivilegeGrantTestParams(
+                        new SnowflakeGrantModel(
+                                "MONITOR",
+                                "AGENT",
+                                "MOCK_DB.MOCK_SCHEMA.MOCK_AGENT",
+                                "ROLE",
+                                "MOCK_ROLE_A",
+                                false,
+                                false,
+                                false),
+                        new PlaybookPrivilegeGrant(
+                                "agent",
+                                "MOCK_AGENT",
+                                "MOCK_SCHEMA",
+                                "MOCK_DB",
+                                List.of("monitor"),
+                                false,
+                                false)),
+                new PlaybookPrivilegeGrantTestParams(
+                        new SnowflakeGrantModel(
+                                "CREATE AGENT",
+                                "SCHEMA",
+                                "MOCK_DB.MOCK_SCHEMA",
+                                "ROLE",
+                                "MOCK_ROLE_A",
+                                false,
+                                false,
+                                false),
+                        new PlaybookPrivilegeGrant(
+                                "schema",
+                                null,
+                                "MOCK_SCHEMA",
+                                "MOCK_DB",
+                                List.of("create agent"),
                                 false,
                                 false)));
     }
