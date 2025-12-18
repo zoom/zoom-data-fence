@@ -96,6 +96,23 @@ class SnowflakeGrantBuilderTest {
         assertNull(result);
     }
 
+    @Test
+    void fromGrantInvalidObjectGrantWithSuppressErrorsReturnsNull() {
+        SnowflakeGrantModel grantModel = new SnowflakeGrantModel(
+                "OWNERSHIP",
+                "MODEL",
+                "FOO.BAR.ZAR",
+                "ROLE",
+                "MOCK_ROLE",
+                false,
+                false,
+                false);
+        SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
+        options.setSuppressErrors(true);
+        SnowflakeGrantBuilder result = SnowflakeGrantBuilder.fromGrant(grantModel, options);
+        assertNull(result);
+    }
+
     /**
      * Tests that grant and revoke statements are generated correctly.
      * Test cases are defined in grant-revoke-statements.yml
