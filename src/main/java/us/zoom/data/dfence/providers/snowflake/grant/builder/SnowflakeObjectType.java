@@ -91,6 +91,10 @@ public enum SnowflakeObjectType {
         this(qualLevel, aliasFor, null, null);
     }
 
+    public String getObjectType() {
+        return this.objectType;
+    }
+
     public String getAliasFor() {
         if (this.aliasFor == null) {
             return this.name();

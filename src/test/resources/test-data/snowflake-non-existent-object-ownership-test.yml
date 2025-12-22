@@ -1,0 +1,127 @@
+roles:
+  OWNER_DELETE_ME_USER_PROVISIONER_TEST_USER1:
+    name: OWNER_DELETE_ME_USER_PROVISIONER_TEST_USER1
+    create: true
+    revoke-other-grants: true
+    enable: true
+    role-owner: SECURITYADMIN
+    unsupported-revoke-behavior: DROP
+    grants:
+      - object-type: DATABASE
+        database-name: DELETE_ME_USER_PROVISIONER_DB
+        privileges:
+          - USAGE
+          - MONITOR
+        include-future: true
+        include-all: true
+      - object-type: SCHEMA
+        database-name: DELETE_ME_USER_PROVISIONER_DB
+        schema-name: DELETE_ME_USER_PROVISIONER_TEST_USER1
+        privileges:
+          - USAGE
+          - MONITOR
+          - CREATE TABLE
+          - CREATE VIEW
+          - CREATE PROCEDURE
+          - CREATE STAGE
+          - CREATE FILE FORMAT
+          - CREATE EXTERNAL TABLE
+          - CREATE FUNCTION
+          - CREATE SEMANTIC VIEW
+        include-future: true
+        include-all: true
+      - object-type: TABLE
+        database-name: DELETE_ME_USER_PROVISIONER_DB
+        schema-name: DELETE_ME_USER_PROVISIONER_TEST_USER1
+        object-name: "*"
+        privileges:
+          - OWNERSHIP
+        include-future: true
+        include-all: true
+      - object-type: VIEW
+        database-name: DELETE_ME_USER_PROVISIONER_DB
+        schema-name: DELETE_ME_USER_PROVISIONER_TEST_USER1
+        object-name: "*"
+        privileges:
+          - OWNERSHIP
+        include-future: true
+        include-all: true
+      - object-type: EXTERNAL_TABLE
+        database-name: DELETE_ME_USER_PROVISIONER_DB
+        schema-name: DELETE_ME_USER_PROVISIONER_TEST_USER1
+        object-name: "*"
+        privileges:
+          - OWNERSHIP
+        include-future: true
+        include-all: true
+      - object-type: PROCEDURE
+        database-name: DELETE_ME_USER_PROVISIONER_DB
+        schema-name: DELETE_ME_USER_PROVISIONER_TEST_USER1
+        object-name: "*"
+        privileges:
+          - OWNERSHIP
+        include-future: true
+        include-all: true
+      - object-type: FUNCTION
+        database-name: DELETE_ME_USER_PROVISIONER_DB
+        schema-name: DELETE_ME_USER_PROVISIONER_TEST_USER1
+        object-name: "*"
+        privileges:
+          - OWNERSHIP
+        include-future: true
+        include-all: true
+      - object-type: STAGE
+        database-name: DELETE_ME_USER_PROVISIONER_DB
+        schema-name: DELETE_ME_USER_PROVISIONER_TEST_USER1
+        object-name: "*"
+        privileges:
+          - OWNERSHIP
+        include-future: true
+        include-all: true
+      - object-type: FILE_FORMAT
+        database-name: DELETE_ME_USER_PROVISIONER_DB
+        schema-name: DELETE_ME_USER_PROVISIONER_TEST_USER1
+        object-name: "*"
+        privileges:
+          - OWNERSHIP
+        include-future: true
+        include-all: true
+      - object-type: SEMANTIC_VIEW
+        database-name: DELETE_ME_USER_PROVISIONER_DB
+        schema-name: DELETE_ME_USER_PROVISIONER_TEST_USER1
+        object-name: "*"
+        privileges:
+          - OWNERSHIP
+        include-future: true
+        include-all: true
+
+  UR_DELETE_ME_USER_PROVISIONER_TEST_USER1:
+    name: UR_DELETE_ME_USER_PROVISIONER_TEST_USER1
+    create: true
+    revoke-other-grants: true
+    enable: true
+    role-owner: SECURITYADMIN
+    unsupported-revoke-behavior: DROP
+    grants:
+      - object-type: ROLE
+        object-name: OWNER_DELETE_ME_USER_PROVISIONER_TEST_USER1
+        privileges:
+          - USAGE
+        include-future: true
+        include-all: true
+
+  UR_DELETE_ME_USER_PROVISIONER_TEST_USER1_FUTURE:
+    name: UR_DELETE_ME_USER_PROVISIONER_TEST_USER1_FUTURE
+    create: true
+    revoke-other-grants: true
+    enable: true
+    role-owner: SECURITYADMIN
+    unsupported-revoke-behavior: DROP
+    grants:
+      - object-type: ROLE
+        object-name: OWNER_DELETE_ME_USER_PROVISIONER_TEST_USER1
+        privileges:
+          - USAGE
+        include-future: true
+        include-all: true
+
