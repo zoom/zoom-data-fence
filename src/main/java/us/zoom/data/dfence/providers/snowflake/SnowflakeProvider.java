@@ -34,8 +34,6 @@ public class SnowflakeProvider implements Provider {
 
     private final SnowflakeObjectsService snowflakeObjectsService;
 
-    private final SnowflakeRevokeGrantsCompiler revokeGrantCompiler;
-
     private final ForkJoinPool forkJoinPool;
 
     /**
@@ -49,7 +47,7 @@ public class SnowflakeProvider implements Provider {
             SnowflakeStatementsService snowflakeStatementsService,
             SnowflakeGrantsService snowflakeGrantsService,
             SnowflakeObjectsService snowflakeObjectsService) {
-        this(snowflakeStatementsService, snowflakeGrantsService, snowflakeObjectsService, new SnowflakeRevokeGrantsCompiler(), ForkJoinPool.commonPool());
+        this(snowflakeStatementsService, snowflakeGrantsService, snowflakeObjectsService, ForkJoinPool.commonPool());
     }
 
     /**
@@ -65,28 +63,9 @@ public class SnowflakeProvider implements Provider {
             SnowflakeGrantsService snowflakeGrantsService,
             SnowflakeObjectsService snowflakeObjectsService,
             ForkJoinPool forkJoinPool) {
-        this(snowflakeStatementsService, snowflakeGrantsService, snowflakeObjectsService, new SnowflakeRevokeGrantsCompiler(), forkJoinPool);
-    }
-
-    /**
-     * Constructor that accepts all dependencies including revoke grant compiler.
-     * 
-     * @param snowflakeStatementsService the statements service
-     * @param snowflakeGrantsService the grants service
-     * @param snowflakeObjectsService the objects service
-     * @param revokeGrantCompiler the revoke grant compiler
-     * @param forkJoinPool the fork join pool to use for parallel operations
-     */
-    public SnowflakeProvider(
-            SnowflakeStatementsService snowflakeStatementsService,
-            SnowflakeGrantsService snowflakeGrantsService,
-            SnowflakeObjectsService snowflakeObjectsService,
-            SnowflakeRevokeGrantsCompiler revokeGrantCompiler,
-            ForkJoinPool forkJoinPool) {
         this.snowflakeStatementsService = snowflakeStatementsService;
         this.snowflakeGrantsService = snowflakeGrantsService;
         this.snowflakeObjectsService = snowflakeObjectsService;
-        this.revokeGrantCompiler = revokeGrantCompiler;
         this.forkJoinPool = forkJoinPool;
     }
 
@@ -331,12 +310,9 @@ public class SnowflakeProvider implements Provider {
                 // Use SnowflakeRevokeGrantsCompiler to identify grants that should be revoked.
                 // This compares current grants against playbook privilege grants to find grants
                 // that are not allowed by the playbook.
-                revokeGrantBuilders.addAll(
-                        revokeGrantCompiler.compileRevokeGrants(
-                                privilegeGrants,
-                                currentGrantBuilders
-                        ).stream().toList()
-                );
+                List<SnowflakeGrantBuilder> grantsToRevoke = SnowflakeRevokeGrantsCompiler
+                        .compileRevokeGrants(privilegeGrants, currentGrantBuilders).stream().toList();
+                revokeGrantBuilders.addAll(grantsToRevoke);
             }
             List<SnowflakeGrantBuilder> grantBuilders = diff.entriesOnlyOnRight().values().stream()
                     .sorted(Comparator.comparing(SnowflakeGrantBuilder::getKey)).toList();
@@ -569,4 +545,3 @@ public class SnowflakeProvider implements Provider {
         return "SnowflakeProvider{" + "snowflakeGrantsService=" + snowflakeGrantsService + ", snowflakeStatementsService=" + snowflakeStatementsService + ", snowflakeObjectsService=" + snowflakeObjectsService + '}';
     }
 }
-
