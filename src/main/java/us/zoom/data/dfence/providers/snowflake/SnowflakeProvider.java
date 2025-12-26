@@ -569,4 +569,3 @@ public class SnowflakeProvider implements Provider {
         return "SnowflakeProvider{" + "snowflakeGrantsService=" + snowflakeGrantsService + ", snowflakeStatementsService=" + snowflakeStatementsService + ", snowflakeObjectsService=" + snowflakeObjectsService + '}';
     }
 }
-
