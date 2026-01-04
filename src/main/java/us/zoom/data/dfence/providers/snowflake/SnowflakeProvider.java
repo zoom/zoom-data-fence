@@ -15,6 +15,8 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuild
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
+import us.zoom.data.dfence.providers.snowflake.consistency.GrantRevokeConsistencyVerifier;
+import us.zoom.data.dfence.providers.snowflake.grant.create.DesiredGrantsCreator;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.providers.snowflake.revoke.SnowflakeRevokeGrantsCompiler;
@@ -36,18 +38,22 @@ public class SnowflakeProvider implements Provider {
 
     private final ForkJoinPool forkJoinPool;
 
+    private final DesiredGrantsCreator grantCreator;
+
     /**
      * Constructor that uses the common ForkJoinPool.
      * 
      * @param snowflakeStatementsService the statements service
      * @param snowflakeGrantsService the grants service
      * @param snowflakeObjectsService the objects service
+     * @param grantCreator the grant creator
      */
     public SnowflakeProvider(
             SnowflakeStatementsService snowflakeStatementsService,
             SnowflakeGrantsService snowflakeGrantsService,
-            SnowflakeObjectsService snowflakeObjectsService) {
-        this(snowflakeStatementsService, snowflakeGrantsService, snowflakeObjectsService, ForkJoinPool.commonPool());
+            SnowflakeObjectsService snowflakeObjectsService,
+            DesiredGrantsCreator grantCreator) {
+        this(snowflakeStatementsService, snowflakeGrantsService, snowflakeObjectsService, grantCreator, ForkJoinPool.commonPool());
     }
 
     /**
@@ -56,16 +62,19 @@ public class SnowflakeProvider implements Provider {
      * @param snowflakeStatementsService the statements service
      * @param snowflakeGrantsService the grants service
      * @param snowflakeObjectsService the objects service
+     * @param grantCreator the grant creator
      * @param forkJoinPool the fork join pool to use for parallel operations
      */
     public SnowflakeProvider(
             SnowflakeStatementsService snowflakeStatementsService,
             SnowflakeGrantsService snowflakeGrantsService,
             SnowflakeObjectsService snowflakeObjectsService,
+            DesiredGrantsCreator grantCreator,
             ForkJoinPool forkJoinPool) {
         this.snowflakeStatementsService = snowflakeStatementsService;
         this.snowflakeGrantsService = snowflakeGrantsService;
         this.snowflakeObjectsService = snowflakeObjectsService;
+        this.grantCreator = grantCreator;
         this.forkJoinPool = forkJoinPool;
     }
 
@@ -126,7 +135,10 @@ public class SnowflakeProvider implements Provider {
     }
 
     @Override
-    public List<CompiledChanges> compileChanges(PlaybookModel playbookModel, Boolean ignoreUnknownGrants) {
+    public List<CompiledChanges> compileChanges(
+            PlaybookModel playbookModel, 
+            Boolean ignoreUnknownGrants,
+            Boolean enableGrantRevokeConsistencyCheck) {
         Boolean consolidateWildcardGrantsToAll = false;
         log.debug("Compiling changes.");
         this.snowflakeObjectsService.clearCache();
@@ -135,13 +147,14 @@ public class SnowflakeProvider implements Provider {
                 SnowflakeObjectType.ROLE,
                 "");
         return forkJoinPool.submit(() -> 
-            playbookModel.roles().keySet().parallelStream().map(k -> this.compileRoleChanges(
+                    playbookModel.roles().keySet().parallelStream().map(k -> this.compileRoleChanges(
                     k,
                     playbookModel.roles().get(k),
                     existingRoles,
                     consolidateWildcardGrantsToAll,
                     playbookModel,
-                    ignoreUnknownGrants)).filter(CompiledChanges::containsChanges)
+                    ignoreUnknownGrants,
+                    enableGrantRevokeConsistencyCheck)).filter(CompiledChanges::containsChanges)
             .sorted(Comparator.comparing(CompiledChanges::roleName)).toList()
         ).join();
     }
@@ -157,7 +170,7 @@ public class SnowflakeProvider implements Provider {
     public void applyPrivilegeChangesToRole(CompiledChanges compiledChanges) {
         log.info("Applying {} privilege changes for role {}", compiledChanges.roleName(), compiledChanges.roleGrantStatements().size());
         try {
-            forkJoinPool.submit(() -> 
+            forkJoinPool.submit(() ->
                 compiledChanges.roleGrantStatements().parallelStream().forEach(snowflakeStatementsService::applyStatements)
             ).join();
         } catch (DatabaseError e) {
@@ -234,7 +247,8 @@ public class SnowflakeProvider implements Provider {
             List<String> existingRoles,
             Boolean consolidateWildcardsToAllGrants,
             PlaybookModel playbookModel,
-            Boolean ignoreUnknownGrants) {
+            Boolean ignoreUnknownGrants,
+            Boolean enableGrantRevokeConsistencyCheck) {
         log.info("Compiling changes for role {}", role.name());
         Boolean roleExists = existingRoles.contains(role.name().toUpperCase());
         List<String> roleCreationStatements = new ArrayList<>();
@@ -255,6 +269,27 @@ public class SnowflakeProvider implements Provider {
         List<List<String>> privilegeGrantStatements = new ArrayList<>();
         if (roleWillExist) {
             log.debug("Compiling grants for role {}.", role.name());
+            
+            // Verify grant-revoke consistency if enabled
+            if (Boolean.TRUE.equals(enableGrantRevokeConsistencyCheck)) {
+                try {
+                    GrantRevokeConsistencyVerifier.verifyAllGrants(
+                        role.grants(),
+                        grantCreator,
+                        role.name());
+                } catch (RbacDataError e) {
+                    throw new RbacDataError(
+                        String.format(
+                            "Grant-Revoke consistency check failed for role %s. "
+                                + "Application aborted to prevent data inconsistency. "
+                                + "Please fix the matching logic divergence before proceeding. "
+                                + "You can disable this check with --skip-consistency-check flag (not recommended).\n%s",
+                            role.name(),
+                            e.getMessage()),
+                        e);
+                }
+            }
+            
             privilegeGrantStatements.addAll(compilePlaybookPrivilegeGrants(
                     role.grants(),
                     role.name(),
@@ -344,109 +379,15 @@ public class SnowflakeProvider implements Provider {
             PlaybookPrivilegeGrant playbookPrivilegeGrant,
             String roleName,
             SnowflakeGrantBuilderOptions options) {
-        List<SnowflakeGrantModel> grants = new ArrayList<>();
-        grants.addAll(standardGrants(playbookPrivilegeGrant, roleName));
-        grants.addAll(containerGrants(playbookPrivilegeGrant, roleName));
-        return grants.stream().map(x -> SnowflakeGrantBuilder.fromGrant(x, options))
-                .filter(Objects::nonNull).toList();
+        return grantCreator.playbookGrantToSnowflakeGrants(playbookPrivilegeGrant, roleName, options);
     }
 
     public List<SnowflakeGrantModel> standardGrants(PlaybookPrivilegeGrant playbookPrivilegeGrant, String roleName) {
-        try {
-            if (!"*".equals(playbookPrivilegeGrant.objectName()) && !"*".equals(playbookPrivilegeGrant.schemaName())) {
-                SnowflakeObjectType snowflakeObjectType
-                        = SnowflakeObjectType.fromString(playbookPrivilegeGrant.objectType().toUpperCase());
-                String objectName = qualifiedObjectName(
-                        playbookPrivilegeGrant.databaseName(),
-                        playbookPrivilegeGrant.schemaName(),
-                        playbookPrivilegeGrant.objectName(),
-                        snowflakeObjectType);
-                if (objectName == null) {
-                    log.info(String.format(
-                            "Skipping grant %s for role %s due to one or more objects not found.",
-                            playbookPrivilegeGrant,
-                            roleName));
-                    return List.of();
-                }
-                return playbookPrivilegeGrant.privileges().stream().map(p -> new SnowflakeGrantModel(
-                        p, playbookPrivilegeGrant.objectType(),
-
-                        objectName, "ROLE", roleName, false, false, false)).toList();
-            } else {
-                return List.of();
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException(
-                    String.format(
-                            "Unable to generate grants for role %s grant %s",
-                            roleName,
-                            playbookPrivilegeGrant),
-                    e);
-        }
+        return grantCreator.standardGrants(playbookPrivilegeGrant, roleName);
     }
 
     public List<SnowflakeGrantModel> containerGrants(PlaybookPrivilegeGrant playbookPrivilegeGrant, String roleName) {
-        if ("*".equals(playbookPrivilegeGrant.objectName()) || "*".equals(playbookPrivilegeGrant.schemaName())) {
-            if (playbookPrivilegeGrant.databaseName() == null || playbookPrivilegeGrant.databaseName().equals("*")) {
-                throw new RbacDataError(String.format(
-                        "Database name not provided along with wildcard for objectName in permissions for role %s.",
-                        roleName));
-            }
-            SnowflakeObjectType containerObjectType;
-            String containerName;
-            if (playbookPrivilegeGrant.schemaName() == null || "*".equals(playbookPrivilegeGrant.schemaName())) {
-                containerObjectType = SnowflakeObjectType.DATABASE;
-                containerName = qualifiedAccountObjectName(
-                        playbookPrivilegeGrant.databaseName(),
-                        SnowflakeObjectType.DATABASE);
-            } else {
-                containerObjectType = SnowflakeObjectType.SCHEMA;
-                containerName = qualifiedSchemaName(
-                        playbookPrivilegeGrant.databaseName(),
-                        playbookPrivilegeGrant.schemaName());
-            }
-            if (containerName == null) {
-                log.warn(String.format(
-                        "Skipping grant %s for role %s due to one or more objects not found.",
-                        playbookPrivilegeGrant,
-                        roleName));
-                return List.of();
-            }
-            SnowflakeObjectType objectType = SnowflakeObjectType.fromString(playbookPrivilegeGrant.objectType()
-                    .toUpperCase());
-            List<SnowflakeGrantModel> snowflakeGrantModels = new ArrayList<>();
-            if (playbookPrivilegeGrant.includeFuture()) {
-                // Grant on future
-                snowflakeGrantModels.addAll(createFutureGrants(
-                        objectType,
-                        containerName,
-                        playbookPrivilegeGrant.privileges(),
-                        roleName,
-                        false));
-                if (containerObjectType == SnowflakeObjectType.DATABASE && objectType.getQualLevel() > 2) {
-                    snowflakeGrantModels.addAll(createFutureSchemaObjectGrantsInAllSchemasInDatabase(
-                            containerName,
-                            objectType,
-                            playbookPrivilegeGrant.privileges(),
-                            roleName,
-                            false));
-                }
-            }
-            if (playbookPrivilegeGrant.includeAll()) {
-                // Grant on all
-                snowflakeGrantModels.addAll(expandAllGrants(
-                        containerObjectType,
-                        objectType,
-                        containerName,
-                        playbookPrivilegeGrant.privileges(),
-                        roleName,
-                        false));
-            }
-            return List.copyOf(snowflakeGrantModels);
-
-        } else {
-            return List.of();
-        }
+        return grantCreator.containerGrants(playbookPrivilegeGrant, roleName);
     }
 
 
@@ -456,16 +397,8 @@ public class SnowflakeProvider implements Provider {
             List<String> privileges,
             String roleName,
             Boolean grantOption) {
-        if (!snowflakeObjectsService.objectExists(databaseName, SnowflakeObjectType.DATABASE)) {
-            log.info("Database {} does not exist. Skipping creation of future grants in schemas.", databaseName);
-            return List.of();
-        }
-        List<String> schemas = snowflakeObjectsService.getContainerObjectQualNames(
-                SnowflakeObjectType.DATABASE,
-                SnowflakeObjectType.SCHEMA,
-                databaseName);
-        return schemas.stream()
-                .flatMap(x -> createFutureGrants(objectType, x, privileges, roleName, grantOption).stream()).toList();
+        return grantCreator.createFutureSchemaObjectGrantsInAllSchemasInDatabase(
+                databaseName, objectType, privileges, roleName, grantOption);
     }
 
     public List<SnowflakeGrantModel> createFutureGrants(
@@ -474,20 +407,7 @@ public class SnowflakeProvider implements Provider {
             List<String> privileges,
             String roleName,
             Boolean grantOption) {
-        String objectName = String.format(
-                "%s.<%s>",
-                containerName,
-                objectType.getObjectType().replace(" ", "_").toUpperCase());
-        List<SnowflakeGrantModel> grants = privileges.stream().map(p -> new SnowflakeGrantModel(
-                p,
-                objectType.getObjectType().replace(" ", "_"),
-                objectName,
-                "ROLE",
-                roleName,
-                grantOption,
-                true,
-                false)).toList();
-        return grants;
+        return grantCreator.createFutureGrants(objectType, containerName, privileges, roleName, grantOption);
     }
 
     public List<SnowflakeGrantModel> expandAllGrants(
@@ -497,25 +417,8 @@ public class SnowflakeProvider implements Provider {
             List<String> privileges,
             String roleName,
             Boolean grantOption) {
-        if (!snowflakeObjectsService.objectExists(containerName, containerObjectType)) {
-            log.warn("{} {} does not exist. Skipping expanding grants.", containerObjectType, containerName);
-            return List.of();
-        }
-        List<String> objects = snowflakeObjectsService.getContainerObjectQualNames(
-                containerObjectType,
-                objectType,
-                containerName);
-        List<SnowflakeGrantModel> results = new ArrayList<>();
-        objects.forEach(objectName -> privileges.forEach(privilege -> results.add(new SnowflakeGrantModel(
-                privilege,
-                objectType.getObjectType().replace(" ", "_"),
-                objectName,
-                "role",
-                roleName,
-                grantOption,
-                false,
-                false))));
-        return results;
+        return grantCreator.expandAllGrants(
+                containerObjectType, objectType, containerName, privileges, roleName, grantOption);
     }
 
     @Override

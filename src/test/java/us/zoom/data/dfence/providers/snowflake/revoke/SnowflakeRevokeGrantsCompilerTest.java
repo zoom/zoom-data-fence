@@ -12,59 +12,49 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenGrantMatchesPlaybook_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "TEST_SCHEMA", "TEST_TABLE", List.of("SELECT"));
     SnowflakeGrantModel currentGrant =
         createGrant("SELECT", "TABLE", "TEST_DB.TEST_SCHEMA.TEST_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenGrantNotInPlaybook_shouldRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "TEST_SCHEMA", "TEST_TABLE", List.of("SELECT"));
     SnowflakeGrantModel currentGrant =
         createGrant("UPDATE", "TABLE", "TEST_DB.TEST_SCHEMA.TEST_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     List<String> privileges = actualRevokes.stream().map(b -> b.getGrant().privilege()).toList();
     assertEquals(List.of("UPDATE"), privileges);
   }
 
   @Test
   void compileRevokeGrants_whenWildcardMatches_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "TEST_SCHEMA", "*", List.of("SELECT"));
     SnowflakeGrantModel currentGrant =
         createGrant("SELECT", "TABLE", "TEST_DB.TEST_SCHEMA.ANY_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenAliasMatches_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant(
             "EXTERNAL_TABLE", "TEST_DB", "TEST_SCHEMA", "TEST_TABLE", List.of("SELECT"));
@@ -73,17 +63,14 @@ class SnowflakeRevokeGrantsCompilerTest {
             "SELECT", "EXTERNAL_TABLE", "TEST_DB.TEST_SCHEMA.TEST_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenFutureGrantCompatible_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant(
             "TABLE", "TEST_DB", "TEST_SCHEMA", "*", List.of("SELECT"), true, true, true);
@@ -91,17 +78,14 @@ class SnowflakeRevokeGrantsCompilerTest {
         createFutureGrant("SELECT", "TABLE", "TEST_DB.TEST_SCHEMA", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenFutureGrantNotCompatible_shouldRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant(
             "TABLE", "TEST_DB", "TEST_SCHEMA", "*", List.of("SELECT"), false, true, true);
@@ -109,11 +93,9 @@ class SnowflakeRevokeGrantsCompilerTest {
         createFutureGrant("SELECT", "TABLE", "TEST_DB.TEST_SCHEMA", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("SELECT", revokedGrant.privilege());
@@ -127,7 +109,6 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenAllGrantCompatible_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant(
             "TABLE", "TEST_DB", "TEST_SCHEMA", "*", List.of("SELECT"), true, true, true);
@@ -135,77 +116,63 @@ class SnowflakeRevokeGrantsCompilerTest {
         createAllGrant("SELECT", "TABLE", "TEST_DB.TEST_SCHEMA", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenRoleGrantMatches_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrantForRole("TEST_ROLE", List.of("USAGE"));
     SnowflakeGrantModel currentGrant =
         createGrant("USAGE", "ROLE", "TEST_ROLE", "ROLE", "ANOTHER_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenDatabaseGrantMatches_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("DATABASE", "TEST_DB", null, null, List.of("USAGE"));
     SnowflakeGrantModel currentGrant =
         createGrant("USAGE", "DATABASE", "TEST_DB", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenSchemaGrantMatches_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("SCHEMA", "TEST_DB", "TEST_SCHEMA", null, List.of("USAGE"));
     SnowflakeGrantModel currentGrant =
         createGrant("USAGE", "SCHEMA", "TEST_DB.TEST_SCHEMA", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenEmptyPlaybook_shouldRevokeAllGrants() {
-    // Given
     SnowflakeGrantModel currentGrant =
         createGrant("SELECT", "TABLE", "TEST_DB.TEST_SCHEMA.TEST_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("SELECT", revokedGrant.privilege());
@@ -217,22 +184,18 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenEmptyCurrentGrants_shouldReturnEmpty() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "TEST_SCHEMA", "TEST_TABLE", List.of("SELECT"));
     Map<String, SnowflakeGrantBuilder> currentGrants = new HashMap<>();
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenDisabledPlaybookGrant_shouldRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant(
             "TABLE", "TEST_DB", "TEST_SCHEMA", "TEST_TABLE", List.of("SELECT"), true, true, false);
@@ -240,11 +203,9 @@ class SnowflakeRevokeGrantsCompilerTest {
         createGrant("SELECT", "TABLE", "TEST_DB.TEST_SCHEMA.TEST_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("SELECT", revokedGrant.privilege());
@@ -256,7 +217,6 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenMultipleGrants_shouldHaveMixedResults() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "TEST_SCHEMA", "*", List.of("SELECT"));
     SnowflakeGrantModel allowedGrant =
@@ -268,11 +228,9 @@ class SnowflakeRevokeGrantsCompilerTest {
     Map<String, SnowflakeGrantBuilder> currentGrants =
         createCurrentGrants(allowedGrant, revokedGrant1, revokedGrant2);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     List<String> privileges =
         actualRevokes.stream().map(b -> b.getGrant().privilege()).sorted().toList();
     assertTrue(privileges.contains("UPDATE"));
@@ -282,7 +240,6 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenAllGrantNotCompatible_shouldRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant(
             "TABLE", "TEST_DB", "TEST_SCHEMA", "*", List.of("SELECT"), true, false, true);
@@ -290,11 +247,9 @@ class SnowflakeRevokeGrantsCompilerTest {
         createAllGrant("SELECT", "TABLE", "TEST_DB.TEST_SCHEMA", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("SELECT", revokedGrant.privilege());
@@ -308,35 +263,29 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenSchemaWildcardMatches_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("SCHEMA", "TEST_DB", "*", null, List.of("USAGE"));
     SnowflakeGrantModel currentGrant =
         createGrant("USAGE", "SCHEMA", "TEST_DB.ANY_SCHEMA", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenDifferentObjectType_shouldRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "TEST_SCHEMA", "TEST_TABLE", List.of("SELECT"));
     SnowflakeGrantModel currentGrant =
         createGrant("SELECT", "VIEW", "TEST_DB.TEST_SCHEMA.TEST_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("SELECT", revokedGrant.privilege());
@@ -348,7 +297,6 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenEmptyPrivilegesList_shouldNotIndexPrivilege() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         new PlaybookPrivilegeGrant(
             "TABLE", "TEST_TABLE", "TEST_SCHEMA", "TEST_DB", List.of(), true, true, true);
@@ -356,11 +304,9 @@ class SnowflakeRevokeGrantsCompilerTest {
         createGrant("SELECT", "TABLE", "TEST_DB.TEST_SCHEMA.TEST_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("SELECT", revokedGrant.privilege());
@@ -372,7 +318,6 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenInvalidObjectTypeInPlaybook_shouldStillWork() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         new PlaybookPrivilegeGrant(
             "INVALID_TYPE",
@@ -387,11 +332,9 @@ class SnowflakeRevokeGrantsCompilerTest {
         createGrant("SELECT", "TABLE", "TEST_DB.TEST_SCHEMA.TEST_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("SELECT", revokedGrant.privilege());
@@ -403,7 +346,6 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenInvalidObjectTypeInGrant_cannotCreateBuilder() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "TEST_SCHEMA", "TEST_TABLE", List.of("SELECT"));
     SnowflakeGrantModel invalidGrant =
@@ -421,11 +363,9 @@ class SnowflakeRevokeGrantsCompilerTest {
     Map<String, SnowflakeGrantBuilder> currentGrants =
         createCurrentGrants(invalidGrant, validGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, currentGrants.values().size());
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
@@ -435,24 +375,20 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenDatabaseAndSchemaWildcards_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "*", "*", List.of("SELECT"));
     SnowflakeGrantModel currentGrant =
         createGrant("SELECT", "TABLE", "TEST_DB.ANY_SCHEMA.ANY_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenDatabaseAndSchemaWildcardsDifferentSchema_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "*", "*", List.of("SELECT"));
     SnowflakeGrantModel currentGrant =
@@ -460,28 +396,23 @@ class SnowflakeRevokeGrantsCompilerTest {
             "SELECT", "TABLE", "TEST_DB.DIFFERENT_SCHEMA.DIFFERENT_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenDatabaseAndSchemaWildcardsWrongDatabase_shouldRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "*", "*", List.of("SELECT"));
     SnowflakeGrantModel currentGrant =
         createGrant("SELECT", "TABLE", "OTHER_DB.ANY_SCHEMA.ANY_TABLE", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("SELECT", revokedGrant.privilege());
@@ -494,52 +425,43 @@ class SnowflakeRevokeGrantsCompilerTest {
   @Test
   void
       compileRevokeGrants_whenDatabaseLevelPlaybookMatchesDatabaseLevelFutureGrant_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", null, "*", List.of("SELECT"), true, true, true);
     SnowflakeGrantModel futureGrant =
         createFutureGrant("SELECT", "TABLE", "TEST_DB", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(futureGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenDatabaseLevelPlaybookMatchesDatabaseLevelAllGrant_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", null, "*", List.of("SELECT"), true, true, true);
     SnowflakeGrantModel allGrant =
         createAllGrant("SELECT", "TABLE", "TEST_DB", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(allGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenDatabaseLevelPlaybookDoesNotMatchWrongDatabase_shouldRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", null, "*", List.of("SELECT"), true, true, true);
     SnowflakeGrantModel futureGrant =
         createFutureGrant("SELECT", "TABLE", "OTHER_DB", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(futureGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("SELECT", revokedGrant.privilege());
@@ -551,70 +473,58 @@ class SnowflakeRevokeGrantsCompilerTest {
   @Test
   void
       compileRevokeGrants_whenPlaybookWithWildcardSchemaMatchesDatabaseLevelFutureGrant_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "*", "*", List.of("SELECT"), true, true, true);
     SnowflakeGrantModel futureGrant =
         createFutureGrant("SELECT", "TABLE", "TEST_DB", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(futureGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void
       compileRevokeGrants_whenPlaybookWithWildcardSchemaMatchesDatabaseLevelAllGrant_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("TABLE", "TEST_DB", "*", "*", List.of("SELECT"), true, true, true);
     SnowflakeGrantModel allGrant =
         createAllGrant("SELECT", "TABLE", "TEST_DB", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(allGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenDatabaseFutureGrantMatchesPlaybook_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("DATABASE", "TEST_DB", null, null, List.of("USAGE"), true, true, true);
     SnowflakeGrantModel futureGrant =
         createFutureGrant("USAGE", "DATABASE", "TEST_DB", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(futureGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenDatabaseFutureGrantDoesNotMatchPlaybook_shouldRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("DATABASE", "TEST_DB", null, null, List.of("USAGE"), true, true, true);
     SnowflakeGrantModel futureGrant =
         createFutureGrant("USAGE", "DATABASE", "OTHER_DB", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(futureGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("USAGE", revokedGrant.privilege());
@@ -625,35 +535,29 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_whenDatabaseAllGrantMatchesPlaybook_shouldNotRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("DATABASE", "TEST_DB", null, null, List.of("USAGE"), true, true, true);
     SnowflakeGrantModel allGrant =
         createAllGrant("USAGE", "DATABASE", "TEST_DB", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(allGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertTrue(actualRevokes.isEmpty());
   }
 
   @Test
   void compileRevokeGrants_whenDatabaseAllGrantDoesNotMatchPlaybook_shouldRevoke() {
-    // Given
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("DATABASE", "TEST_DB", null, null, List.of("USAGE"), true, true, true);
     SnowflakeGrantModel allGrant =
         createAllGrant("USAGE", "DATABASE", "OTHER_DB", "ROLE", "TEST_ROLE");
     Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(allGrant);
 
-    // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
 
-    // Then
     assertEquals(1, actualRevokes.size());
     SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
     assertEquals("USAGE", revokedGrant.privilege());
@@ -664,7 +568,6 @@ class SnowflakeRevokeGrantsCompilerTest {
 
   @Test
   void compileRevokeGrants_shouldReturnResultsSortedByKey() {
-    // Given
     SnowflakeGrantModel grantB =
         createGrant("SELECT", "TABLE", "DB.SCHEMA.TABLE_B", "ROLE", "ROLE_1");
     SnowflakeGrantModel grantA =
@@ -679,11 +582,9 @@ class SnowflakeRevokeGrantsCompilerTest {
     if (builderB != null) currentGrants.put(builderB.getKey(), builderB);
     if (builderA != null) currentGrants.put(builderA.getKey(), builderA);
 
-    // When
     List<SnowflakeGrantBuilder> result =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(playbookGrants, currentGrants);
 
-    // Then
     assertEquals(2, result.size());
     assertEquals(builderA.getKey(), result.get(0).getKey());
     assertEquals(builderB.getKey(), result.get(1).getKey());

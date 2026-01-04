@@ -1,7 +1,7 @@
 package us.zoom.data.dfence.providers.snowflake.revoke.matchers.playbook;
 
 import static us.zoom.data.dfence.providers.snowflake.revoke.matchers.SnowflakeGrantMatchers.*;
-import static us.zoom.data.dfence.providers.snowflake.revoke.matchers.SnowflakeGrantMatchers.grantObjectName;
+import static us.zoom.data.dfence.providers.snowflake.revoke.matchers.SnowflakeGrantMatchers.grantName;
 
 import java.util.function.BiFunction;
 import lombok.AccessLevel;
@@ -20,7 +20,7 @@ public class PlaybookGrantMatcher {
           grantObjectType(snowflakeGrant.snowflakeObjectType()).apply(playbookGrant)
               && grantPrivilege(snowflakeGrant.privilege()).apply(playbookGrant)
               && grantType(snowflakeGrant.grantType()).apply(playbookGrant)
-              && grantObjectName(snowflakeGrant.name()).apply(playbookGrant);
+              && grantName(snowflakeGrant.name()).apply(playbookGrant);
 
       if (!result) {
         log.info(

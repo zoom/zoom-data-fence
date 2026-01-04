@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.revoke.collection.NonEmptyList;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookGrant;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookGrantHashIndex;
-import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrantType;
+import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookGrantType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.GrantPrivilege;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.ObjectType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.ObjectTypeAlias;
@@ -20,7 +20,6 @@ class PlaybookGrantHashIndexerTest {
 
   @Test
   void buildPrivilegeGrantIndex_shouldCorrectlyIndexGrantsByPlaybook() {
-    // Given
     List<PlaybookPrivilegeGrant> grants =
         new ArrayList<>(
             List.of(
@@ -28,12 +27,10 @@ class PlaybookGrantHashIndexerTest {
                 createPlaybookGrant("TABLE", "DB", "SCHEMA", "T2", List.of("SELECT", "UPDATE")),
                 createPlaybookGrant("VIEW", "DB", "SCHEMA", "V1", List.of("SELECT"))));
 
-    // When
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(grants);
 
-    // Then
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
-    var updateGrants = index.privilegeIndex().get(new GrantPrivilege("UPDATE"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> updateGrants = index.privilegeIndex().get(new GrantPrivilege("UPDATE"));
 
     assertNotNull(selectGrants);
     assertNotNull(updateGrants);
@@ -43,19 +40,18 @@ class PlaybookGrantHashIndexerTest {
 
   @Test
   void buildPlaybookGrantHashIndex_shouldCorrectlyIndexGrantsByObjectType() {
-    // Given
     List<PlaybookPrivilegeGrant> grants =
         new ArrayList<>(
             List.of(
                 createPlaybookGrant("TABLE", "DB", "SCHEMA", "T1", List.of("SELECT")),
                 createPlaybookGrant("VIEW", "DB", "SCHEMA", "V1", List.of("SELECT"))));
 
-    // When
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(grants);
 
-    // Then
-    var tableGrants = index.objectTypeIndex().get(ObjectType.apply(SnowflakeObjectType.TABLE));
-    var viewGrants = index.objectTypeIndex().get(ObjectType.apply(SnowflakeObjectType.VIEW));
+    Set<PlaybookGrant> tableGrants =
+        index.objectTypeIndex().get(ObjectType.apply(SnowflakeObjectType.TABLE));
+    Set<PlaybookGrant> viewGrants =
+        index.objectTypeIndex().get(ObjectType.apply(SnowflakeObjectType.VIEW));
 
     assertNotNull(tableGrants);
     assertNotNull(viewGrants);
@@ -68,7 +64,6 @@ class PlaybookGrantHashIndexerTest {
     // Critical: Test both branches of the if/else in buildObjectTypeAndObjectTypeAliasIndex
     // Primary object type: TABLE (getObjectType().equals(getAliasFor()) is true)
     // Alias object type: EXTERNAL_TABLE (getObjectType().equals(getAliasFor()) is false)
-    // Given
     List<PlaybookPrivilegeGrant> grants =
         new ArrayList<>(
             List.of(
@@ -77,16 +72,14 @@ class PlaybookGrantHashIndexerTest {
                     "EXTERNAL_TABLE", "DB", "SCHEMA", "ET1", List.of("SELECT")) // Alias
                 ));
 
-    // When
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(grants);
 
-    // Then - primary object type should be in objectTypeIndex
-    var primaryGrants = index.objectTypeIndex().get(ObjectType.apply(SnowflakeObjectType.TABLE));
+    Set<PlaybookGrant> primaryGrants =
+        index.objectTypeIndex().get(ObjectType.apply(SnowflakeObjectType.TABLE));
     assertNotNull(primaryGrants, "Primary object type (TABLE) should be in objectTypeIndex");
     assertEquals(1, primaryGrants.size());
 
-    // Then - alias object type should be in objectAliasIndex
-    var aliasGrants =
+    Set<PlaybookGrant> aliasGrants =
         index.objectAliasIndex().get(ObjectTypeAlias.apply(SnowflakeObjectType.EXTERNAL_TABLE));
     assertNotNull(aliasGrants, "Alias object type (EXTERNAL_TABLE) should be in objectAliasIndex");
     assertEquals(1, aliasGrants.size());
@@ -94,17 +87,14 @@ class PlaybookGrantHashIndexerTest {
 
   @Test
   void buildPlaybookGrantHashIndex_shouldCorrectlyIndexGrantsByAliasedObjectType() {
-    // Given
     List<PlaybookPrivilegeGrant> grants =
         new ArrayList<>(
             List.of(
                 createPlaybookGrant("EXTERNAL_TABLE", "DB", "SCHEMA", "ET1", List.of("SELECT"))));
 
-    // When
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(grants);
 
-    // Then
-    var aliasGrants =
+    Set<PlaybookGrant> aliasGrants =
         index.objectAliasIndex().get(ObjectTypeAlias.apply(SnowflakeObjectType.EXTERNAL_TABLE));
     assertNotNull(aliasGrants);
     assertEquals(1, aliasGrants.size());
@@ -112,33 +102,27 @@ class PlaybookGrantHashIndexerTest {
 
   @Test
   void buildPlaybookGrantHashIndex_shouldMergeDuplicateKeysCorrectly() {
-    // Given
     List<PlaybookPrivilegeGrant> grants =
         new ArrayList<>(
             List.of(
                 createPlaybookGrant("TABLE", "DB", "SCHEMA", "T1", List.of("SELECT")),
                 createPlaybookGrant("TABLE", "DB", "SCHEMA", "T2", List.of("SELECT"))));
 
-    // When
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(grants);
 
-    // Then
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     assertEquals(2, selectGrants.size());
   }
 
   @Test
   void buildPlaybookGrantHashIndex_shouldFilterDisabledGrants() {
-    // Given
     List<PlaybookPrivilegeGrant> grants =
         new ArrayList<>(
             List.of(createPlaybookGrant("TABLE", "DB", "SCHEMA", "T1", List.of("SELECT"), false)));
 
-    // When
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(grants);
 
-    // Then
     assertTrue(index.privilegeIndex().isEmpty());
     assertTrue(index.objectTypeIndex().isEmpty());
     assertTrue(index.objectAliasIndex().isEmpty());
@@ -146,17 +130,14 @@ class PlaybookGrantHashIndexerTest {
 
   @Test
   void buildPlaybookGrantHashIndex_shouldHandleInvalidObjectTypesGracefully() {
-    // Given
     List<PlaybookPrivilegeGrant> grants =
         new ArrayList<>(
             List.of(
                 createPlaybookGrant(
                     "INVALID_OBJECT_TYPE", "DB", "SCHEMA", "T1", List.of("SELECT"))));
 
-    // When
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(grants);
 
-    // Then
     assertTrue(index.privilegeIndex().isEmpty(), "Invalid grants should be filtered out");
   }
 
@@ -177,12 +158,12 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     assertEquals(1, selectGrants.size());
     assertEquals(
-        NonEmptyList.of(SnowflakeGrantType.Standard),
-        selectGrants.iterator().next().grantTypes(),
+        PlaybookGrantType.STANDARD,
+        selectGrants.iterator().next().grantType(),
         "Should create Standard grant type when both future and all are false");
   }
 
@@ -203,12 +184,12 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     assertEquals(1, selectGrants.size());
     assertEquals(
-        NonEmptyList.of(SnowflakeGrantType.Future),
-        selectGrants.iterator().next().grantTypes(),
+        PlaybookGrantType.FUTURE,
+        selectGrants.iterator().next().grantType(),
         "Should create Future grant type when only includeFuture is true");
   }
 
@@ -229,18 +210,18 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     assertEquals(1, selectGrants.size());
     assertEquals(
-        NonEmptyList.of(SnowflakeGrantType.All),
-        selectGrants.iterator().next().grantTypes(),
+        PlaybookGrantType.ALL,
+        selectGrants.iterator().next().grantType(),
         "Should create All grant type when only includeAll is true");
   }
 
   @Test
   void buildPlaybookGrantHashIndex_shouldCreateFutureAndAllGrantType_whenBothFutureAndAllAreTrue() {
-    // Critical: NonEmptyList containing both Future and All grant types when both are true
+    // Critical: FUTURE_AND_ALL grant type when both future and all are true
     PlaybookPrivilegeGrant grant =
         new PlaybookPrivilegeGrant(
             "TABLE",
@@ -255,12 +236,12 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     assertEquals(1, selectGrants.size());
     assertEquals(
-        NonEmptyList.of(SnowflakeGrantType.Future, SnowflakeGrantType.All),
-        selectGrants.iterator().next().grantTypes(),
+        PlaybookGrantType.FUTURE_AND_ALL,
+        selectGrants.iterator().next().grantType(),
         "Should create Future and All grant types when both future and all are true");
   }
 
@@ -280,8 +261,8 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
-    var updateGrants = index.privilegeIndex().get(new GrantPrivilege("UPDATE"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> updateGrants = index.privilegeIndex().get(new GrantPrivilege("UPDATE"));
     assertNotNull(selectGrants, "SELECT privilege should be indexed (normalized from lowercase)");
     assertNotNull(updateGrants, "UPDATE privilege should be indexed (normalized from lowercase)");
   }
@@ -295,7 +276,7 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     PlaybookGrant playbookGrant = selectGrants.iterator().next();
     assertEquals(
@@ -314,7 +295,7 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     PlaybookGrant playbookGrant = selectGrants.iterator().next();
     assertTrue(
@@ -369,7 +350,7 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     assertEquals(1, selectGrants.size());
     PlaybookGrant playbookGrant = selectGrants.iterator().next();
@@ -397,7 +378,7 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     assertEquals(1, selectGrants.size());
     PlaybookGrant playbookGrant = selectGrants.iterator().next();
@@ -424,7 +405,7 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     assertEquals(1, selectGrants.size());
     PlaybookGrant playbookGrant = selectGrants.iterator().next();
@@ -450,7 +431,7 @@ class PlaybookGrantHashIndexerTest {
 
     PlaybookGrantHashIndex index = PlaybookGrantHashIndexer.create(new ArrayList<>(List.of(grant)));
 
-    var selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
+    Set<PlaybookGrant> selectGrants = index.privilegeIndex().get(new GrantPrivilege("SELECT"));
     assertNotNull(selectGrants);
     assertEquals(1, selectGrants.size());
     PlaybookGrant playbookGrant = selectGrants.iterator().next();

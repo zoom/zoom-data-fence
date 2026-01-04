@@ -9,6 +9,7 @@ import us.zoom.data.dfence.playbook.VariableParser;
 import us.zoom.data.dfence.profile.model.ProfileModel;
 import us.zoom.data.dfence.profile.model.ProfilesModel;
 import us.zoom.data.dfence.providers.snowflake.*;
+import us.zoom.data.dfence.providers.snowflake.grant.create.DesiredGrantsCreator;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 
 import java.util.Map;
@@ -69,7 +70,8 @@ public class Profile {
                     snowflakeConnectionService);
             SnowflakeGrantsService snowflakeGrantsService = new SnowflakeGrantsService(snowflakeConnectionService);
             SnowflakeObjectsService snowflakeObjectsService = new SnowflakeObjectsService(snowflakeConnectionService);
-            return new SnowflakeProvider(snowflakeStatementsService, snowflakeGrantsService, snowflakeObjectsService, forkJoinPool);
+            DesiredGrantsCreator grantCreator = new DesiredGrantsCreator(snowflakeObjectsService);
+            return new SnowflakeProvider(snowflakeStatementsService, snowflakeGrantsService, snowflakeObjectsService, grantCreator, forkJoinPool);
         }
         // We should not ever get here.
         throw new RuntimeException("Unable to create provider.");

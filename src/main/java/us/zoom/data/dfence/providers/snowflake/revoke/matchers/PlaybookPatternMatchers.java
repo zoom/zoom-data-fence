@@ -12,12 +12,11 @@ import us.zoom.data.dfence.sql.ObjectName;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class PlaybookPatternMatchers {
 
-  public static Function<PlaybookPattern, Boolean> accountLevelGrant(String value) {
+  public static Function<PlaybookPattern, Boolean> accountLevel(String value) {
     return pattern -> {
       boolean result = value.trim().isEmpty();
       if (!result) {
-        log.info(
-            "Playbook pattern {} match failed for account-level-grant value {}", pattern, value);
+        log.debug("Playbook pattern {} match failed for account-level value {}", pattern, value);
       }
       return result;
     };
@@ -33,7 +32,7 @@ public class PlaybookPatternMatchers {
               && !"*".equals(objName.get())
               && ObjectName.equalObjectName(snowObj.trim(), objName.get());
       if (!result) {
-        log.info(
+        log.debug(
             "Playbook pattern {} match failed for account-level-object value {}", pattern, snowObj);
       }
       return result;
@@ -48,7 +47,7 @@ public class PlaybookPatternMatchers {
               && !"*".equals(dbName.get())
               && ObjectName.equalObjectName(snowDb.trim(), dbName.get().trim());
       if (!result) {
-        log.info("Playbook pattern {} match failed for database value {}", pattern, snowDb);
+        log.debug("Playbook pattern {} match failed for database value {}", pattern, snowDb);
       }
       return result;
     };
@@ -60,10 +59,9 @@ public class PlaybookPatternMatchers {
       boolean result =
           schName.isEmpty()
               || "*".equals(schName.orElse(""))
-              || (schName.isPresent()
-                  && ObjectName.equalObjectName(snowSchema.trim(), schName.get().trim()));
+              || ObjectName.equalObjectName(snowSchema.trim(), schName.get().trim());
       if (!result) {
-        log.info("Playbook pattern {} match failed for schema value {}", pattern, snowSchema);
+        log.debug("Playbook pattern {} match failed for schema value {}", pattern, snowSchema);
       }
       return result;
     };
@@ -75,10 +73,9 @@ public class PlaybookPatternMatchers {
       boolean result =
           objName.isEmpty()
               || "*".equals(objName.orElse(""))
-              || (objName.isPresent()
-                  && ObjectName.equalObjectName(snowObj.trim(), objName.get().trim()));
+              || ObjectName.equalObjectName(snowObj.trim(), objName.get().trim());
       if (!result) {
-        log.info("Playbook pattern {} match failed for object value {}", pattern, snowObj);
+        log.debug("Playbook pattern {} match failed for object value {}", pattern, snowObj);
       }
       return result;
     };

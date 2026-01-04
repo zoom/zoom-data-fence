@@ -9,7 +9,7 @@ import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrant;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrantType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.GrantPrivilege;
-import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.SnowflakeGrantObjectName;
+import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.SnowflakeGrantName;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -24,7 +24,7 @@ public final class SnowflakeGrantCompanion {
               SnowflakeObjectType.fromString(model.grantedOn()),
               new GrantPrivilege(model.privilege()),
               grantType,
-              SnowflakeGrantObjectName.apply(model.name())));
+              SnowflakeGrantName.apply(model.name())));
     } catch (Exception e) {
       log.error("Conversion to SnowflakeGrant failed for grant model {}", model, e);
       return Optional.empty();

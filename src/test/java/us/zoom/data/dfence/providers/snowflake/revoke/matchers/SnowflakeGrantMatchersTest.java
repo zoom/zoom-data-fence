@@ -7,10 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.revoke.collection.NonEmptyList;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.*;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.GrantPrivilege;
-import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.SnowflakeGrantObjectName;
+import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.SnowflakeGrantName;
 
 class SnowflakeGrantMatchersTest {
 
@@ -19,100 +18,95 @@ class SnowflakeGrantMatchersTest {
       PlaybookPattern pattern,
       SnowflakeObjectType objectType,
       List<String> privileges,
-      NonEmptyList<SnowflakeGrantType> grantTypes) {
+      PlaybookGrantType grantType) {
     return new PlaybookGrant(
         objectType,
         pattern,
-        NonEmptyList.from(
-            ImmutableList.copyOf(privileges.stream().map(GrantPrivilege::new).toList())),
-        grantTypes,
+        ImmutableList.copyOf(privileges.stream().map(GrantPrivilege::new).toList()),
+        grantType,
         true);
   }
 
   private PlaybookGrant createPlaybookGrant(PlaybookPattern pattern) {
     return createPlaybookGrant(
-        pattern,
-        SnowflakeObjectType.TABLE,
-        List.of("SELECT"),
-        NonEmptyList.of(SnowflakeGrantType.Standard));
+        pattern, SnowflakeObjectType.TABLE, List.of("SELECT"), PlaybookGrantType.STANDARD);
   }
 
   @Test
-  void grantObjectName_shouldMatch_whenThreePartNameMatchesExactPattern() {
+  void grantName_shouldMatch_whenThreePartNameMatchesExactPattern() {
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.of("OBJ"));
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("DB.SCHEMA.OBJ");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB.SCHEMA.OBJ");
 
     assertTrue(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Three-part object name should match when database, schema, and object all match");
   }
 
   @Test
-  void grantObjectName_shouldMatch_whenObjectNameIsWildcardInPattern() {
+  void grantObjectName_shouldMatch_whenNameIsWildcardInPattern() {
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.empty());
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("DB.SCHEMA.ANY_OBJ");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB.SCHEMA.ANY_OBJ");
 
     assertTrue(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should match any object when pattern has null object name (wildcard)");
   }
 
   @Test
-  void grantObjectName_shouldMatch_whenSchemaIsWildcardButObjectMatches() {
+  void grantObjectName_shouldMatch_whenSchemaIsWildcardButMatches() {
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.of("DB"), Optional.empty(), Optional.of("OBJ"));
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("DB.ANY_SCHEMA.OBJ");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB.ANY_SCHEMA.OBJ");
 
     assertTrue(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should match when schema is wildcard (null) but object name matches");
   }
 
   @Test
-  void grantObjectName_shouldMatch_whenSchemaAndObjectAreWildcards() {
+  void grantObjectName_shouldMatch_whenSchemaAndAreWildcards() {
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.of("DB"), Optional.empty(), Optional.empty());
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName =
-        SnowflakeGrantObjectName.apply("DB.ANY_SCHEMA.ANY_OBJ");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB.ANY_SCHEMA.ANY_OBJ");
 
     assertTrue(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should match any schema and object when both are wildcards (null) in pattern");
   }
 
   @Test
-  void grantObjectName_shouldNotMatch_whenDatabaseNameDiffers() {
+  void grantName_shouldNotMatch_whenDatabaseNameDiffers() {
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.of("OBJ"));
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("OTHER_DB.SCHEMA.OBJ");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("OTHER_DB.SCHEMA.OBJ");
 
     assertFalse(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should not match when database name differs even if schema and object match");
   }
 
   @Test
-  void grantObjectName_shouldMatchCaseInsensitively() {
+  void grantName_shouldMatchCaseInsensitively() {
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.of("OBJ"));
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("db.schema.obj");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("db.schema.obj");
 
     assertTrue(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Object name matching should be case-insensitive");
   }
 
@@ -123,7 +117,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Standard));
+            PlaybookGrantType.STANDARD);
 
     assertTrue(
         SnowflakeGrantMatchers.grantType(SnowflakeGrantType.Standard).apply(pg),
@@ -137,7 +131,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Future));
+            PlaybookGrantType.FUTURE);
 
     assertTrue(
         SnowflakeGrantMatchers.grantType(SnowflakeGrantType.Future).apply(pg),
@@ -152,7 +146,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Future));
+            PlaybookGrantType.FUTURE);
 
     assertTrue(
         SnowflakeGrantMatchers.grantType(SnowflakeGrantType.Standard).apply(pg),
@@ -166,7 +160,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.All));
+            PlaybookGrantType.ALL);
 
     assertTrue(
         SnowflakeGrantMatchers.grantType(SnowflakeGrantType.All).apply(pg),
@@ -181,7 +175,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.All));
+            PlaybookGrantType.ALL);
 
     assertTrue(
         SnowflakeGrantMatchers.grantType(SnowflakeGrantType.Standard).apply(pg),
@@ -195,7 +189,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Future, SnowflakeGrantType.All));
+            PlaybookGrantType.FUTURE_AND_ALL);
 
     assertTrue(
         SnowflakeGrantMatchers.grantType(SnowflakeGrantType.Standard).apply(pg),
@@ -215,7 +209,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Standard));
+            PlaybookGrantType.STANDARD);
 
     assertFalse(
         SnowflakeGrantMatchers.grantType(SnowflakeGrantType.Future).apply(pg),
@@ -232,7 +226,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Standard));
+            PlaybookGrantType.STANDARD);
 
     assertFalse(
         SnowflakeGrantMatchers.grantObjectType(SnowflakeObjectType.VIEW).apply(pg),
@@ -240,15 +234,15 @@ class SnowflakeGrantMatchersTest {
   }
 
   @Test
-  void grantObjectName_shouldMatchEmptyString_forAccountLevelGrants() {
+  void grantName_shouldMatchEmptyString_forAccountLevelGrants() {
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty());
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("");
 
     assertTrue(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Empty object name should match empty pattern for account-level grants");
   }
 
@@ -259,7 +253,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Standard));
+            PlaybookGrantType.STANDARD);
 
     assertTrue(
         SnowflakeGrantMatchers.grantObjectType(SnowflakeObjectType.TABLE).apply(pg),
@@ -275,7 +269,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Standard));
+            PlaybookGrantType.STANDARD);
 
     // EXTERNAL_TABLE != TABLE (first OR branch is false)
     // But EXTERNAL_TABLE.getAliasFor() == TABLE.getAliasFor() == "TABLE" (second OR branch is true)
@@ -293,7 +287,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Standard));
+            PlaybookGrantType.STANDARD);
 
     // Direct equality: TABLE == TABLE (first OR branch is true, short-circuits)
     assertTrue(
@@ -309,7 +303,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.CORTEX_AGENT,
             List.of("USAGE"),
-            NonEmptyList.of(SnowflakeGrantType.Standard));
+            PlaybookGrantType.STANDARD);
 
     assertTrue(
         SnowflakeGrantMatchers.grantObjectType(SnowflakeObjectType.CORTEX_AGENT).apply(pg),
@@ -327,9 +321,8 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.CORTEX_AGENT,
             List.of("USAGE"),
-            NonEmptyList.of(SnowflakeGrantType.Standard));
+            PlaybookGrantType.STANDARD);
 
-    // When AGENT string is converted via fromString(), it becomes CORTEX_AGENT enum
     // So this test verifies that CORTEX_AGENT matches CORTEX_AGENT
     assertTrue(
         SnowflakeGrantMatchers.grantObjectType(SnowflakeObjectType.CORTEX_AGENT).apply(pg),
@@ -343,7 +336,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT", "UPDATE"),
-            NonEmptyList.of(SnowflakeGrantType.Standard));
+            PlaybookGrantType.STANDARD);
 
     assertTrue(
         SnowflakeGrantMatchers.grantPrivilege(new GrantPrivilege("SELECT")).apply(pg),
@@ -360,7 +353,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Standard));
+            PlaybookGrantType.STANDARD);
 
     assertFalse(
         SnowflakeGrantMatchers.grantPrivilege(new GrantPrivilege("UPDATE")).apply(pg),
@@ -368,29 +361,16 @@ class SnowflakeGrantMatchersTest {
   }
 
   @Test
-  void grantObjectName_shouldMatch_whenSizeIsOneAndMatchesAccountLevel() {
+  void grantName_shouldMatch_whenSizeIsOneAndMatchesAccountLevel() {
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.of("ACCOUNT_OBJ"));
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("ACCOUNT_OBJ");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("ACCOUNT_OBJ");
 
     assertTrue(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should match account level object");
-  }
-
-  @Test
-  void grantObjectName_shouldMatch_whenSizeIsOneAndMatchesDatabase() {
-    PlaybookPattern pattern =
-        new PlaybookPattern(Optional.of("DB"), Optional.empty(), Optional.empty());
-    PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
-
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("DB");
-
-    assertTrue(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
-        "Should match database level");
   }
 
   @Test
@@ -404,15 +384,15 @@ class SnowflakeGrantMatchersTest {
         new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty());
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("");
 
     assertTrue(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should match when accountLevelObject is false but accountLevelGrant is true (second OR branch)");
   }
 
   @Test
-  void grantObjectName_shouldMatch_whenSizeIsOneAndOnlyDatabaseMatches() {
+  void grantName_shouldMatch_whenSizeIsOneAndOnlyDatabaseMatches() {
     // Critical: Test the third branch of OR chain - when both accountLevelObject and
     // accountLevelGrant return false, but database returns true
     // Pattern: db/empty/empty, part: "DB"
@@ -423,64 +403,90 @@ class SnowflakeGrantMatchersTest {
         new PlaybookPattern(Optional.of("DB"), Optional.empty(), Optional.empty());
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("DB");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB");
 
     assertTrue(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should match when accountLevelObject and accountLevelGrant are false but database is true (third OR branch)");
   }
 
   @Test
-  void grantObjectName_shouldReturnFalse_whenSizeIsTwoButDatabaseDoesNotMatch() {
+  void grantName_shouldMatch_whenSizeIsTwoAndDatabaseAndObjectMatch() {
     PlaybookPattern pattern =
-        new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.empty());
+        new PlaybookPattern(Optional.of("DB"), Optional.empty(), Optional.of("OBJ"));
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("OTHER_DB.SCHEMA");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB.OBJ");
+
+    assertTrue(
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
+        "Two-part object name should match when database and object both match");
+  }
+
+  @Test
+  void grantName_shouldMatch_whenSizeIsTwoAndObjectIsWildcard() {
+    PlaybookPattern pattern =
+        new PlaybookPattern(Optional.of("DB"), Optional.empty(), Optional.empty());
+    PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
+
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB.ANY_OBJ");
+
+    assertTrue(
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
+        "Two-part object name should match when database matches and object is wildcard (empty)");
+  }
+
+  @Test
+  void grantName_shouldReturnFalse_whenSizeIsTwoButDatabaseDoesNotMatch() {
+    PlaybookPattern pattern =
+        new PlaybookPattern(Optional.of("DB"), Optional.empty(), Optional.empty());
+    PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
+
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("OTHER_DB.OBJ");
 
     assertFalse(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should not match when database doesn't match");
   }
 
   @Test
-  void grantObjectName_shouldReturnFalse_whenSizeIsTwoButSchemaDoesNotMatch() {
+  void grantName_shouldReturnFalse_whenSizeIsTwoButObjectDoesNotMatch() {
     PlaybookPattern pattern =
-        new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.empty());
+        new PlaybookPattern(Optional.of("DB"), Optional.empty(), Optional.of("OBJ"));
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("DB.OTHER_SCHEMA");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB.OTHER_OBJ");
 
     assertFalse(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
-        "Should not match when schema doesn't match");
-  }
-
-  @Test
-  void grantObjectName_shouldReturnFalse_whenSizeIsThreeButObjectDoesNotMatch() {
-    PlaybookPattern pattern =
-        new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.of("OBJ"));
-    PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
-
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("DB.SCHEMA.OTHER_OBJ");
-
-    assertFalse(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should not match when object doesn't match");
   }
 
   @Test
-  void grantObjectName_shouldNotMatch_whenSinglePartNameDoesNotMatchAnyPattern() {
+  void grantObjectName_shouldReturnFalse_whenSizeIsThreeButDoesNotMatch() {
+    PlaybookPattern pattern =
+        new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.of("OBJ"));
+    PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
+
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB.SCHEMA.OTHER_OBJ");
+
+    assertFalse(
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
+        "Should not match when object doesn't match");
+  }
+
+  @Test
+  void grantName_shouldNotMatch_whenSinglePartNameDoesNotMatchAnyPattern() {
     // Critical edge case: single-part name that doesn't match account-level object, account-level
     // grant, or database
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.of("OBJ"));
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("UNMATCHED");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("UNMATCHED");
 
     assertFalse(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Single-part name should not match when it doesn't match account-level object, grant, or database pattern");
   }
 
@@ -492,7 +498,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.Future));
+            PlaybookGrantType.FUTURE);
 
     assertFalse(
         SnowflakeGrantMatchers.grantType(SnowflakeGrantType.All).apply(pg),
@@ -507,7 +513,7 @@ class SnowflakeGrantMatchersTest {
             new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty()),
             SnowflakeObjectType.TABLE,
             List.of("SELECT"),
-            NonEmptyList.of(SnowflakeGrantType.All));
+            PlaybookGrantType.ALL);
 
     assertFalse(
         SnowflakeGrantMatchers.grantType(SnowflakeGrantType.Future).apply(pg),
@@ -515,7 +521,7 @@ class SnowflakeGrantMatchersTest {
   }
 
   @Test
-  void grantObjectName_shouldHandleException_whenObjectNameIsInvalid() {
+  void grantObjectName_shouldHandleException_whenNameIsInvalid() {
     // Critical: Exception handling - when ObjectName.splitObjectName throws exception
     // This tests the exception path that can occur in grantObjectName
     PlaybookPattern pattern =
@@ -524,17 +530,17 @@ class SnowflakeGrantMatchersTest {
 
     // Create an object name that will cause splitObjectName to throw
     // ObjectName.splitObjectName throws for names with more than 3 parts
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("DB.SCHEMA.OBJ.SUBOBJ");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB.SCHEMA.OBJ.SUBOBJ");
 
     // The exception will propagate, which is expected behavior
     assertThrows(
         us.zoom.data.dfence.exception.ObjectNameException.class,
-        () -> SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        () -> SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should throw ObjectNameException for invalid object name format");
   }
 
   @Test
-  void grantObjectName_shouldReturnFalse_whenSizeIsThreeButSchemaDoesNotMatch() {
+  void grantName_shouldReturnFalse_whenSizeIsThreeButSchemaDoesNotMatch() {
     // Critical: Test the second AND branch in case 3 - when database matches but schema doesn't
     // This covers the missing branch: matchers.schema() returns false
     // Pattern: DB/SCHEMA/OBJ, Grant: DB/OTHER_SCHEMA/OBJ
@@ -544,15 +550,15 @@ class SnowflakeGrantMatchersTest {
         new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.of("OBJ"));
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("DB.OTHER_SCHEMA.OBJ");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("DB.OTHER_SCHEMA.OBJ");
 
     assertFalse(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should return false when database matches but schema doesn't (second AND branch is false)");
   }
 
   @Test
-  void grantObjectName_shouldReturnFalse_whenSizeIsThreeButDatabaseDoesNotMatch() {
+  void grantName_shouldReturnFalse_whenSizeIsThreeButDatabaseDoesNotMatch() {
     // Critical: Test the first AND branch in case 3 - when database doesn't match
     // This ensures we also test when the first AND branch is false (short-circuits)
     // Pattern: DB/SCHEMA/OBJ, Grant: OTHER_DB/SCHEMA/OBJ
@@ -561,10 +567,10 @@ class SnowflakeGrantMatchersTest {
         new PlaybookPattern(Optional.of("DB"), Optional.of("SCHEMA"), Optional.of("OBJ"));
     PlaybookGrant playbookGrant = createPlaybookGrant(pattern);
 
-    SnowflakeGrantObjectName snowGrantName = SnowflakeGrantObjectName.apply("OTHER_DB.SCHEMA.OBJ");
+    SnowflakeGrantName snowGrantName = SnowflakeGrantName.apply("OTHER_DB.SCHEMA.OBJ");
 
     assertFalse(
-        SnowflakeGrantMatchers.grantObjectName(snowGrantName).apply(playbookGrant),
+        SnowflakeGrantMatchers.grantName(snowGrantName).apply(playbookGrant),
         "Should return false when database doesn't match (first AND branch is false, short-circuits)");
   }
 }

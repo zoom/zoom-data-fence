@@ -10,6 +10,7 @@ import us.zoom.data.dfence.playbook.model.PlaybookModel;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.playbook.model.PlaybookRoleModel;
 import us.zoom.data.dfence.providers.snowflake.*;
+import us.zoom.data.dfence.providers.snowflake.grant.create.DesiredGrantsCreator;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 
 import java.io.File;
@@ -67,11 +68,13 @@ class PlaybookServiceBuilderTest {
         String db_name = "mock_db";
         SnowflakeObjectsService snowflakeObjectsService
                 = new SnowflakeObjectsService(snowflakeConnectionServiceExpected);
+        DesiredGrantsCreator grantCreator = new DesiredGrantsCreator(snowflakeObjectsService);
         PlaybookService playbookServiceExpected = new PlaybookService(
                 new SnowflakeProvider(
                         new SnowflakeStatementsService(snowflakeConnectionServiceExpected),
                         new SnowflakeGrantsService(snowflakeConnectionServiceExpected),
-                        new SnowflakeObjectsService(snowflakeConnectionServiceExpected)), new PlaybookModel(Map.of(
+                        snowflakeObjectsService,
+                        grantCreator), new PlaybookModel(Map.of(
                 "rbac-example-role-1",
                 new PlaybookRoleModel(
                         "rbac_example_1",
@@ -116,11 +119,13 @@ class PlaybookServiceBuilderTest {
         String db_name = "mock_db";
         SnowflakeObjectsService snowflakeObjectsService
                 = new SnowflakeObjectsService(snowflakeConnectionServiceExpected);
+        DesiredGrantsCreator grantCreator = new DesiredGrantsCreator(snowflakeObjectsService);
         PlaybookService playbookServiceExpected = new PlaybookService(
                 new SnowflakeProvider(
                         new SnowflakeStatementsService(snowflakeConnectionServiceExpected),
                         new SnowflakeGrantsService(snowflakeConnectionServiceExpected),
-                        new SnowflakeObjectsService(snowflakeConnectionServiceExpected)), new PlaybookModel(Map.of(
+                        snowflakeObjectsService,
+                        grantCreator), new PlaybookModel(Map.of(
                 "rbac-example-role-1",
                 new PlaybookRoleModel(
                         "rbac_example_1",

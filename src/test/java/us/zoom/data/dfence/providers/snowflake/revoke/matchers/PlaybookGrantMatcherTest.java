@@ -2,17 +2,17 @@ package us.zoom.data.dfence.providers.snowflake.revoke.matchers;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.revoke.collection.NonEmptyList;
 import us.zoom.data.dfence.providers.snowflake.revoke.companions.SnowflakeGrantCompanion;
 import us.zoom.data.dfence.providers.snowflake.revoke.matchers.playbook.PlaybookGrantMatcher;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookGrant;
+import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookGrantType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookPattern;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrant;
-import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrantType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.GrantPrivilege;
 
 class PlaybookGrantMatcherTest {
@@ -92,12 +92,7 @@ class PlaybookGrantMatcherTest {
     SnowflakeGrant snowGrant = createSnowGrant("SELECT", "TABLE", "DB.SCHEMA", true, false);
     PlaybookGrant playbookGrant =
         createPlaybookGrant(
-            "SELECT",
-            SnowflakeObjectType.TABLE,
-            "DB",
-            "SCHEMA",
-            null,
-            NonEmptyList.of(SnowflakeGrantType.Future));
+            "SELECT", SnowflakeObjectType.TABLE, "DB", "SCHEMA", null, PlaybookGrantType.FUTURE);
     boolean actualMatch =
         PlaybookGrantMatcher.matchGrantAgainstPlaybook().apply(playbookGrant, snowGrant);
 
@@ -126,19 +121,18 @@ class PlaybookGrantMatcherTest {
       String db,
       String schema,
       String obj,
-      NonEmptyList<SnowflakeGrantType> grantTypes) {
+      PlaybookGrantType grantType) {
     return new PlaybookGrant(
         objectType,
         new PlaybookPattern(
             Optional.ofNullable(db), Optional.ofNullable(schema), Optional.ofNullable(obj)),
-        NonEmptyList.of(new GrantPrivilege(privilege)),
-        grantTypes,
+        ImmutableList.of(new GrantPrivilege(privilege)),
+        grantType,
         true);
   }
 
   private PlaybookGrant createPlaybookGrant(
       String privilege, SnowflakeObjectType objectType, String db, String schema, String obj) {
-    return createPlaybookGrant(
-        privilege, objectType, db, schema, obj, NonEmptyList.of(SnowflakeGrantType.Standard));
+    return createPlaybookGrant(privilege, objectType, db, schema, obj, PlaybookGrantType.STANDARD);
   }
 }

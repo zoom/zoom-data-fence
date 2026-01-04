@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -17,10 +18,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import us.zoom.data.dfence.playbook.Playbook;
 import us.zoom.data.dfence.playbook.model.PlaybookModel;
+import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
+import us.zoom.data.dfence.playbook.model.PlaybookRoleModel;
 import us.zoom.data.dfence.providers.snowflake.SnowflakeGrantsService;
 import us.zoom.data.dfence.providers.snowflake.SnowflakeProvider;
 import us.zoom.data.dfence.providers.snowflake.SnowflakeStatementsService;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
+import us.zoom.data.dfence.providers.snowflake.grant.create.DesiredGrantsCreator;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
@@ -42,11 +46,13 @@ class SnowflakeNonExistentObjectOwnershipTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
+    DesiredGrantsCreator grantCreator = new DesiredGrantsCreator(snowflakeObjectsService);
     snowflakeProvider =
         new SnowflakeProvider(
             snowflakeStatementsService,
             snowflakeGrantsService,
             snowflakeObjectsService,
+            grantCreator,
             ForkJoinPool.commonPool());
   }
 
@@ -93,8 +99,8 @@ class SnowflakeNonExistentObjectOwnershipTest {
 
     when(snowflakeGrantsService.getGrants(ownerRoleName, false)).thenReturn(currentGrants);
 
-    var ownerRole = playbookModel.roles().get(ownerRoleName);
-    var privilegeGrants = ownerRole.grants();
+    PlaybookRoleModel ownerRole = playbookModel.roles().get(ownerRoleName);
+    List<PlaybookPrivilegeGrant> privilegeGrants = ownerRole.grants();
 
     List<List<String>> statements =
         snowflakeProvider.compilePlaybookPrivilegeGrants(
@@ -119,7 +125,7 @@ class SnowflakeNonExistentObjectOwnershipTest {
   }
 
   private PlaybookModel getUserProvisionerPlaybookModel() throws IOException, URISyntaxException {
-    var resourceUrl =
+    URL resourceUrl =
         getClass()
             .getClassLoader()
             .getResource("test-data/snowflake-non-existent-object-ownership-test.yml");

@@ -8,10 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.revoke.collection.NonEmptyList;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookGrant;
+import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookGrantType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrantType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.GrantPrivilege;
 
 @Slf4j
@@ -20,8 +19,7 @@ public final class PlaybookGrantCompanion {
 
   public static Optional<PlaybookGrant> toPlaybookGrant(PlaybookPrivilegeGrant grant) {
     try {
-      NonEmptyList<SnowflakeGrantType> grantTypes =
-          getSnowflakeGrantTypes(grant.includeFuture(), grant.includeAll());
+      PlaybookGrantType grantType = getPlaybookGrantType(grant.includeFuture(), grant.includeAll());
 
       Optional<String> dbName =
           Optional.ofNullable(grant.databaseName()).map(String::trim).filter(s -> !s.isEmpty());
@@ -30,19 +28,18 @@ public final class PlaybookGrantCompanion {
       Optional<String> objName =
           Optional.ofNullable(grant.objectName()).map(String::trim).filter(s -> !s.isEmpty());
 
-      NonEmptyList<GrantPrivilege> privileges =
-          NonEmptyList.from(
-              ImmutableList.copyOf(
-                  grant.privileges().parallelStream()
-                      .map(GrantPrivilege::new)
-                      .collect(Collectors.toList())));
+      ImmutableList<GrantPrivilege> privileges =
+          ImmutableList.copyOf(
+              grant.privileges().parallelStream()
+                  .map(GrantPrivilege::new)
+                  .collect(Collectors.toList()));
 
       return Optional.of(
           new PlaybookGrant(
               SnowflakeObjectType.fromString(grant.objectType()),
               new PlaybookPattern(dbName, schName, objName),
               privileges,
-              grantTypes,
+              grantType,
               grant.enable()));
     } catch (Exception err) {
       log.error("Conversion to playbook grant failed for playbook privilege grant {}", grant, err);
@@ -50,16 +47,15 @@ public final class PlaybookGrantCompanion {
     }
   }
 
-  private static NonEmptyList<SnowflakeGrantType> getSnowflakeGrantTypes(
-      boolean includeFuture, boolean includeAll) {
+  private static PlaybookGrantType getPlaybookGrantType(boolean includeFuture, boolean includeAll) {
     if (includeFuture && includeAll) {
-      return NonEmptyList.of(SnowflakeGrantType.Future, SnowflakeGrantType.All);
+      return PlaybookGrantType.FUTURE_AND_ALL;
     } else if (includeFuture) {
-      return NonEmptyList.of(SnowflakeGrantType.Future);
+      return PlaybookGrantType.FUTURE;
     } else if (includeAll) {
-      return NonEmptyList.of(SnowflakeGrantType.All);
+      return PlaybookGrantType.ALL;
     } else {
-      return NonEmptyList.of(SnowflakeGrantType.Standard);
+      return PlaybookGrantType.STANDARD;
     }
   }
 }

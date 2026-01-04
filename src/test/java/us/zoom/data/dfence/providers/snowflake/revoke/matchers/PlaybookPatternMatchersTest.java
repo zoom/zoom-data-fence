@@ -9,29 +9,29 @@ import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookPattern;
 class PlaybookPatternMatchersTest {
 
   @Test
-  void accountLevelGrant_shouldMatch_whenValueIsEmptyOrWhitespace() {
+  void accountLevel_shouldMatch_whenValueIsEmptyOrWhitespace() {
     // Critical: Account-level grants have empty object names
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty());
 
     assertTrue(
-        PlaybookPatternMatchers.accountLevelGrant("").apply(pattern),
+        PlaybookPatternMatchers.accountLevel("").apply(pattern),
         "Empty string should match account-level grant");
     assertTrue(
-        PlaybookPatternMatchers.accountLevelGrant("   ").apply(pattern),
+        PlaybookPatternMatchers.accountLevel("   ").apply(pattern),
         "Whitespace-only string should match account-level grant");
   }
 
   @Test
-  void accountLevelGrant_shouldNotMatch_whenValueIsNotEmpty() {
+  void accountLevel_shouldNotMatch_whenValueIsNotEmpty() {
     PlaybookPattern pattern =
         new PlaybookPattern(Optional.empty(), Optional.empty(), Optional.empty());
 
     assertFalse(
-        PlaybookPatternMatchers.accountLevelGrant("TEST").apply(pattern),
+        PlaybookPatternMatchers.accountLevel("TEST").apply(pattern),
         "Non-empty value should not match account-level grant");
     assertFalse(
-        PlaybookPatternMatchers.accountLevelGrant("  TEST  ").apply(pattern),
+        PlaybookPatternMatchers.accountLevel("  TEST  ").apply(pattern),
         "Trimmed non-empty value should not match");
   }
 

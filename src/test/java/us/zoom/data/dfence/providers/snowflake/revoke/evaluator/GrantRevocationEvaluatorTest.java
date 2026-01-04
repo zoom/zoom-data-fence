@@ -2,16 +2,16 @@ package us.zoom.data.dfence.providers.snowflake.revoke.evaluator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.common.collect.ImmutableList;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.revoke.collection.NonEmptyList;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookGrant;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookGrantHashIndex;
+import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookGrantType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrantType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.GrantPrivilege;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.ObjectType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.ObjectTypeAlias;
@@ -20,37 +20,30 @@ class GrantRevocationEvaluatorTest {
 
   @Test
   void needsRevoke_shouldReturnTrue_whenNoMatchingPlaybookGrantExists() {
-    // Given
     PlaybookGrantHashIndex index = createEmptyIndex();
     GrantRevocationEvaluator evaluator = new GrantRevocationEvaluator(index);
     SnowflakeGrantModel grantToCheck = createGrantModel("SELECT", "TABLE", "DB.SCHEMA.TABLE");
 
-    // When
     boolean actualNeedsRevoke = evaluator.needsRevoke(grantToCheck);
 
-    // Then
     assertTrue(actualNeedsRevoke, "Should revoke grant not found in playbook");
   }
 
   @Test
   void needsRevoke_shouldReturnFalse_whenMatchingPlaybookGrantExists() {
-    // Given
     PlaybookGrant playbookGrant =
         createPlaybookGrant("SELECT", SnowflakeObjectType.TABLE, "DB", "SCHEMA", "TABLE");
     PlaybookGrantHashIndex index = createIndexWith(playbookGrant);
     GrantRevocationEvaluator evaluator = new GrantRevocationEvaluator(index);
     SnowflakeGrantModel grantToCheck = createGrantModel("SELECT", "TABLE", "DB.SCHEMA.TABLE");
 
-    // When
     boolean actualNeedsRevoke = evaluator.needsRevoke(grantToCheck);
 
-    // Then
     assertFalse(actualNeedsRevoke, "Should NOT revoke grant found in playbook");
   }
 
   @Test
   void needsRevoke_shouldReturnFalse_whenAliasMatches() {
-    // Given
     PlaybookGrant playbookGrant =
         createPlaybookGrant(
             "SELECT", SnowflakeObjectType.EXTERNAL_TABLE, "DB", "SCHEMA", "EXT_TABLE");
@@ -59,10 +52,8 @@ class GrantRevocationEvaluatorTest {
     SnowflakeGrantModel grantToCheck =
         createGrantModel("SELECT", "EXTERNAL_TABLE", "DB.SCHEMA.EXT_TABLE");
 
-    // When
     boolean actualNeedsRevoke = evaluator.needsRevoke(grantToCheck);
 
-    // Then
     assertFalse(actualNeedsRevoke, "Should NOT revoke when object types are valid aliases");
   }
 
@@ -266,8 +257,8 @@ class GrantRevocationEvaluatorTest {
         objType,
         new PlaybookPattern(
             Optional.ofNullable(db), Optional.ofNullable(schema), Optional.ofNullable(obj)),
-        NonEmptyList.of(new GrantPrivilege(priv)),
-        NonEmptyList.of(SnowflakeGrantType.Standard),
+        ImmutableList.of(new GrantPrivilege(priv)),
+        PlaybookGrantType.STANDARD,
         true);
   }
 
@@ -277,7 +268,7 @@ class GrantRevocationEvaluatorTest {
   }
 
   private PlaybookGrantHashIndex createIndexWith(PlaybookGrant grant) {
-    GrantPrivilege priv = grant.privileges().asImmutableList().get(0);
+    GrantPrivilege priv = grant.privileges().get(0);
     ObjectType objType = ObjectType.apply(grant.objectType());
     ObjectTypeAlias alias = ObjectTypeAlias.apply(grant.objectType());
 
@@ -298,8 +289,8 @@ class GrantRevocationEvaluatorTest {
   private PlaybookGrantHashIndex createIndexWithNonIntersectingGrants(
       PlaybookGrant privilegeGrant, PlaybookGrant objectTypeGrant) {
     // Create index where grants don't intersect (different privileges and object types)
-    GrantPrivilege priv1 = privilegeGrant.privileges().asImmutableList().get(0);
-    GrantPrivilege priv2 = objectTypeGrant.privileges().asImmutableList().get(0);
+    GrantPrivilege priv1 = privilegeGrant.privileges().get(0);
+    GrantPrivilege priv2 = objectTypeGrant.privileges().get(0);
     ObjectType objType1 = ObjectType.apply(privilegeGrant.objectType());
     ObjectType objType2 = ObjectType.apply(objectTypeGrant.objectType());
     ObjectTypeAlias alias1 = ObjectTypeAlias.apply(privilegeGrant.objectType());

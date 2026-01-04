@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
-import us.zoom.data.dfence.providers.snowflake.revoke.collection.NonEmptyList;
 import us.zoom.data.dfence.providers.snowflake.revoke.companions.PlaybookGrantCompanion;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.*;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.GrantPrivilege;
@@ -34,7 +33,8 @@ public final class PlaybookGrantHashIndexer {
   public static PlaybookGrantHashIndex createFromGrants(List<PlaybookGrant> enabledPlaybookGrants) {
     ConcurrentHashMap<GrantPrivilege, Set<PlaybookGrant>> privilegeIndex =
         buildPrivilegeIndex(enabledPlaybookGrants);
-    var objectTypeIndexes = buildObjectTypeAndObjectTypeAliasIndex(enabledPlaybookGrants);
+    ObjectTypeIndexes objectTypeIndexes =
+        buildObjectTypeAndObjectTypeAliasIndex(enabledPlaybookGrants);
 
     return new PlaybookGrantHashIndex(
         privilegeIndex, objectTypeIndexes.objectTypeIndex(), objectTypeIndexes.objectAliasIndex());
@@ -44,8 +44,7 @@ public final class PlaybookGrantHashIndexer {
       List<PlaybookGrant> playbookGrants) {
     ConcurrentHashMap<GrantPrivilege, Set<PlaybookGrant>> index = new ConcurrentHashMap<>();
     for (PlaybookGrant grant : playbookGrants) {
-      NonEmptyList<GrantPrivilege> privileges = grant.privileges();
-      for (GrantPrivilege privilege : privileges.asImmutableList()) {
+      for (GrantPrivilege privilege : grant.privileges()) {
         index.computeIfAbsent(privilege, k -> ConcurrentHashMap.newKeySet()).add(grant);
       }
     }
