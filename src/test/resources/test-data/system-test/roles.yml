@@ -28,7 +28,3 @@ roles:
         privileges:
           - usage
           - ownership
-      - object-type: application_role
-        object-name: SNOWFLAKE.TRUST_CENTER_VIEWER
-        privileges:
-          - usage
