@@ -107,6 +107,7 @@ class SnowflakeProviderTest {
                         new CompiledChanges(
                                 roleId,
                                 roleName,
+                                List.of(),
                                 expectedRoleCreationStatements,
                                 expectedRoleGrantStatements)),
                 new CompileRoleChangesTestParams(
@@ -115,7 +116,7 @@ class SnowflakeProviderTest {
                         true,
                         List.of("SOME_OTHER_ROLE", roleName.toUpperCase()),
                         new HashMap<>(),
-                        new CompiledChanges(roleId, roleName, List.of(), expectedRoleGrantStatements)),
+                        new CompiledChanges(roleId, roleName, List.of(), List.of(), expectedRoleGrantStatements)),
                 new CompileRoleChangesTestParams(
                         new PlaybookRoleModel(roleName, playbookPrivilegeGrants),
                         roleId,
@@ -123,7 +124,7 @@ class SnowflakeProviderTest {
                         List.of("SOME_OTHER_ROLE", roleName.toUpperCase()),
                         Map.of(extraGrant.getKey(), extraGrant),
                         new CompiledChanges(
-                                roleId, roleName, List.of(), new ArrayList<>() {{
+                                roleId, roleName, List.of(), List.of(), new ArrayList<>() {{
                             add(List.of(
                                     "REVOKE CREATE TABLE ON SCHEMA \"OTHER_DB\".\"OTHER_SCHEMA\" FROM ROLE MOCK_ROLE_NAME;"));
                             addAll(expectedRoleGrantStatements);
@@ -135,7 +136,7 @@ class SnowflakeProviderTest {
                         List.of("SOME_OTHER_ROLE", roleName.toUpperCase()),
                         Map.of(extraGrant.getKey(), extraGrant),
                         new CompiledChanges(
-                                roleId, roleName, List.of(), new ArrayList<>() {{
+                                roleId, roleName, List.of(), List.of(), new ArrayList<>() {{
                             addAll(expectedRoleGrantStatements);
                         }})),
                 new CompileRoleChangesTestParams(
@@ -155,14 +156,14 @@ class SnowflakeProviderTest {
                         true,
                         List.of(roleName.toUpperCase()),
                         Map.of(),
-                        new CompiledChanges(roleId, roleName, List.of(), expectedRoleGrantStatements)),
+                        new CompiledChanges(roleId, roleName, List.of(), List.of(), expectedRoleGrantStatements)),
                 new CompileRoleChangesTestParams(
                         new PlaybookRoleModel(roleName, playbookPrivilegeGrants, false, true, true, null, UnsupportedRevokeBehavior.IGNORE),
                         roleId,
                         false,
                         List.of("SOME_OTHER_ROLE"),
                         new HashMap<>(),
-                        new CompiledChanges(roleId, roleName, List.of(), List.of())));
+                        new CompiledChanges(roleId, roleName, List.of(), List.of(), List.of())));
     }
 
     public static Stream<CompilePlaybookPrivilegeGrantsTestParams> compilePlaybookPrivilegeGrantsTestParamsStream() {
@@ -286,15 +287,17 @@ class SnowflakeProviderTest {
                 new CompiledChanges(
                         "role-a",
                         "role_a",
-                        List.of(),
                         List.of(List.of(
-                                "GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"OTHER_TABLE_NAME\" TO ROLE SECURITYADMIN COPY CURRENT GRANTS;"))),
+                                "GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"OTHER_TABLE_NAME\" TO ROLE SECURITYADMIN COPY CURRENT GRANTS;")),
+                        List.of(),
+                        List.of()),
                 new CompiledChanges(
                         "role-b",
                         "role_b",
-                        List.of(),
                         List.of(List.of(
-                                "GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE ROLE_B COPY CURRENT GRANTS;"))));
+                                "GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE ROLE_B COPY CURRENT GRANTS;")),
+                        List.of(),
+                        List.of()));
         List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
         assertEquals(compiledChangesExpected, compiledChangesActual);
     }
@@ -347,13 +350,17 @@ class SnowflakeProviderTest {
                 new CompiledChanges(
                         "role-a",
                         "role_a",
-                        List.of(),
                         List.of(List.of(
-                                "GRANT OWNERSHIP ON TABLE \"OTHER_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE SECURITYADMIN COPY CURRENT GRANTS;"))),
+                                "GRANT OWNERSHIP ON TABLE \"OTHER_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE SECURITYADMIN COPY CURRENT GRANTS;")),
+                        List.of(),
+                        List.of()),
                 new CompiledChanges(
-                        "role-b", "role_b", List.of(), List.of(
-                        List.of("GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"mock_table_name_2\" TO ROLE ROLE_B COPY CURRENT GRANTS;"),
-                        List.of("GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE ROLE_B COPY CURRENT GRANTS;"))));
+                        "role-b", "role_b", 
+                        List.of(
+                            List.of("GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"mock_table_name_2\" TO ROLE ROLE_B COPY CURRENT GRANTS;"),
+                            List.of("GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE ROLE_B COPY CURRENT GRANTS;")),
+                        List.of(),
+                        List.of()));
         List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
         assertEquals(compiledChangesExpected, compiledChangesActual);
     }
@@ -369,7 +376,8 @@ class SnowflakeProviderTest {
                 eq(SnowflakeObjectType.ROLE),
                 anyString())).thenReturn(List.of());
         List<CompiledChanges> compiledChangesExpected = List.of(new CompiledChanges(
-                "role-a", "role_a", List.of(
+                "role-a", "role_a", List.of(),
+                List.of(
                 "CREATE ROLE IF NOT EXISTS ROLE_A;",
                 "GRANT OWNERSHIP ON ROLE ROLE_A TO ROLE SECURITYADMIN COPY CURRENT GRANTS;"), List.of()));
         List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
@@ -381,14 +389,20 @@ class SnowflakeProviderTest {
         List<CompiledChanges> compiledChanges = List.of(compileRoleChangesTestParamsStream().findFirst()
                 .get().expected);
         snowflakeProvider.applyPrivilegeChanges(compiledChanges);
-        compiledChanges.forEach(x -> x.roleGrantStatements()
-                .forEach(y -> verify(snowflakeStatementsService, times(1)).applyStatements(y)));
+        compiledChanges.forEach(x -> {
+            x.ownershipGrantStatements()
+                .forEach(y -> verify(snowflakeStatementsService, times(1)).applyStatements(y));
+            x.roleGrantStatements()
+                .forEach(y -> verify(snowflakeStatementsService, times(1)).applyStatements(y));
+        });
     }
 
     @Test
     void applyPrivilegeChangesToRole() {
         CompiledChanges compiledChanges = compileRoleChangesTestParamsStream().findFirst().get().expected;
         snowflakeProvider.applyPrivilegeChangesToRole(compiledChanges);
+        compiledChanges.ownershipGrantStatements()
+                .forEach(x -> verify(snowflakeStatementsService, times(1)).applyStatements(x));
         compiledChanges.roleGrantStatements()
                 .forEach(x -> verify(snowflakeStatementsService, times(1)).applyStatements(x));
     }

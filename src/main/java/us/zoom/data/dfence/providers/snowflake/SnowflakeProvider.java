@@ -154,11 +154,28 @@ public class SnowflakeProvider implements Provider {
     }
 
     public void applyPrivilegeChangesToRole(CompiledChanges compiledChanges) {
-        log.info("Applying {} privilege changes for role {}", compiledChanges.roleName(), compiledChanges.roleGrantStatements().size());
+        log.info("Applying {} ownership grants and {} other grants for role {}", 
+            compiledChanges.ownershipGrantStatements().size(), 
+            compiledChanges.roleGrantStatements().size(), 
+            compiledChanges.roleName());
         try {
-            forkJoinPool.submit(() -> 
-                compiledChanges.roleGrantStatements().parallelStream().forEach(snowflakeStatementsService::applyStatements)
-            ).join();
+            // First, run ownership grants in parallel
+            if (!compiledChanges.ownershipGrantStatements().isEmpty()) {
+                log.info("Applying {} ownership grants for role {}", 
+                    compiledChanges.ownershipGrantStatements().size(), compiledChanges.roleName());
+                forkJoinPool.submit(() -> 
+                    compiledChanges.ownershipGrantStatements().parallelStream().forEach(snowflakeStatementsService::applyStatements)
+                ).join();
+            }
+            
+            // Then, run the rest of the grants in parallel
+            if (!compiledChanges.roleGrantStatements().isEmpty()) {
+                log.info("Applying {} other grants for role {}", 
+                    compiledChanges.roleGrantStatements().size(), compiledChanges.roleName());
+                forkJoinPool.submit(() -> 
+                    compiledChanges.roleGrantStatements().parallelStream().forEach(snowflakeStatementsService::applyStatements)
+                ).join();
+            }
         } catch (DatabaseError e) {
             throw new DatabaseError("Unable to apply privileges to role due to database error.", e);
         }
@@ -268,8 +285,19 @@ public class SnowflakeProvider implements Provider {
                     "Skipping grant statement creation for role {} because it does not exist " + "and is not planned to be created.",
                     role.name());
         }
-        log.debug("{} statements planned for role {}", privilegeGrantStatements.size(), role.name());
-        return new CompiledChanges(roleId, role.name(), roleCreationStatements, privilegeGrantStatements);
+        // Separate ownership grants from other grants using partitioningBy
+        Map<Boolean, List<List<String>>> partitionedGrants = privilegeGrantStatements.stream()
+            .collect(Collectors.partitioningBy(
+                statements -> statements.stream()
+                    .anyMatch(stmt -> stmt.toUpperCase().contains("OWNERSHIP"))
+            ));
+        
+        List<List<String>> ownershipGrantStatements = partitionedGrants.get(true);
+        List<List<String>> otherGrantStatements = partitionedGrants.get(false);
+        
+        log.debug("{} ownership statements and {} other statements planned for role {}", 
+            ownershipGrantStatements.size(), otherGrantStatements.size(), role.name());
+        return new CompiledChanges(roleId, role.name(), ownershipGrantStatements, roleCreationStatements, otherGrantStatements);
     }
 
     public List<List<String>> compilePlaybookPrivilegeGrants(
