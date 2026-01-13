@@ -16,6 +16,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakePermissionGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
+import us.zoom.data.dfence.providers.snowflake.grant.create.DesiredGrantsCreator;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
@@ -180,7 +181,8 @@ class SnowflakeProviderTest {
     void setUp() {
         mocks = MockitoAnnotations.openMocks(this);
         // Create a new SnowflakeProvider with the mock services and a ForkJoinPool
-        snowflakeProvider = new SnowflakeProvider(snowflakeStatementsService, snowflakeGrantsService, snowflakeObjectsService, ForkJoinPool.commonPool());
+        DesiredGrantsCreator grantCreator = new DesiredGrantsCreator(snowflakeObjectsService);
+        snowflakeProvider = new SnowflakeProvider(snowflakeStatementsService, snowflakeGrantsService, snowflakeObjectsService, grantCreator, ForkJoinPool.commonPool());
         snowflakeObjectsService.clearCache();
         when(snowflakeObjectsService.objectExists(
                 anyString(),
@@ -234,7 +236,7 @@ class SnowflakeProviderTest {
         PlaybookModel playbookModel = new PlaybookModel(Map.of(params.roleId, params.playbookRoleModel));
         List<CompiledChanges> compiledChangesExpected = params.expected.containsChanges() ? List.of(params.expected) :
                 List.of();
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, true);
         assertEquals(compiledChangesExpected, compiledChangesActual);
     }
 
@@ -295,7 +297,7 @@ class SnowflakeProviderTest {
                         List.of(),
                         List.of(List.of(
                                 "GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE ROLE_B COPY CURRENT GRANTS;"))));
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, true);
         assertEquals(compiledChangesExpected, compiledChangesActual);
     }
 
@@ -354,7 +356,7 @@ class SnowflakeProviderTest {
                         "role-b", "role_b", List.of(), List.of(
                         List.of("GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"mock_table_name_2\" TO ROLE ROLE_B COPY CURRENT GRANTS;"),
                         List.of("GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE ROLE_B COPY CURRENT GRANTS;"))));
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, true);
         assertEquals(compiledChangesExpected, compiledChangesActual);
     }
 
@@ -372,7 +374,7 @@ class SnowflakeProviderTest {
                 "role-a", "role_a", List.of(
                 "CREATE ROLE IF NOT EXISTS ROLE_A;",
                 "GRANT OWNERSHIP ON ROLE ROLE_A TO ROLE SECURITYADMIN COPY CURRENT GRANTS;"), List.of()));
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, true);
         assertEquals(compiledChangesExpected, compiledChangesActual);
     }
 
@@ -426,7 +428,8 @@ class SnowflakeProviderTest {
                 params.existingRoles,
                 false,
                 new PlaybookModel(Map.of("foo", params.playbookRoleModel)),
-                false);
+                false,
+                true);
         assertEquals(params.expected, compiledChangesActual);
     }
 

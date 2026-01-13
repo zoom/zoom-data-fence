@@ -157,7 +157,7 @@
         <dependency>
             <groupId>io.vavr</groupId>
             <artifactId>vavr</artifactId>
-            <version>0.10.4</version>
+            <version>0.11.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.jsqlparser</groupId>
@@ -263,6 +263,30 @@
                         <version>3.5.3</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <java>
+                        <includes>
+                            <include>src/main/java/us/zoom/data/dfence/providers/snowflake/revoke/**/*.java</include>
+                            <include>src/test/java/us/zoom/data/dfence/providers/snowflake/revoke/**/*.java</include>
+                            <include>src/main/java/us/zoom/data/dfence/providers/snowflake/grant/create/**/*.java</include>
+                            <include>src/test/java/us/zoom/data/dfence/providers/snowflake/grant/create/**/*.java</include>
+                            <include>src/main/java/us/zoom/data/dfence/providers/snowflake/consistency/**/*.java</include>
+                            <include>src/test/java/us/zoom/data/dfence/providers/snowflake/consistency/**/*.java</include>
+                        </includes>
+                        <googleJavaFormat>
+                            <version>1.22.0</version>
+                            <style>GOOGLE</style>
+                        </googleJavaFormat>
+                        <removeUnusedImports/>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>
+                    </java>
+                </configuration>
             </plugin>
         </plugins>
     </build>
