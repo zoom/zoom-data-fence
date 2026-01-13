@@ -11,7 +11,6 @@ import us.zoom.data.dfence.CompiledChanges;
 import us.zoom.data.dfence.playbook.model.PlaybookModel;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.playbook.model.PlaybookRoleModel;
-import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeApplicationRoleGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakePermissionGrantBuilder;
@@ -526,37 +525,6 @@ class SnowflakeProviderTest {
         assertEquals(expectedBuilders, actualBuilders);
     }
 
-    @Test
-    void playbookGrantToSnowflakeGrantsApplicationRole() {
-        PlaybookPrivilegeGrant playbookPrivilegeGrant = new PlaybookPrivilegeGrant(
-                "application_role",
-                "snowflake.trust_center_viewer",
-                null,
-                null,
-                List.of("usage"),
-                true,
-                true);
-        String roleName = "mock_role_name";
-        SnowflakeGrantBuilderOptions expectedOptions = new SnowflakeGrantBuilderOptions();
-        expectedOptions.setSuppressErrors(false);
-        List<SnowflakeGrantBuilder> expectedBuilders = List.of(
-                new SnowflakeApplicationRoleGrantBuilder(new SnowflakeGrantModel(
-                        "USAGE",
-                        "APPLICATION_ROLE",
-                        "SNOWFLAKE.TRUST_CENTER_VIEWER",
-                        "ROLE",
-                        "MOCK_ROLE_NAME",
-                        false,
-                        false,
-                        false), expectedOptions));
-        SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
-        options.setSuppressErrors(false);
-        List<SnowflakeGrantBuilder> actualBuilders = this.snowflakeProvider.playbookGrantToSnowflakeGrants(playbookPrivilegeGrant,
-                roleName,
-                options);
-        assertEquals(expectedBuilders.get(0).getKey(), actualBuilders.get(0).getKey());
-        assertEquals(expectedBuilders, actualBuilders);
-    }
 
     @Test
     void standardGrants() {

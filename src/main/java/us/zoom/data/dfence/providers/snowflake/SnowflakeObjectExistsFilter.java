@@ -42,9 +42,6 @@ public class SnowflakeObjectExistsFilter {
                 snowflakeGrantModel.name()))) {
             return true;
         }
-        if (snowflakeGrantModel.grantedOn().equals("APPLICATION_ROLE")) {
-            return true;
-        }
         String objectName;
         SnowflakeObjectType snowflakeObjectType;
         if (snowflakeGrantModel.all() || snowflakeGrantModel.future()) {

@@ -67,7 +67,6 @@ public abstract class SnowflakeGrantBuilder {
                 new SnowflakeAllOwnershipGrantBuilder(normalizedGrant, options),
                 new SnowflakeAllMLPermissionGrantBuilder(normalizedGrant, options),
                 new SnowflakeAllCorePermissionGrantBuilder(normalizedGrant, options),
-                new SnowflakeApplicationRoleGrantBuilder(normalizedGrant, options),
                 new SnowflakeUnsupportedOwnershipManagementGrantBuilder(normalizedGrant, options)};
         for (SnowflakeGrantBuilder builder : snowflakeGrantBuilders) {
             if (builder.isValid()) {

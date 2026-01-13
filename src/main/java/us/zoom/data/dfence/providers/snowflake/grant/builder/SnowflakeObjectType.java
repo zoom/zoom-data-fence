@@ -8,7 +8,6 @@ import java.util.Objects;
 public enum SnowflakeObjectType {
     ACCOUNT(0, null),
     ALERT(3, null),
-    APPLICATION_ROLE(1, null),
     CLASS(1, null),
     CORTEX_AGENT(3, null, "AGENT", "AGENTS"),
     DATABASE(1, null),
