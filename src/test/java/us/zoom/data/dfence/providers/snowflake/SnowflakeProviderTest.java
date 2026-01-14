@@ -18,6 +18,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakePermission
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
+import us.zoom.data.dfence.providers.snowflake.models.PartitionedGrantStatements;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 import java.util.*;
@@ -605,7 +606,7 @@ class SnowflakeProviderTest {
                 "OTHER_DB.OTHER_SCHEMA",
                 SnowflakeObjectType.SCHEMA)).thenReturn(true);
         when(snowflakeGrantsService.getGrants(params.roleName(), false)).thenReturn(params.mockGetGrantsResult);
-        List<List<String>> actualStatements = this.snowflakeProvider.compilePlaybookPrivilegeGrants(
+        PartitionedGrantStatements partitioned = this.snowflakeProvider.compilePlaybookPrivilegeGrants(
                 params.playbookPrivilegeGrants,
                 params.roleName,
                 params.roleExists,
@@ -614,6 +615,9 @@ class SnowflakeProviderTest {
                 new PlaybookModel(Map.of()),
                 false,
                 UnsupportedRevokeBehavior.IGNORE);
+        List<List<String>> actualStatements = new ArrayList<>();
+        actualStatements.addAll(partitioned.ownershipStatements());
+        actualStatements.addAll(partitioned.nonOwnershipStatements());
         try {
             assertEquals(
                     params.expected.stream().flatMap(Collection::stream).toList(),
@@ -641,7 +645,8 @@ class SnowflakeProviderTest {
                 List.of("GRANT SELECT ON FUTURE VIEWS IN SCHEMA \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\" TO ROLE FOO_BAR;"),
                 List.of("GRANT UPDATE ON FUTURE VIEWS IN DATABASE \"MOCK_DB_NAME\" TO ROLE FOO_BAR;"),
                 List.of("GRANT UPDATE ON FUTURE VIEWS IN SCHEMA \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\" TO ROLE FOO_BAR;"));
-        List<List<String>> actualStatements = this.snowflakeProvider.compilePlaybookPrivilegeGrants(playbookPrivilegeGrants,
+        PartitionedGrantStatements partitioned = this.snowflakeProvider.compilePlaybookPrivilegeGrants(
+                playbookPrivilegeGrants,
                 roleName,
                 true,
                 true,
@@ -649,6 +654,9 @@ class SnowflakeProviderTest {
                 new PlaybookModel(Map.of()),
                 false,
                 UnsupportedRevokeBehavior.IGNORE);
+        List<List<String>> actualStatements = new ArrayList<>();
+        actualStatements.addAll(partitioned.ownershipStatements());
+        actualStatements.addAll(partitioned.nonOwnershipStatements());
         assertEquals(expectedStatements, actualStatements);
 
     }

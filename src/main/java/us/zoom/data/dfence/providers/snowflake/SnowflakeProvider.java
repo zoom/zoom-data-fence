@@ -13,9 +13,11 @@ import us.zoom.data.dfence.playbook.model.PlaybookRoleModel;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.GrantBuilderDiff;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeOwnershipGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
+import us.zoom.data.dfence.providers.snowflake.models.PartitionedGrantStatements;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.sql.ObjectName;
 
@@ -154,9 +156,9 @@ public class SnowflakeProvider implements Provider {
     }
 
     public void applyPrivilegeChangesToRole(CompiledChanges compiledChanges) {
-        log.info("Applying {} ownership grants and {} other grants for role {}", 
-            compiledChanges.ownershipGrantStatements().size(), 
-            compiledChanges.roleGrantStatements().size(), 
+        log.info("Applying {} ownership grants and {} non-ownership grants for role {}",
+            compiledChanges.ownershipGrantStatements().size(),
+            compiledChanges.roleGrantStatements().size(),
             compiledChanges.roleName());
         try {
             // First, run ownership grants in parallel
@@ -170,7 +172,7 @@ public class SnowflakeProvider implements Provider {
             
             // Then, run the rest of the grants in parallel
             if (!compiledChanges.roleGrantStatements().isEmpty()) {
-                log.info("Applying {} other grants for role {}", 
+                log.info("Applying {} non-ownership grants for role {}",
                     compiledChanges.roleGrantStatements().size(), compiledChanges.roleName());
                 forkJoinPool.submit(() -> 
                     compiledChanges.roleGrantStatements().parallelStream().forEach(snowflakeStatementsService::applyStatements)
@@ -268,10 +270,11 @@ public class SnowflakeProvider implements Provider {
         } else {
             log.debug("Skipping role creation for role {}.", role.name());
         }
-        List<List<String>> privilegeGrantStatements = new ArrayList<>();
+        List<List<String>> ownershipGrantStatements = new ArrayList<>();
+        List<List<String>> nonOwnershipGrantStatements = new ArrayList<>();
         if (roleWillExist) {
             log.debug("Compiling grants for role {}.", role.name());
-            privilegeGrantStatements.addAll(compilePlaybookPrivilegeGrants(
+            PartitionedGrantStatements partitionedGrantStatements = compilePlaybookPrivilegeGrants(
                     role.grants(),
                     role.name(),
                     roleExists,
@@ -279,28 +282,21 @@ public class SnowflakeProvider implements Provider {
                     consolidateWildcardsToAllGrants,
                     playbookModel,
                     ignoreUnknownGrants,
-                    role.unsupportedRevokeBehavior()));
+                    role.unsupportedRevokeBehavior());
+            ownershipGrantStatements.addAll(partitionedGrantStatements.ownershipStatements());
+            nonOwnershipGrantStatements.addAll(partitionedGrantStatements.nonOwnershipStatements());
         } else {
             log.debug(
                     "Skipping grant statement creation for role {} because it does not exist " + "and is not planned to be created.",
                     role.name());
         }
-        // Separate ownership grants from other grants using partitioningBy
-        Map<Boolean, List<List<String>>> partitionedGrants = privilegeGrantStatements.stream()
-            .collect(Collectors.partitioningBy(
-                statements -> statements.stream()
-                    .anyMatch(stmt -> stmt.toUpperCase().contains("OWNERSHIP"))
-            ));
         
-        List<List<String>> ownershipGrantStatements = partitionedGrants.get(true);
-        List<List<String>> otherGrantStatements = partitionedGrants.get(false);
-        
-        log.debug("{} ownership statements and {} other statements planned for role {}", 
-            ownershipGrantStatements.size(), otherGrantStatements.size(), role.name());
-        return new CompiledChanges(roleId, role.name(), ownershipGrantStatements, roleCreationStatements, otherGrantStatements);
+        log.debug("{} ownership statements and {} non-ownership statements planned for role {}",
+            ownershipGrantStatements.size(), nonOwnershipGrantStatements.size(), role.name());
+        return new CompiledChanges(roleId, role.name(), ownershipGrantStatements, roleCreationStatements, nonOwnershipGrantStatements);
     }
 
-    public List<List<String>> compilePlaybookPrivilegeGrants(
+    PartitionedGrantStatements compilePlaybookPrivilegeGrants(
             List<PlaybookPrivilegeGrant> privilegeGrants,
             String roleName,
             Boolean roleExists,
@@ -318,7 +314,6 @@ public class SnowflakeProvider implements Provider {
                     .flatMap(x -> playbookGrantToSnowflakeGrants(x, roleName, options).stream())
                     .collect(Collectors.toMap(SnowflakeGrantBuilder::getKey, x -> x, (x0, x1) -> x0))
             ).join();
-            List<List<String>> statements = new ArrayList<>();
             Map<String, SnowflakeGrantBuilder> currentGrantBuilders = new HashMap<>();
             if (roleExists) {
                 log.debug("Role exists so we are going to get the current grants.");
@@ -352,15 +347,44 @@ public class SnowflakeProvider implements Provider {
                         roleName);
             }
             grantBuilderDiff = SnowflakeOwnedObjectFilter.filterDiff(grantBuilderDiff, playbookModel);
-            statements.addAll(grantBuilderDiff.revoke().stream().map(SnowflakeGrantBuilder::getRevokeStatements)
-                    .toList());
-            statements.addAll(grantBuilderDiff.grant().stream().map(SnowflakeGrantBuilder::getGrantStatements)
-                    .toList());
-            log.debug("{} changes planned for role {}", statements.size(), roleName);
-            return statements;
+            PartitionedGrantStatements partitionedGrantStatements = partitionGrantsByOwnership(grantBuilderDiff);
+            log.debug("{} ownership grant changes and {} non-ownership changes planned for role {}",
+                    partitionedGrantStatements.ownershipStatements().size(),
+                    partitionedGrantStatements.nonOwnershipStatements().size(), roleName);
+            return partitionedGrantStatements;
         } catch (RuntimeException e) {
             throw new RuntimeException(String.format("Unable to compile role %s due to error %s", roleName, e), e);
         }
+    }
+
+    private PartitionedGrantStatements partitionGrantsByOwnership(GrantBuilderDiff grantBuilderDiff) {
+        Map<Boolean, List<SnowflakeGrantBuilder>> partitionedGrantGrants = grantBuilderDiff.grant().stream()
+                .collect(Collectors.partitioningBy(gb -> gb instanceof SnowflakeOwnershipGrantBuilder));
+        Map<Boolean, List<SnowflakeGrantBuilder>> partitionedRevokeGrants = grantBuilderDiff.revoke().stream()
+                .collect(Collectors.partitioningBy(gb -> gb instanceof SnowflakeOwnershipGrantBuilder));
+        
+        List<SnowflakeGrantBuilder> ownershipGrantBuilders = partitionedGrantGrants.get(true);
+        List<SnowflakeGrantBuilder> nonOwnershipGrantBuilders = partitionedGrantGrants.get(false);
+        List<SnowflakeGrantBuilder> ownershipRevokeBuilders = partitionedRevokeGrants.get(true);
+        List<SnowflakeGrantBuilder> nonOwnershipRevokeBuilders = partitionedRevokeGrants.get(false);
+        
+        List<List<String>> ownershipStatements = new ArrayList<>();
+        ownershipStatements.addAll(ownershipRevokeBuilders.stream()
+                .map(SnowflakeGrantBuilder::getRevokeStatements)
+                .toList());
+        ownershipStatements.addAll(ownershipGrantBuilders.stream()
+                .map(SnowflakeGrantBuilder::getGrantStatements)
+                .toList());
+        
+        List<List<String>> nonOwnershipStatements = new ArrayList<>();
+        nonOwnershipStatements.addAll(nonOwnershipRevokeBuilders.stream()
+                .map(SnowflakeGrantBuilder::getRevokeStatements)
+                .toList());
+        nonOwnershipStatements.addAll(nonOwnershipGrantBuilders.stream()
+                .map(SnowflakeGrantBuilder::getGrantStatements)
+                .toList());
+        
+        return new PartitionedGrantStatements(ownershipStatements, nonOwnershipStatements);
     }
 
     public List<SnowflakeGrantBuilder> playbookGrantToSnowflakeGrants(
