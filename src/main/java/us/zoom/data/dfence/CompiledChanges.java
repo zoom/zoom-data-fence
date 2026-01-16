@@ -5,13 +5,15 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 
 public record CompiledChanges(
-        String roleId, String roleName, List<String> roleCreationStatements, List<List<String>> roleGrantStatements) {
+        String roleId, String roleName, List<List<String>> ownershipGrantStatements,
+        List<String> roleCreationStatements, List<List<String>> roleGrantStatements) {
     public CompiledChanges {
+        ownershipGrantStatements = ImmutableList.copyOf(ownershipGrantStatements);
         roleCreationStatements = ImmutableList.copyOf(roleCreationStatements);
         roleGrantStatements = ImmutableList.copyOf(roleGrantStatements);
     }
 
     public Boolean containsChanges() {
-        return !roleCreationStatements.isEmpty() || !roleGrantStatements.isEmpty();
+        return !ownershipGrantStatements.isEmpty() || !roleCreationStatements.isEmpty() || !roleGrantStatements.isEmpty();
     }
 }
