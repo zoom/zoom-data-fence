@@ -70,7 +70,8 @@ public class SnowflakeWildcardAllGrantFilter {
                             roleName,
                             false,
                             false,
-                            true)).toList();
+                            true,
+                            false)).toList();
             return grants.stream().map(SnowflakeGrantBuilder::fromGrant).toList();
         } else {
             return List.of();

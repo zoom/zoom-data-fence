@@ -73,7 +73,8 @@ public class SnowflakeAccountPermissionGrantBuilder extends SnowflakeGrantBuilde
                 grant.granteeName(),
                 grant.grantOption(),
                 grant.future(),
-                grant.all());
+                grant.all(),
+                grant.isOwnershipGrant());
     }
 
     @Override

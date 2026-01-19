@@ -62,6 +62,7 @@ public class SnowflakeGrantsService {
                                 resultSet.getString("grantee_name"),
                                 resultSet.getBoolean("grant_option"),
                                 isFuture,
+                                false,
                                 false);
                     } catch (ObjectNameException e) {
                         if (ignoreUnknownGrantTypes) {
