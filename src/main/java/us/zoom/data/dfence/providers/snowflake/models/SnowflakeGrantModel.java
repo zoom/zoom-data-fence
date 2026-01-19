@@ -41,10 +41,6 @@ public record SnowflakeGrantModel(
     }
 
     public Boolean isOwnershipGrant() {
-        return computeIsOwnershipGrant(privilege);
-    }
-
-    private static Boolean computeIsOwnershipGrant(String privilege) {
         return "OWNERSHIP".equalsIgnoreCase(privilege.trim());
     }
 
