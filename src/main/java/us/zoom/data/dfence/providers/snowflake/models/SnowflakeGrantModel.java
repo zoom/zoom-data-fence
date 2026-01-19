@@ -11,8 +11,7 @@ public record SnowflakeGrantModel(
         String granteeName,
         Boolean grantOption,
         Boolean future,
-        Boolean all,
-        Boolean isOwnershipGrant) {
+        Boolean all) {
     public SnowflakeGrantModel {
         if (!name.isEmpty()) {
             // Patch for user name not quoted in Snowflake. This looks like a bug in Snowflake where they handle the
@@ -39,7 +38,14 @@ public record SnowflakeGrantModel(
                                 granteeName), e);
             }
         }
-        isOwnershipGrant = "OWNERSHIP".equalsIgnoreCase(privilege.trim());
+    }
+
+    public Boolean isOwnershipGrant() {
+        return computeIsOwnershipGrant(privilege);
+    }
+
+    private static Boolean computeIsOwnershipGrant(String privilege) {
+        return "OWNERSHIP".equalsIgnoreCase(privilege.trim());
     }
 
     public String getEscapedName() {

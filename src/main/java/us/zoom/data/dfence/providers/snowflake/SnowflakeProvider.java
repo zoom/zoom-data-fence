@@ -417,7 +417,7 @@ public class SnowflakeProvider implements Provider {
                 return playbookPrivilegeGrant.privileges().stream().map(p -> new SnowflakeGrantModel(
                         p, playbookPrivilegeGrant.objectType(),
 
-                        objectName, "ROLE", roleName, false, false, false, false)).toList();
+                        objectName, "ROLE", roleName, false, false, false)).toList();
             } else {
                 return List.of();
             }
@@ -532,7 +532,6 @@ public class SnowflakeProvider implements Provider {
                 roleName,
                 grantOption,
                 true,
-                false,
                 false)).toList();
         return grants;
     }
@@ -560,7 +559,6 @@ public class SnowflakeProvider implements Provider {
                 "role",
                 roleName,
                 grantOption,
-                false,
                 false,
                 false))));
         return results;

@@ -49,8 +49,7 @@ public abstract class SnowflakeGrantBuilder {
                 grant.granteeName(),
                 grant.grantOption(),
                 grant.future(),
-                grant.all(),
-                grant.isOwnershipGrant()
+                grant.all()
         );
         SnowflakeGrantBuilder[] snowflakeGrantBuilders = new SnowflakeGrantBuilder[]{
                 new SnowflakeRoleGrantBuilder(normalizedGrant, options),
