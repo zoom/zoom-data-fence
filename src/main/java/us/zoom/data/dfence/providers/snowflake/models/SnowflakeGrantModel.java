@@ -40,6 +40,10 @@ public record SnowflakeGrantModel(
         }
     }
 
+    public Boolean isOwnershipGrant() {
+        return "OWNERSHIP".equalsIgnoreCase(privilege.trim());
+    }
+
     public String getEscapedName() {
         try {
             return ObjectName.quotedObjectName(name);
