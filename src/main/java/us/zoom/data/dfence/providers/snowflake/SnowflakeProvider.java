@@ -13,7 +13,6 @@ import us.zoom.data.dfence.playbook.model.PlaybookRoleModel;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.GrantBuilderDiff;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeOwnershipGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
@@ -359,9 +358,9 @@ public class SnowflakeProvider implements Provider {
 
     private PartitionedGrantStatements partitionGrantsByOwnership(GrantBuilderDiff grantBuilderDiff) {
         Map<Boolean, List<SnowflakeGrantBuilder>> partitionedGrantGrants = grantBuilderDiff.grant().stream()
-                .collect(Collectors.partitioningBy(gb -> gb instanceof SnowflakeOwnershipGrantBuilder));
+                .collect(Collectors.partitioningBy(gb -> gb.getGrant().isOwnershipGrant()));
         Map<Boolean, List<SnowflakeGrantBuilder>> partitionedRevokeGrants = grantBuilderDiff.revoke().stream()
-                .collect(Collectors.partitioningBy(gb -> gb instanceof SnowflakeOwnershipGrantBuilder));
+                .collect(Collectors.partitioningBy(gb -> gb.getGrant().isOwnershipGrant()));
         
         List<SnowflakeGrantBuilder> ownershipGrantBuilders = partitionedGrantGrants.get(true);
         List<SnowflakeGrantBuilder> nonOwnershipGrantBuilders = partitionedGrantGrants.get(false);
