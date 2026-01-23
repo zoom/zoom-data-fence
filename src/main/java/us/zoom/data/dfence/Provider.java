@@ -8,7 +8,10 @@ import java.util.regex.Pattern;
 
 public interface Provider {
 
-    List<CompiledChanges> compileChanges(PlaybookModel playbookModel, Boolean ignoreUnknownChanges);
+    List<CompiledChanges> compileChanges(
+        PlaybookModel playbookModel, 
+        Boolean ignoreUnknownChanges, 
+        Boolean enableGrantRevokeConsistencyCheck);
 
     void applyPrivilegeChanges(List<CompiledChanges> compiledChanges);
 

@@ -28,10 +28,20 @@ public class CompileCommand extends PlaybookCommand {
     @Setter
     private Boolean ignoreUnknownGrants;
 
+    @CommandLine.Option(
+            names = {"--skip-consistency-check"},
+            description = "Skip grant-revoke consistency verification. "
+                + "By default, consistency check is always enabled and will abort if divergence is detected. "
+                + "Use this flag only if you need to bypass the check (NOT RECOMMENDED).",
+            defaultValue = "false")
+    @Setter
+    private Boolean skipConsistencyCheck;
+
     @Override
     public Integer unhandledCall() {
         PlaybookService service = getPlaybookService();
-        ChangesSummary changes = service.compileChanges(ignoreUnknownGrants);
+        Boolean enableGrantRevokeConsistencyCheck = !skipConsistencyCheck;
+        ChangesSummary changes = service.compileChanges(ignoreUnknownGrants, enableGrantRevokeConsistencyCheck);
         String changesOutput = writeChanges(changes);
         System.out.println(changesOutput);
         if (outputFile != null) {

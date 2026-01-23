@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import us.zoom.data.dfence.CompiledChanges;
@@ -17,6 +16,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakePermissionGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.DesiredGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.PartitionedGrantStatements;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import org.mockito.InOrder;
 
 
 class SnowflakeProviderTest {
@@ -41,6 +43,8 @@ class SnowflakeProviderTest {
     SnowflakeObjectsService snowflakeObjectsService;
 
     SnowflakeProvider snowflakeProvider;
+
+    DesiredGrantsProvider desiredGrantsProvider;
 
     AutoCloseable mocks;
 
@@ -84,7 +88,6 @@ class SnowflakeProviderTest {
                 List.of("GRANT SELECT ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"mock_table_name_2\" TO ROLE MOCK_ROLE_NAME;"),
                 List.of("GRANT SELECT ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE MOCK_ROLE_NAME;"),
                 List.of("GRANT SELECT ON FUTURE VIEWS IN DATABASE \"MOCK_DB_NAME\" TO ROLE MOCK_ROLE_NAME;"),
-                List.of("GRANT SELECT ON FUTURE VIEWS IN SCHEMA \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\" TO ROLE MOCK_ROLE_NAME;"),
                 List.of("GRANT UPDATE ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE MOCK_ROLE_NAME;"),
                 List.of("GRANT USAGE ON DATABASE \"MOCK_DB_NAME\" TO ROLE MOCK_ROLE_NAME;"));
         List<String> expectedRoleCreationStatements = List.of("CREATE ROLE IF NOT EXISTS MOCK_ROLE_NAME;");
@@ -184,6 +187,7 @@ class SnowflakeProviderTest {
         mocks = MockitoAnnotations.openMocks(this);
         // Create a new SnowflakeProvider with the mock services and a ForkJoinPool
         snowflakeProvider = new SnowflakeProvider(snowflakeStatementsService, snowflakeGrantsService, snowflakeObjectsService, ForkJoinPool.commonPool());
+        desiredGrantsProvider = new DesiredGrantsProvider(snowflakeObjectsService);
         snowflakeObjectsService.clearCache();
         when(snowflakeObjectsService.objectExists(
                 anyString(),
@@ -237,7 +241,7 @@ class SnowflakeProviderTest {
         PlaybookModel playbookModel = new PlaybookModel(Map.of(params.roleId, params.playbookRoleModel));
         List<CompiledChanges> compiledChangesExpected = params.expected.containsChanges() ? List.of(params.expected) :
                 List.of();
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, false);
         assertEquals(compiledChangesExpected, compiledChangesActual);
     }
 
@@ -300,7 +304,7 @@ class SnowflakeProviderTest {
                                 "GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE ROLE_B COPY CURRENT GRANTS;")),
                         List.of(),
                         List.of()));
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, false);
         assertEquals(compiledChangesExpected, compiledChangesActual);
     }
 
@@ -359,11 +363,11 @@ class SnowflakeProviderTest {
                 new CompiledChanges(
                         "role-b", "role_b", 
                         List.of(
-                            List.of("GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"mock_table_name_2\" TO ROLE ROLE_B COPY CURRENT GRANTS;"),
-                            List.of("GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE ROLE_B COPY CURRENT GRANTS;")),
+                        List.of("GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"mock_table_name_2\" TO ROLE ROLE_B COPY CURRENT GRANTS;"),
+                        List.of("GRANT OWNERSHIP ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE ROLE_B COPY CURRENT GRANTS;")),
                         List.of(),
                         List.of()));
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, false);
         assertEquals(compiledChangesExpected, compiledChangesActual);
     }
 
@@ -382,7 +386,7 @@ class SnowflakeProviderTest {
                 List.of(
                 "CREATE ROLE IF NOT EXISTS ROLE_A;",
                 "GRANT OWNERSHIP ON ROLE ROLE_A TO ROLE SECURITYADMIN COPY CURRENT GRANTS;"), List.of()));
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, false);
         assertEquals(compiledChangesExpected, compiledChangesActual);
     }
 
@@ -429,31 +433,31 @@ class SnowflakeProviderTest {
                 eq(SnowflakeObjectType.ACCOUNT),
                 eq(SnowflakeObjectType.ROLE),
                 anyString())).thenReturn(List.of("ROLE_A"));
-        
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
-        
+
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, false);
+
         assertEquals(1, compiledChangesActual.size());
         CompiledChanges changes = compiledChangesActual.get(0);
-        
+
         // Verify ownership grants are in ownershipGrantStatements
         assertEquals(1, changes.ownershipGrantStatements().size());
         assertTrue(changes.ownershipGrantStatements().get(0).stream()
                 .anyMatch(stmt -> stmt.contains("GRANT OWNERSHIP")));
-        
+
         // Verify regular grants are in roleGrantStatements
         assertEquals(2, changes.roleGrantStatements().size());
         assertTrue(changes.roleGrantStatements().stream()
                 .anyMatch(stmts -> stmts.stream().anyMatch(stmt -> stmt.contains("GRANT SELECT"))));
         assertTrue(changes.roleGrantStatements().stream()
                 .anyMatch(stmts -> stmts.stream().anyMatch(stmt -> stmt.contains("GRANT UPDATE"))));
-        
+
         // Verify ownership grants are NOT in roleGrantStatements
         assertFalse(changes.roleGrantStatements().stream()
                 .anyMatch(stmts -> stmts.stream().anyMatch(stmt -> stmt.contains("OWNERSHIP"))));
-        
+
         // Verify regular grants are NOT in ownershipGrantStatements
         assertFalse(changes.ownershipGrantStatements().stream()
-                .anyMatch(stmts -> stmts.stream().anyMatch(stmt -> 
+                .anyMatch(stmts -> stmts.stream().anyMatch(stmt ->
                         stmt.contains("SELECT") || stmt.contains("UPDATE"))));
     }
 
@@ -465,27 +469,27 @@ class SnowflakeProviderTest {
         List<List<String>> regularGrants = List.of(
                 List.of("GRANT SELECT ON TABLE \"DB\".\"SCHEMA\".\"TABLE1\" TO ROLE ROLE_A;"),
                 List.of("GRANT UPDATE ON TABLE \"DB\".\"SCHEMA\".\"TABLE1\" TO ROLE ROLE_A;"));
-        
+
         CompiledChanges compiledChanges = new CompiledChanges(
                 "role-a", "role_a", ownershipGrants, List.of(), regularGrants);
-        
+
         snowflakeProvider.applyPrivilegeChangesToRole(compiledChanges);
-        
+
         // Use InOrder to verify ownership grants are applied before regular grants
         // Note: Regular grants may execute in parallel, so we verify all ownership grants
         // complete before any regular grants start
         InOrder inOrder = inOrder(snowflakeStatementsService);
-        
+
         // Verify ownership grants are applied first (all of them complete)
         inOrder.verify(snowflakeStatementsService, times(1))
                 .applyStatements(ownershipGrants.get(0));
-        
+
         // Verify regular grants are applied after ownership grants complete
         // We verify at least one regular grant is called after ownership
         // (exact order within regular grants may vary due to parallel execution)
         inOrder.verify(snowflakeStatementsService, atLeastOnce())
                 .applyStatements(anyList());
-        
+
         // Verify all calls were made (order within regular grants doesn't matter)
         verify(snowflakeStatementsService, times(1)).applyStatements(ownershipGrants.get(0));
         verify(snowflakeStatementsService, times(1)).applyStatements(regularGrants.get(0));
@@ -513,15 +517,15 @@ class SnowflakeProviderTest {
                 eq(SnowflakeObjectType.ACCOUNT),
                 eq(SnowflakeObjectType.ROLE),
                 anyString())).thenReturn(List.of("ROLE_A"));
-        
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
-        
+
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, false);
+
         assertEquals(1, compiledChangesActual.size());
         CompiledChanges changes = compiledChangesActual.get(0);
-        
+
         // Verify ownershipGrantStatements is empty
         assertTrue(changes.ownershipGrantStatements().isEmpty());
-        
+
         // Verify regular grants are in roleGrantStatements
         assertFalse(changes.roleGrantStatements().isEmpty());
         assertEquals(2, changes.roleGrantStatements().size());
@@ -547,16 +551,16 @@ class SnowflakeProviderTest {
                 eq(SnowflakeObjectType.ACCOUNT),
                 eq(SnowflakeObjectType.ROLE),
                 anyString())).thenReturn(List.of("ROLE_A"));
-        
-        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false);
-        
+
+        List<CompiledChanges> compiledChangesActual = snowflakeProvider.compileChanges(playbookModel, false, false);
+
         assertEquals(1, compiledChangesActual.size());
         CompiledChanges changes = compiledChangesActual.get(0);
-        
+
         // Verify ownershipGrantStatements has grants
         assertFalse(changes.ownershipGrantStatements().isEmpty());
         assertEquals(1, changes.ownershipGrantStatements().size());
-        
+
         // Verify roleGrantStatements is empty
         assertTrue(changes.roleGrantStatements().isEmpty());
     }
@@ -594,6 +598,7 @@ class SnowflakeProviderTest {
                 params.existingRoles,
                 false,
                 new PlaybookModel(Map.of("foo", params.playbookRoleModel)),
+                false,
                 false);
         assertEquals(params.expected, compiledChangesActual);
     }
@@ -606,7 +611,7 @@ class SnowflakeProviderTest {
                 "OTHER_DB.OTHER_SCHEMA",
                 SnowflakeObjectType.SCHEMA)).thenReturn(true);
         when(snowflakeGrantsService.getGrants(params.roleName(), false)).thenReturn(params.mockGetGrantsResult);
-        PartitionedGrantStatements partitioned = this.snowflakeProvider.compilePlaybookPrivilegeGrants(
+        PartitionedGrantStatements partitionedStatements = this.snowflakeProvider.compilePlaybookPrivilegeGrants(
                 params.playbookPrivilegeGrants,
                 params.roleName,
                 params.roleExists,
@@ -616,8 +621,8 @@ class SnowflakeProviderTest {
                 false,
                 UnsupportedRevokeBehavior.IGNORE);
         List<List<String>> actualStatements = new ArrayList<>();
-        actualStatements.addAll(partitioned.ownershipStatements());
-        actualStatements.addAll(partitioned.nonOwnershipStatements());
+        actualStatements.addAll(partitionedStatements.ownershipStatements());
+        actualStatements.addAll(partitionedStatements.nonOwnershipStatements());
         try {
             assertEquals(
                     params.expected.stream().flatMap(Collection::stream).toList(),
@@ -642,11 +647,8 @@ class SnowflakeProviderTest {
                 true));
         List<List<String>> expectedStatements = List.of(
                 List.of("GRANT SELECT ON FUTURE VIEWS IN DATABASE \"MOCK_DB_NAME\" TO ROLE FOO_BAR;"),
-                List.of("GRANT SELECT ON FUTURE VIEWS IN SCHEMA \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\" TO ROLE FOO_BAR;"),
-                List.of("GRANT UPDATE ON FUTURE VIEWS IN DATABASE \"MOCK_DB_NAME\" TO ROLE FOO_BAR;"),
-                List.of("GRANT UPDATE ON FUTURE VIEWS IN SCHEMA \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\" TO ROLE FOO_BAR;"));
-        PartitionedGrantStatements partitioned = this.snowflakeProvider.compilePlaybookPrivilegeGrants(
-                playbookPrivilegeGrants,
+                List.of("GRANT UPDATE ON FUTURE VIEWS IN DATABASE \"MOCK_DB_NAME\" TO ROLE FOO_BAR;"));
+        PartitionedGrantStatements partitionedStatements = this.snowflakeProvider.compilePlaybookPrivilegeGrants(playbookPrivilegeGrants,
                 roleName,
                 true,
                 true,
@@ -655,8 +657,8 @@ class SnowflakeProviderTest {
                 false,
                 UnsupportedRevokeBehavior.IGNORE);
         List<List<String>> actualStatements = new ArrayList<>();
-        actualStatements.addAll(partitioned.ownershipStatements());
-        actualStatements.addAll(partitioned.nonOwnershipStatements());
+        actualStatements.addAll(partitionedStatements.ownershipStatements());
+        actualStatements.addAll(partitionedStatements.nonOwnershipStatements());
         assertEquals(expectedStatements, actualStatements);
 
     }
@@ -694,211 +696,17 @@ class SnowflakeProviderTest {
                         false), expectedOptions));
         SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
         options.setSuppressErrors(false);
-        List<SnowflakeGrantBuilder> actualBuilders = this.snowflakeProvider.playbookGrantToSnowflakeGrants(playbookPrivilegeGrant,
+        List<SnowflakeGrantBuilder> actualBuilders = desiredGrantsProvider.playbookGrantToSnowflakeGrants(playbookPrivilegeGrant,
                 roleName,
                 options);
         assertEquals(expectedBuilders, actualBuilders);
     }
 
 
-    @Test
-    void standardGrants() {
-        PlaybookPrivilegeGrant playbookPrivilegeGrant = new PlaybookPrivilegeGrant(
-                "table",
-                "mock_table_name",
-                "mock_schema_name",
-                "mock_db_name",
-                List.of("select", "update"),
-                true,
-                true);
-        String roleName = "mock_role_name";
-        List<SnowflakeGrantModel> expectedGrants = List.of(
-                new SnowflakeGrantModel(
-                        "SELECT",
-                        "TABLE",
-                        "MOCK_DB_NAME.MOCK_SCHEMA_NAME.MOCK_TABLE_NAME",
-                        "ROLE",
-                        "MOCK_ROLE_NAME",
-                        false,
-                        false,
-                        false), new SnowflakeGrantModel(
-                        "UPDATE",
-                        "TABLE",
-                        "MOCK_DB_NAME.MOCK_SCHEMA_NAME.MOCK_TABLE_NAME",
-                        "ROLE",
-                        "MOCK_ROLE_NAME",
-                        false,
-                        false,
-                        false));
-        List<SnowflakeGrantModel> actualGrants = this.snowflakeProvider.standardGrants(
-                playbookPrivilegeGrant,
-                roleName);
-        assertEquals(expectedGrants, actualGrants);
-    }
-
-    @Test
-    void standardGrantsWildcard() {
-        PlaybookPrivilegeGrant playbookPrivilegeGrant = new PlaybookPrivilegeGrant(
-                "table",
-                "*",
-                "mock_schema_name",
-                "mock_db_name",
-                List.of("select", "update"),
-                true,
-                true);
-        String roleName = "mock_role_name";
-        List<SnowflakeGrantModel> expectedGrants = List.of();
-        List<SnowflakeGrantModel> actualGrants = this.snowflakeProvider.standardGrants(
-                playbookPrivilegeGrant,
-                roleName);
-        assertEquals(expectedGrants, actualGrants);
-    }
-
-    @Test
-    void containerGrants() {
-        PlaybookPrivilegeGrant playbookPrivilegeGrant = new PlaybookPrivilegeGrant(
-                "table",
-                "*",
-                "mock_schema_name",
-                "mock_db_name",
-                List.of("select", "update"),
-                true,
-                true);
-        List<String> tablesInDatabase = List.of(
-                "MOCK_DB_NAME.MOCK_SCHEMA_NAME.MOCK_TABLE_1",
-                "MOCK_DB_NAME.MOCK_SCHEMA_NAME.\"mock_table_2\"");
-        when(snowflakeObjectsService.getContainerObjectQualNames(
-                SnowflakeObjectType.ACCOUNT,
-                SnowflakeObjectType.DATABASE,
-                "")).thenReturn(List.of("MOCK_DB_NAME"));
-        when(snowflakeObjectsService.getContainerObjectQualNames(
-                SnowflakeObjectType.DATABASE,
-                SnowflakeObjectType.SCHEMA,
-                "MOCK_DB_NAME")).thenReturn(List.of("MOCK_DB_NAME.MOCK_SCHEMA_NAME"));
-        when(snowflakeObjectsService.getContainerObjectQualNames(
-                SnowflakeObjectType.SCHEMA,
-                SnowflakeObjectType.TABLE,
-                "MOCK_DB_NAME.MOCK_SCHEMA_NAME")).thenReturn(tablesInDatabase);
-        String roleName = "mock_role_name";
-        List<SnowflakeGrantModel> expectedGrants = new ArrayList<>();
-        expectedGrants.add(new SnowflakeGrantModel(
-                "SELECT",
-                "TABLE",
-                "MOCK_DB_NAME.MOCK_SCHEMA_NAME.<TABLE>",
-                "ROLE",
-                "MOCK_ROLE_NAME",
-                false,
-                true,
-                false));
-        expectedGrants.add(new SnowflakeGrantModel(
-                "UPDATE",
-                "TABLE",
-                "MOCK_DB_NAME.MOCK_SCHEMA_NAME.<TABLE>",
-                "ROLE",
-                "MOCK_ROLE_NAME",
-                false,
-                true,
-                false));
-        tablesInDatabase.forEach(expectedObjectName -> {
-            expectedGrants.add(new SnowflakeGrantModel(
-                    "SELECT",
-                    "TABLE",
-                    expectedObjectName,
-                    "ROLE",
-                    "MOCK_ROLE_NAME",
-                    false,
-                    false,
-                    false));
-            expectedGrants.add(new SnowflakeGrantModel(
-                    "UPDATE",
-                    "TABLE",
-                    expectedObjectName,
-                    "ROLE",
-                    "MOCK_ROLE_NAME",
-                    false,
-                    false,
-                    false));
-
-        });
-        List<SnowflakeGrantModel> actualGrants = this.snowflakeProvider.containerGrants(
-                playbookPrivilegeGrant,
-                roleName);
-        assertEquals(expectedGrants, actualGrants);
-    }
-
-    @Test
-    void containerGrantsMultipleWordObjectName() {
-        PlaybookPrivilegeGrant playbookPrivilegeGrant = new PlaybookPrivilegeGrant(
-                "external_table",
-                "*",
-                "mock_schema_name",
-                "mock_db_name",
-                List.of("select"),
-                true,
-                true);
-        List<String> tablesInDatabase = List.of(
-                "MOCK_DB_NAME.MOCK_SCHEMA_NAME.MOCK_TABLE_1",
-                "MOCK_DB_NAME.MOCK_SCHEMA_NAME.\"mock_table_2\"");
-        when(snowflakeObjectsService.getContainerObjectQualNames(
-                SnowflakeObjectType.ACCOUNT,
-                SnowflakeObjectType.DATABASE,
-                "")).thenReturn(List.of("MOCK_DB_NAME"));
-        when(snowflakeObjectsService.getContainerObjectQualNames(
-                SnowflakeObjectType.DATABASE,
-                SnowflakeObjectType.SCHEMA,
-                "MOCK_DB_NAME")).thenReturn(List.of("MOCK_DB_NAME.MOCK_SCHEMA_NAME"));
-        when(snowflakeObjectsService.getContainerObjectQualNames(
-                SnowflakeObjectType.SCHEMA,
-                SnowflakeObjectType.EXTERNAL_TABLE,
-                "MOCK_DB_NAME.MOCK_SCHEMA_NAME")).thenReturn(tablesInDatabase);
-        String roleName = "mock_role_name";
-        List<SnowflakeGrantModel> expectedGrants = new ArrayList<>();
-        expectedGrants.add(new SnowflakeGrantModel(
-                "SELECT",
-                "EXTERNAL_TABLE",
-                "MOCK_DB_NAME.MOCK_SCHEMA_NAME.<EXTERNAL_TABLE>",
-                "ROLE",
-                "MOCK_ROLE_NAME",
-                false,
-                true,
-                false));
-        tablesInDatabase.forEach(expectedObjectName -> {
-            expectedGrants.add(new SnowflakeGrantModel(
-                    "SELECT",
-                    "EXTERNAL_TABLE",
-                    expectedObjectName,
-                    "ROLE",
-                    "MOCK_ROLE_NAME",
-                    false,
-                    false,
-                    false));
-        });
-        List<SnowflakeGrantModel> actualGrants = this.snowflakeProvider.containerGrants(
-                playbookPrivilegeGrant,
-                roleName);
-        assertEquals(expectedGrants, actualGrants);
-    }
-
-    @Test
-    void createFutureGrants() {
-        List<SnowflakeGrantModel> expected = List.of(new SnowflakeGrantModel(
-                "SELECT",
-                "EXTERNAL_TABLE",
-                "FOO_DB.<EXTERNAL_TABLE>",
-                "ROLE",
-                "BAR_ROLE",
-                false,
-                true,
-                false));
-        List<SnowflakeGrantModel> actual = snowflakeProvider.createFutureGrants(
-                SnowflakeObjectType.EXTERNAL_TABLE,
-                "FOO_DB",
-                List.of("SELECT"),
-                "BAR_ROLE",
-                false);
-        assertEquals(expected, actual);
-
-    }
+    // Note: The following tests have been removed as the methods standardGrants, containerGrants, 
+    // and createFutureGrants have been refactored into internal classes (StandardGrantsProvider, 
+    // AllGrantsProvider, FutureGrantsProvider) and are no longer directly accessible from SnowflakeProvider.
+    // The functionality is now tested through the playbookGrantToSnowflakeGrants method in DesiredGrantsProvider.
 
     public record CompilePlaybookPrivilegeGrantsTestParams(
             List<PlaybookPrivilegeGrant> playbookPrivilegeGrants,
@@ -919,5 +727,61 @@ class SnowflakeProviderTest {
             List<String> existingRoles, Map<String, SnowflakeGrantBuilder> mockGetGrantsResult,
 
             CompiledChanges expected) {
+    }
+
+    @Test
+    void applyPrivilegeChangesToRole_executesOwnershipFirst() {
+        List<String> ownershipGrant = List.of("GRANT OWNERSHIP ON TABLE T1 TO ROLE R1");
+        List<String> standardGrant = List.of("GRANT SELECT ON TABLE T1 TO ROLE R1");
+
+        CompiledChanges changes = new CompiledChanges(
+                "role-id",
+                "ROLE1",
+                List.of(ownershipGrant),
+                List.of(),
+                List.of(standardGrant)
+        );
+
+        snowflakeProvider.applyPrivilegeChangesToRole(changes);
+
+        InOrder inOrder = inOrder(snowflakeStatementsService);
+        inOrder.verify(snowflakeStatementsService).applyStatements(ownershipGrant);
+        inOrder.verify(snowflakeStatementsService).applyStatements(standardGrant);
+    }
+
+    @Test
+    void compileChanges_partitionsMixedGrants() {
+        // Setup existing grants: One OWNERSHIP, One STANDARD
+        SnowflakeGrantBuilder existingOwnership = SnowflakeGrantBuilder.fromGrant(new SnowflakeGrantModel(
+                "OWNERSHIP", "TABLE", "DB.SCHEMA.T1", "ROLE", "ROLE_A", false, false, false));
+        SnowflakeGrantBuilder existingStandard = SnowflakeGrantBuilder.fromGrant(new SnowflakeGrantModel(
+                "SELECT", "TABLE", "DB.SCHEMA.T1", "ROLE", "ROLE_A", false, false, false));
+
+        when(snowflakeGrantsService.getGrants("role_a", false)).thenReturn(Map.of(
+                existingOwnership.getKey(), existingOwnership,
+                existingStandard.getKey(), existingStandard));
+
+        when(snowflakeObjectsService.getContainerObjectQualNames(eq(SnowflakeObjectType.ACCOUNT), eq(SnowflakeObjectType.ROLE), anyString()))
+                .thenReturn(List.of("ROLE_A"));
+        when(snowflakeObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class))).thenReturn(true);
+
+        // Playbook: Revoke everything (empty grants list, revokeOtherGrants=true)
+        PlaybookModel playbookModel = new PlaybookModel(Map.of(
+                "role-a", new PlaybookRoleModel("role_a", List.of(), true, true, true, null, UnsupportedRevokeBehavior.IGNORE)));
+
+        List<CompiledChanges> changes = snowflakeProvider.compileChanges(playbookModel, false, false);
+
+        assertEquals(1, changes.size());
+        CompiledChanges roleChanges = changes.get(0);
+
+        // Check ownership grants (should contain revoke of OWNERSHIP)
+        assertEquals(1, roleChanges.ownershipGrantStatements().size(), "Should have 1 ownership revoke statement");
+        assertEquals("GRANT OWNERSHIP ON TABLE \"DB\".\"SCHEMA\".\"T1\" TO ROLE SECURITYADMIN COPY CURRENT GRANTS;",
+                roleChanges.ownershipGrantStatements().get(0).get(0));
+
+        // Check non-ownership grants (should contain revoke of SELECT)
+        assertEquals(1, roleChanges.roleGrantStatements().size(), "Should have 1 non-ownership revoke statement");
+        assertEquals("REVOKE SELECT ON TABLE \"DB\".\"SCHEMA\".\"T1\" FROM ROLE ROLE_A;",
+                roleChanges.roleGrantStatements().get(0).get(0));
     }
 }

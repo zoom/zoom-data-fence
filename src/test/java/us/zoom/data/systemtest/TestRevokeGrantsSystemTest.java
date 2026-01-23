@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.testng.Assert;
 import org.testng.annotations.*;
 import us.zoom.data.dfence.ChangesSummary;
+import us.zoom.data.dfence.CompiledChanges;
 import us.zoom.data.dfence.playbook.PlaybookService;
 import us.zoom.data.dfence.playbook.PlaybookServiceBuilder;
 import us.zoom.data.dfence.test.fixtures.TestRunFixture;
@@ -19,16 +20,17 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * System test for table and procedure grants.
+ * System test for revoke functionality.
+ * Creates extra grants not covered by playbook, runs revoke to remove only the extra grants.
  * Uses unique naming to avoid collisions with other tests.
  */
 @Slf4j
-public class TestRunSystemTest extends BaseGrantSystemTest {
+public class TestRevokeGrantsSystemTest extends BaseGrantSystemTest {
 
     private TestRunFixture fixture;
 
-    @BeforeGroups(groups = {"a"})
-    public void beforeGroupsA() {
+    @BeforeGroups(groups = {"revoke"})
+    public void beforeGroupsRevoke() {
         fixture = new TestRunFixtureBuilder(
                 sysadminSnowflakeConnectionProvider,
                 securityadminSnowflakeConnectionProvider)
@@ -41,8 +43,8 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         log.info("Test fixture setup complete for {}", this.getClass().getSimpleName());
     }
 
-    @AfterGroups(groups = {"a"})
-    public void afterGroupsA() throws SQLException {
+    @AfterGroups(groups = {"revoke"})
+    public void afterGroupsRevoke() throws SQLException {
         if (fixture == null) {
             return; // Nothing to clean up
         }
@@ -63,16 +65,15 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         fixture.lifecycleManager().teardown();
     }
 
-
-    // Test state - stored as instance variables instead of ITestContext
+    // Test state - stored as instance variables
     private ChangesSummary changes;
     private PlaybookService playbookService;
     private Map<String, String> variables;
     private ChangesSummary revokeChanges;
     private PlaybookService revokePlaybookService;
 
-    @Test(groups = {"a"})
-    public void testCompile() throws URISyntaxException {
+    @Test(groups = {"revoke"})
+    public void testCompileInitialGrants() throws URISyntaxException {
         // Grant permissions to SYSADMIN role for the test objects
         try (Connection connection = securityadminSnowflakeConnectionProvider.getConnection()) {
             connection.createStatement().execute(
@@ -88,7 +89,7 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         }
 
         File rolesFile = new File(Objects.requireNonNull(this.getClass().getClassLoader()
-                .getResource("test-data/system-test/roles.yml")).toURI());
+                .getResource("test-data/system-test/revoke-grants/roles.yml")).toURI());
         File profilesFile = new File(Objects.requireNonNull(this.getClass().getClassLoader()
                 .getResource("test-data/system-test/profiles.yml")).toURI());
 
@@ -118,27 +119,19 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         return vars;
     }
 
-    @Test(dependsOnMethods = {"testCompile"}, groups = {"a"})
-    public void testApply() throws SQLException {
+    @Test(dependsOnMethods = {"testCompileInitialGrants"}, groups = {"revoke"})
+    public void testApplyInitialGrants() throws SQLException {
+        log.error("*****************APPLYING CREATE GRANTS " + changes.changes());
         playbookService.applyChanges(changes.changes());
 
         // Ensure that there are no more changes.
         ChangesSummary newChanges = playbookService.compileChanges(false, false);
         Assert.assertTrue(newChanges.changes().isEmpty(), "Expected no remaining changes after apply");
 
-        // Validate that the role has the expected grants.
+        // Validate that the role has the expected grants from playbook.
         List<Grant> grantsExpected = new ArrayList<>(List.of(
                 new Grant("USAGE", "DATABASE", fixture.databaseName(), "ROLE", fixture.roleName()),
-                new Grant("MONITOR", "DATABASE", fixture.databaseName(), "ROLE", fixture.roleName()),
-                new Grant("USAGE", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
-                new Grant("MONITOR", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
-                new Grant("CREATE SEMANTIC VIEW", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
-                new Grant("SELECT", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName()),
-                new Grant("OWNERSHIP", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName()),
-                new Grant("USAGE", "PROCEDURE", fixture.procedureNameShowGrantsQual(), "ROLE", fixture.roleName()),
-                new Grant("USAGE", "PROCEDURE", fixture.procedureNameNoArgsShowGrantsQual(), "ROLE", fixture.roleName()),
-                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameShowGrantsQual(), "ROLE", fixture.roleName()),
-                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameNoArgsShowGrantsQual(), "ROLE", fixture.roleName())
+                new Grant("SELECT", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName())
         ));
         grantsExpected.sort(Comparator.comparing(x -> x.toString().hashCode()));
 
@@ -146,7 +139,33 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         assertGrantsMatch(grants, grantsExpected);
     }
 
-    @Test(dependsOnMethods = {"testApply"}, groups = {"a"})
+    @Test(dependsOnMethods = {"testApplyInitialGrants"}, groups = {"revoke"})
+    public void testCreateExtraGrants() throws SQLException {
+        // Create extra grants NOT covered by the playbook
+        try (Connection connection = securityadminSnowflakeConnectionProvider.getConnection()) {
+            // Grant MONITOR on database (not in playbook)
+            connection.createStatement().execute(
+                    String.format("GRANT MONITOR ON DATABASE %s TO ROLE %s",
+                            fixture.databaseName(), fixture.roleName())
+            );
+            // Grant USAGE on schema (not in playbook)
+            connection.createStatement().execute(
+                    String.format("GRANT USAGE ON SCHEMA \"%s\".\"%s\" TO ROLE %s",
+                            fixture.databaseName(), fixture.schemaName(), fixture.roleName())
+            );
+            // Grant INSERT on table (not in playbook, only SELECT is in playbook)
+            connection.createStatement().execute(
+                    String.format("GRANT INSERT ON TABLE \"%s\".\"%s\".\"%s\" TO ROLE %s",
+                            fixture.databaseName(), fixture.schemaName(), fixture.tableName(), fixture.roleName())
+            );
+        }
+
+        // Verify extra grants are now present
+        List<Grant> grantsAfterExtra = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
+        Assert.assertTrue(grantsAfterExtra.size() > 2, "Expected extra grants to be present");
+    }
+
+    @Test(dependsOnMethods = {"testCreateExtraGrants"}, groups = {"revoke"})
     public void testCompileRevoke() throws SQLException, URISyntaxException {
         // Grant the test role to SYSADMIN so it can revoke grants
         try (Connection connection = securityadminSnowflakeConnectionProvider.getConnection()) {
@@ -156,7 +175,7 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         }
         
         File rolesFile = new File(Objects.requireNonNull(this.getClass().getClassLoader()
-                .getResource("test-data/system-test/roles_no_grants.yml")).toURI());
+                .getResource("test-data/system-test/revoke-grants/roles.yml")).toURI());
         File profilesFile = new File(Objects.requireNonNull(this.getClass().getClassLoader()
                 .getResource("test-data/system-test/profiles.yml")).toURI());
         
@@ -166,26 +185,44 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
                 .setProfilesYamlString(profilesFile)
                 .build();
         revokeChanges = revokePlaybookService.compileChanges(false, false);
-        Assert.assertFalse(revokeChanges.changes().isEmpty(), "No changes found. Revokes are expected.");
+
+        System.out.println("LEFT OVER1" + revokeChanges.changes());
+
+        // Verify that revoke changes are generated (should revoke the extra grants)
+        Assert.assertFalse(revokeChanges.changes().isEmpty(), "Expected revoke changes to be generated");
+        
+        // Validate that SQL statements are generated for revoke
+        for (CompiledChanges change : revokeChanges.changes()) {
+            // Check that revoke statements are present in the changes
+            // The revoke statements should be in the ownershipGrantStatements or roleGrantStatements
+            boolean hasStatements = !change.ownershipGrantStatements().isEmpty() || 
+                                   !change.roleGrantStatements().isEmpty();
+            if (hasStatements) {
+                log.info("LEFT OVER" + change.toString());
+            }
+            Assert.assertTrue(hasStatements, "Expected valid SQL statements to be generated for revoke");
+            
+            // Log the statements for debugging
+            log.info("Revoke changes for role {}: ownership statements: {}, role statements: {}", 
+                    change.roleName(), 
+                    change.ownershipGrantStatements().size(),
+                    change.roleGrantStatements().size());
+        }
     }
 
-    @Test(dependsOnMethods = {"testCompileRevoke"}, groups = {"a"})
+    @Test(dependsOnMethods = {"testCompileRevoke"}, groups = {"revoke"})
     public void testApplyRevoke() throws SQLException, InterruptedException, JsonProcessingException {
+        System.out.println("***********APPLYING REVOKE GRANTS " + revokeChanges.changes());
         revokePlaybookService.applyChanges(revokeChanges.changes());
 
-        // Validate that role1 has no grants (all revoked)
-        List<Grant> grantsExpectedRole1 = new ArrayList<>(List.of());
-        grantsExpectedRole1.sort(Comparator.comparing(x -> x.toString().hashCode()));
-
-        // Validate that role2 has ownership grants (transferred from role1)
-        List<Grant> grantsExpectedRole2 = new ArrayList<>(List.of(
-                new Grant("OWNERSHIP", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName2()),
-                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameShowGrantsQual(), "ROLE", fixture.roleName2()),
-                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameNoArgsShowGrantsQual(), "ROLE", fixture.roleName2())
+        // Validate that only playbook grants remain (extra grants should be revoked)
+        List<Grant> grantsExpected = new ArrayList<>(List.of(
+                new Grant("USAGE", "DATABASE", fixture.databaseName(), "ROLE", fixture.roleName()),
+                new Grant("SELECT", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName())
         ));
-        grantsExpectedRole2.sort(Comparator.comparing(x -> x.toString().hashCode()));
+        grantsExpected.sort(Comparator.comparing(x -> x.toString().hashCode()));
 
-        // Snowflake appears to have eventual consistency on this metadata after the ownership change.
+        // Snowflake appears to have eventual consistency on this metadata after the revoke.
         // We need to wait for the metadata to catch up.
         int timeoutSeconds = 60;
         LocalDateTime now = LocalDateTime.now();
@@ -193,14 +230,8 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         boolean success = false;
         while (LocalDateTime.now().isBefore(maxTime.plusSeconds(10)) && !success) {
             try {
-                // Verify role1 has no grants
-                List<Grant> grantsRole1 = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
-                assertGrantsMatch(grantsRole1, grantsExpectedRole1);
-
-                // Verify role2 has ownership grants
-                List<Grant> grantsRole2 = getRoleGrants(fixture.roleName2(), securityadminSnowflakeConnectionProvider);
-                assertGrantsMatch(grantsRole2, grantsExpectedRole2);
-                
+                List<Grant> grants = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
+                assertGrantsMatch(grants, grantsExpected);
                 success = true;
             } catch (AssertionError e) {
                 if (LocalDateTime.now().isAfter(maxTime)) {
@@ -213,4 +244,5 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
             }
         }
     }
+
 }
