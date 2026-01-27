@@ -69,4 +69,42 @@ class SnowflakeGrantModelTest {
                 false,
                 false);
     }
+
+    @Test
+    void futureGrantNormalizationAgentMapsToCortexAgent() {
+        String input = "MOCK_DB.MOCK_SCHEMA.<AGENT>";
+        String normalized = SnowflakeGrantModel.normalizeFutureGrantName(input, "CORTEX_AGENT", true);
+        assertEquals("MOCK_DB.MOCK_SCHEMA.<CORTEX_AGENT>", normalized);
+    }
+
+    @Test
+    void futureGrantNormalizationKeepsCortexAgent() {
+        String input = "MOCK_DB.MOCK_SCHEMA.<CORTEX_AGENT>";
+        String normalized = SnowflakeGrantModel.normalizeFutureGrantName(input, "CORTEX_AGENT",  true);
+        assertEquals("MOCK_DB.MOCK_SCHEMA.<CORTEX_AGENT>", normalized);
+    }
+
+    @Test
+    void futureGrantNormalizationKeepsTableViewProcedure() {
+        assertEquals("MOCK_DB.MOCK_SCHEMA.<TABLE>",
+                SnowflakeGrantModel.normalizeFutureGrantName("MOCK_DB.MOCK_SCHEMA.<TABLE>", "TABLE", true));
+        assertEquals("MOCK_DB.MOCK_SCHEMA.<VIEW>",
+                SnowflakeGrantModel.normalizeFutureGrantName("MOCK_DB.MOCK_SCHEMA.<VIEW>", "VIEW", true));
+        assertEquals("MOCK_DB.MOCK_SCHEMA.<PROCEDURE>",
+                SnowflakeGrantModel.normalizeFutureGrantName("MOCK_DB.MOCK_SCHEMA.<PROCEDURE>", "PROCEDURE", true));
+    }
+
+    @Test
+    void constructorStoresNormalizedFutureGrantName() {
+        SnowflakeGrantModel model = new SnowflakeGrantModel(
+                "USAGE",
+                "CORTEX_AGENT",
+                "MOCK_DB.MOCK_SCHEMA.<AGENT>",
+                "ROLE",
+                "MOCK_ROLE",
+                false,
+                true,
+                false);
+        assertEquals("MOCK_DB.MOCK_SCHEMA.<CORTEX_AGENT>", model.name());
+    }
 }

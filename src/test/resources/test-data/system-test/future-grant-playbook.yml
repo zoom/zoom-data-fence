@@ -1,0 +1,183 @@
+# Future grants for qual-2 and qual-3 object types. Regression test: cortex agent (<AGENT> vs <CORTEX_AGENT>)
+# is fixed by normalizeFutureGrantName; all types exercised to ensure no regression.
+# Wildcards (object-name: "*") make these container grants; include-all: false keeps only future.
+roles:
+  future_grants_role:
+    name: ${var.role}
+    grants:
+      - object-type: schema
+        database-name: ${var.database}
+        schema-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - usage
+      - object-type: agent
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - usage
+          - monitor
+      - object-type: table
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - select
+      - object-type: external_table
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - select
+      - object-type: iceberg_table
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - select
+      - object-type: event_table
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - select
+      - object-type: view
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - select
+      - object-type: materialized_view
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - select
+      - object-type: procedure
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - usage
+      - object-type: function
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - usage
+      - object-type: sequence
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - usage
+      - object-type: model
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - usage
+      - object-type: file_format
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - usage
+      - object-type: stage
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - usage
+      - object-type: pipe
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - monitor
+      - object-type: stream
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - select
+      - object-type: task
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - monitor
+      - object-type: alert
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - operate
+      - object-type: secret
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - usage
+      - object-type: streamlit
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - usage
+      - object-type: image_repository
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - read
+      - object-type: semantic_view
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: false
+        privileges:
+          - select
