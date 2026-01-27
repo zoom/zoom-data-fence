@@ -1,4 +1,4 @@
-FROM amazoncorretto:17-al2023 AS runtime
+FROM amazoncorretto:17.0.17-al2023 AS runtime
 ARG INSTALL_AWS_CLI=false
 ARG JAR_PATH=target/zoom-data-fence-jar-with-dependencies.jar
 ENV DFENCE_JAR_PATH="/app/app.jar"
@@ -20,13 +20,10 @@ COPY dfence /usr/bin/dfence
 RUN if [ "$INSTALL_AWS_CLI" = "true" ]; then \
         dnf update -y && dnf install -y unzip tar gzip && \
         ARCH=$(uname -m) && \
-        if [ "$ARCH" = "x86_64" ]; then \
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"; \
-        elif [ "$ARCH" = "aarch64" ]; then \
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"; \
-        else \
+        if [ "$ARCH" != "x86_64" ] && [ "$ARCH" != "aarch64" ]; then \
             echo "Unsupported architecture: $ARCH" && exit 1; \
         fi && \
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}.zip" -o "awscliv2.zip" && \
         unzip awscliv2.zip && \
         ./aws/install && \
         rm -rf awscliv2.zip aws && \
