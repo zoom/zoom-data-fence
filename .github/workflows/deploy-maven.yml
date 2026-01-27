@@ -4,6 +4,7 @@ on:
     branches:
       # Build Snapshots From Main
       - main
+      - release/*
     tags:
       # Build Releases From Tags
       - v*.*.*
