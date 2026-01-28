@@ -1,0 +1,126 @@
+# Create-grants system test roles.
+# Covers qual levels: 0 (account), 1 (role, database), 2 (schema),
+# 3 (table, view, function, procedure, agent, semantic_view, etc.).
+roles:
+  minimal_grants_role:
+    name: ${var.role}
+    grants:
+      # Qual 1: database
+      - object-type: database
+        database-name: ${var.database}
+        privileges:
+          - usage
+          - monitor
+      # Qual 2: schema
+      - object-type: schema
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        privileges:
+          - usage
+          - monitor
+          - create semantic view
+          - create agent
+      # Qual 3: table, procedure
+      - object-type: table
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: ${var.table}
+        privileges:
+          - select
+          - insert
+      - object-type: procedure
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        privileges:
+          - usage
+  # full_patterns_role: qual 0 (account), qual 1 (role, database), qual 2 (schema),
+  # qual 3 (table, view, function, procedure, agent, semantic_view, etc.).
+  full_patterns_role:
+    name: ${var.role2}
+    grants:
+      # Qual 0: account (global object)
+      - object-type: account
+        privileges:
+          - monitor
+      # Qual 1: normal/account-level role, database
+      - object-type: role
+        object-name: ${var.role}
+        privileges:
+          - usage
+      - object-type: database
+        database-name: ${var.database}
+        privileges:
+          - usage
+          - monitor
+      # Qual 2: schema
+      - object-type: schema
+        database-name: ${var.database}
+        schema-name: "*"
+        privileges:
+          - usage
+          - monitor
+      # Qual 3: table, view, function, procedure, agent, semantic_view, etc.
+      - object-type: table
+        database-name: ${var.database}
+        schema-name: "*"
+        object-name: "*"
+        include-future: true
+        include-all: true
+        privileges:
+          - select
+      - object-type: view
+        database-name: ${var.database}
+        schema-name: "*"
+        object-name: "*"
+        include-future: true
+        include-all: true
+        privileges:
+          - select
+      - object-type: materialized_view
+        database-name: ${var.database}
+        schema-name: "*"
+        object-name: "*"
+        include-future: true
+        include-all: true
+        privileges:
+          - select
+      - object-type: external_table
+        database-name: ${var.database}
+        schema-name: "*"
+        object-name: "*"
+        include-future: true
+        include-all: true
+        privileges:
+          - select
+      - object-type: agent
+        database-name: ${var.database}
+        schema-name: "*"
+        object-name: "*"
+        include-future: true
+        include-all: true
+        privileges:
+          - usage
+          - monitor
+      - object-type: semantic_view
+        database-name: ${var.database}
+        schema-name: "*"
+        object-name: "*"
+        include-future: true
+        include-all: true
+        privileges:
+          - select
+          - references
+          - monitor
+      - object-type: function
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        privileges:
+          - usage
+      - object-type: procedure
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        privileges:
+          - usage

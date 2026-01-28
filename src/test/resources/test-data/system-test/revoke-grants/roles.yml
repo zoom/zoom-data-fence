@@ -1,0 +1,79 @@
+# Revoke-grants system test roles.
+# Qual 0 (account), qual 1 (role, database), qual 2 (schema), qual 3 (table, function, procedure, agent, semantic_view).
+roles:
+  minimal_grants_role:
+    name: ${var.role}
+    revoke-other-grants: true
+    grants:
+      - object-type: database
+        database-name: ${var.database}
+        privileges:
+          - usage
+      - object-type: table
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: ${var.table}
+        privileges:
+          - select
+  full_patterns_role:
+    name: ${var.role2}
+    revoke-other-grants: true
+    grants:
+      # Qual 0: account
+      - object-type: account
+        privileges:
+          - monitor
+      # Qual 1: role, database
+      - object-type: role
+        object-name: ${var.role}
+        privileges:
+          - usage
+      - object-type: database
+        database-name: ${var.database}
+        privileges:
+          - usage
+          - monitor
+      # Qual 2: schema
+      - object-type: schema
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        privileges:
+          - usage
+      # Qual 3: table, function, procedure, agent, semantic_view
+      - object-type: table
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: ${var.table}
+        privileges:
+          - select
+      - object-type: function
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        privileges:
+          - usage
+      - object-type: procedure
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        privileges:
+          - usage
+      - object-type: agent
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: true
+        privileges:
+          - usage
+          - monitor
+      - object-type: semantic_view
+        database-name: ${var.database}
+        schema-name: ${var.schema}
+        object-name: "*"
+        include-future: true
+        include-all: true
+        privileges:
+          - select
+          - references
+          - monitor

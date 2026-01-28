@@ -35,6 +35,14 @@ public class ApplyCommand extends PlaybookCommand {
     @Setter
     private Boolean ignoreUnknownGrants;
 
+    @CommandLine.Option(
+            names = {"--skip-consistency-check"},
+            description = "Skip grant-revoke consistency verification. "
+                + "By default, consistency check is always enabled and will abort if divergence is detected. "
+                + "Use this flag only if you need to bypass the check (NOT RECOMMENDED).",
+            defaultValue = "false")
+    @Setter
+    private Boolean skipConsistencyCheck;
 
     @Override
     public Integer unhandledCall() throws RbacDataError {
@@ -51,7 +59,8 @@ public class ApplyCommand extends PlaybookCommand {
             }
         } else {
             log.info("No changes file provided. Compiling changes.");
-            changes = service.compileChanges(ignoreUnknownGrants);
+            Boolean enableGrantRevokeConsistencyCheck = !skipConsistencyCheck;
+            changes = service.compileChanges(ignoreUnknownGrants, enableGrantRevokeConsistencyCheck);
         }
         String changesSummary = writeChanges(changes);
         System.out.println(changesSummary);

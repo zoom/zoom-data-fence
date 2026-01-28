@@ -98,7 +98,7 @@ public class AgentGrantSystemTest extends BaseGrantSystemTest {
                 .putAllVariables(variables)
                 .setProfilesYamlString(profilesFile)
                 .build();
-        changes = playbookService.compileChanges(false);
+        changes = playbookService.compileChanges(false, false);
     }
 
     private Map<String, String> createVariables() {
@@ -123,7 +123,7 @@ public class AgentGrantSystemTest extends BaseGrantSystemTest {
         playbookService.applyChanges(changes.changes());
 
         // Ensure that there are no more changes.
-        ChangesSummary newChanges = playbookService.compileChanges(false);
+        ChangesSummary newChanges = playbookService.compileChanges(false, false);
         Assert.assertTrue(newChanges.changes().isEmpty(), "Expected no remaining changes after apply");
 
         // Validate that the role has the expected grants.
@@ -165,7 +165,7 @@ public class AgentGrantSystemTest extends BaseGrantSystemTest {
                 .putAllVariables(variables)
                 .setProfilesYamlString(profilesFile)
                 .build();
-        revokeChanges = revokePlaybookService.compileChanges(false);
+        revokeChanges = revokePlaybookService.compileChanges(false, false);
         Assert.assertFalse(revokeChanges.changes().isEmpty(), "No changes found. Revokes are expected.");
     }
 

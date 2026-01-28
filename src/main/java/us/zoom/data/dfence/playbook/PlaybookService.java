@@ -22,11 +22,11 @@ public class PlaybookService {
         this.playbookModel = playbookModel;
     }
 
-    public ChangesSummary compileChanges(Boolean ignoreUnknownGrants) {
+    public ChangesSummary compileChanges(Boolean ignoreUnknownGrants, Boolean enableGrantRevokeConsistencyCheck) {
         log.info("Compiling changes.");
         return new ChangesSummary(
                 playbookModel.roles().size(),
-                this.getProvider().compileChanges(playbookModel, ignoreUnknownGrants));
+                this.getProvider().compileChanges(playbookModel, ignoreUnknownGrants, enableGrantRevokeConsistencyCheck));
     }
 
     public void applyChanges(List<CompiledChanges> compiledChanges) {
