@@ -201,6 +201,32 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
+                    <compilerArgs>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.43.0</version>
+                <configuration>
+                    <java>
+                        <googleJavaFormat>
+                            <version>1.17.0</version>
+                            <style>GOOGLE</style>
+                        </googleJavaFormat>
+                        <replaceRegex>
+                            <name>Remove blank lines between record types</name>
+                            <searchRegex>(\}\s*\n)\s*\n(\s*public record|\s*record)</searchRegex>
+                            <replacement>$1$2</replacement>
+                        </replaceRegex>
+                        <includes>
+                            <include>src/main/java/us/zoom/data/dfence/providers/snowflake/grant/desired/**/*.java</include>
+                            <include>src/main/java/us/zoom/data/dfence/providers/snowflake/shared/**/*.java</include>
+                            <include>src/test/java/us/zoom/data/dfence/providers/snowflake/grant/desired/**/*.java</include>
+                            <include>src/test/java/us/zoom/data/dfence/providers/snowflake/shared/**/*.java</include>
+                        </includes>
+                    </java>
                 </configuration>
             </plugin>
             <plugin>
@@ -226,6 +252,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.3</version>
                 <configuration>
+                    <argLine>${jacoco.argLine}</argLine>
                     <properties>
                         <property>
                             <name>testng</name>
@@ -233,6 +260,30 @@
                         </property>
                     </properties>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.11</version>
+                <configuration>
+                    <propertyName>jacoco.argLine</propertyName>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
