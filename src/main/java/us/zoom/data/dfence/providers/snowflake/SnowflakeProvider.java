@@ -520,10 +520,7 @@ public class SnowflakeProvider implements Provider {
             List<String> privileges,
             String roleName,
             Boolean grantOption) {
-        String objectName = String.format(
-                "%s.<%s>",
-                containerName,
-                objectType.getObjectType().replace(" ", "_").toUpperCase());
+        String objectName = String.format("%s.<%s>", containerName, objectType.name());
         List<SnowflakeGrantModel> grants = privileges.stream().map(p -> new SnowflakeGrantModel(
                 p,
                 objectType.getObjectType().replace(" ", "_"),

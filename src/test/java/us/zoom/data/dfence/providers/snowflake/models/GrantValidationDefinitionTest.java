@@ -36,7 +36,7 @@ class GrantValidationDefinitionTest {
         SnowflakeGrantModel snowflakeGrantModel = new SnowflakeGrantModel(
                 "MOCK PRIVILEGE",
                 "DATABASE",
-                "MOCK_DATABASE.<TABLES>",
+                "MOCK_DATABASE.<TABLE>",
                 "ROLE",
                 "MOCK_GRANTEE",
                 false,
