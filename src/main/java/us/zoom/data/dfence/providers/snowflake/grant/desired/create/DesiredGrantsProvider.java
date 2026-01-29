@@ -1,8 +1,5 @@
 package us.zoom.data.dfence.providers.snowflake.grant.desired.create;
 
-import static us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOption.ALL;
-import static us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOption.FUTURE;
-
 import io.vavr.control.Try;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,11 +17,11 @@ import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.AllGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.FutureGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsProvider;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOption;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOption;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.shared.companions.PlaybookGrantCompanion;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookGrant;
+import us.zoom.data.dfence.providers.snowflake.policies.companions.PlaybookGrantCompanion;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrant;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
@@ -48,7 +45,7 @@ public class DesiredGrantsProvider {
       SnowflakeGrantBuilderOptions options) {
     return Try.of(
             () -> {
-              PlaybookGrant grant = PlaybookGrantCompanion.from(playbookPrivilegeGrant);
+              PolicyGrant grant = PlaybookGrantCompanion.from(playbookPrivilegeGrant);
               return getGrants(grant, roleName).stream()
                   .map(x -> SnowflakeGrantBuilder.fromGrant(x, options))
                   .filter(Objects::nonNull)
@@ -66,7 +63,7 @@ public class DesiredGrantsProvider {
             });
   }
 
-  private List<SnowflakeGrantModel> getGrants(PlaybookGrant grant, String roleName) {
+  private List<SnowflakeGrantModel> getGrants(PolicyGrant grant, String roleName) {
     GrantsCreationData data =
         GrantsCreationDataProvider.getGrantsCreationData(grant.resolvedPattern(), grant, roleName);
 

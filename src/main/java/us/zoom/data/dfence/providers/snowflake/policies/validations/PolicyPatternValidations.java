@@ -1,6 +1,6 @@
-package us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook;
+package us.zoom.data.dfence.providers.snowflake.policies.validations;
 
-import static us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.BaseValidations.*;
+import static us.zoom.data.dfence.providers.snowflake.policies.validations.BaseValidations.*;
 
 import io.vavr.Function3;
 import io.vavr.collection.List;
@@ -8,14 +8,14 @@ import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
 import java.util.ArrayList;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOption;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOptions;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ValidationError;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPatternOptions;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOption;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOptions;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPatternOptions;
 
-public record PlaybookPatternValidations(PlaybookPattern pattern, SnowflakeObjectType objectType) {
+public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectType objectType) {
 
   public Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard>
       validateStandardPattern() {
@@ -41,7 +41,7 @@ public record PlaybookPatternValidations(PlaybookPattern pattern, SnowflakeObjec
   }
 
   public Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Container>
-      validateContainerPattern(PlaybookPatternOptions playbookPatternOptions) {
+      validateContainerPattern(PolicyPatternOptions playbookPatternOptions) {
     ArrayList<ContainerPatternOption> options = new ArrayList<>();
     if (playbookPatternOptions.all()) {
       options.add(ContainerPatternOption.ALL);

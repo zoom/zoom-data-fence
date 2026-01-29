@@ -17,7 +17,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.AllGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.shared.models.GrantPrivilege;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
 
 @DisplayName("AllGrantsProvider")
 class AllGrantsProviderTest {
@@ -35,7 +35,7 @@ class AllGrantsProviderTest {
       SnowflakeObjectType objectType,
       SnowflakeObjectType containerObjectType,
       String normalizedObjectName,
-      List<GrantPrivilege> privileges,
+      List<PolicyGrantPrivilege> privileges,
       String roleName) {
     return new ContainerGrantsCreationData(
         objectType,
@@ -60,7 +60,7 @@ class AllGrantsProviderTest {
               SnowflakeObjectType.TABLE,
               SnowflakeObjectType.SCHEMA,
               "MY_DB.MY_SCHEMA",
-              List.of(new GrantPrivilege("SELECT")),
+              List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
       List<SnowflakeGrantModel> result = provider.createGrants(data);
@@ -84,7 +84,7 @@ class AllGrantsProviderTest {
               SnowflakeObjectType.TABLE,
               SnowflakeObjectType.SCHEMA,
               "MY_DB.MY_SCHEMA",
-              List.of(new GrantPrivilege("SELECT"), new GrantPrivilege("INSERT")),
+              List.of(new PolicyGrantPrivilege("SELECT"), new PolicyGrantPrivilege("INSERT")),
               "MY_ROLE");
 
       List<SnowflakeGrantModel> result = provider.createGrants(data);
@@ -120,7 +120,7 @@ class AllGrantsProviderTest {
               SnowflakeObjectType.VIEW,
               SnowflakeObjectType.DATABASE,
               "MY_DB",
-              List.of(new GrantPrivilege("SELECT")),
+              List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
       List<SnowflakeGrantModel> result = provider.createGrants(data);

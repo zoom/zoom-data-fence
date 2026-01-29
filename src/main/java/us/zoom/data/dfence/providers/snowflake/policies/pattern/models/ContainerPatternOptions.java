@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models;
+package us.zoom.data.dfence.providers.snowflake.policies.pattern.models;
 
 import io.vavr.collection.List;
 

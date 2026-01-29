@@ -9,7 +9,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.ContainerGrantsCreationData;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.shared.models.GrantPrivilege;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
@@ -20,7 +20,7 @@ public final class FutureGrantsProvider {
   /** Creates future grants on containers using <OBJECT_TYPE> syntax. */
   public List<SnowflakeGrantModel> createGrants(ContainerGrantsCreationData data) {
     if (data.isSchemaObjectWithAllSchemas()) {
-      List<String> privileges = data.privileges().stream().map(GrantPrivilege::value).toList();
+      List<String> privileges = data.privileges().stream().map(PolicyGrantPrivilege::value).toList();
       List<SnowflakeGrantModel> grants = new ArrayList<>();
       grants.addAll(
           createFutureGrantsOnContainer(
@@ -33,7 +33,7 @@ public final class FutureGrantsProvider {
       return createFutureGrantsOnContainer(
           data.objectType(),
           data.normalizedObjectName(),
-          data.privileges().stream().map(GrantPrivilege::value).toList(),
+          data.privileges().stream().map(PolicyGrantPrivilege::value).toList(),
           data.roleName(),
           false);
     }

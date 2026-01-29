@@ -2,8 +2,8 @@ package us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models
 
 import java.util.List;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOptions;
-import us.zoom.data.dfence.providers.snowflake.shared.models.GrantPrivilege;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOptions;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
 
 /** Data for creating grants. Standard for specific objects, Container for future/all grants. */
 public sealed interface GrantsCreationData {
@@ -11,14 +11,14 @@ public sealed interface GrantsCreationData {
 
   SnowflakeObjectType objectType();
 
-  List<GrantPrivilege> privileges();
+  List<PolicyGrantPrivilege> privileges();
 
   String roleName();
 
   record Standard(
       SnowflakeObjectType objectType,
       String normalizedObjectName,
-      List<GrantPrivilege> privileges,
+      List<PolicyGrantPrivilege> privileges,
       String roleName)
       implements GrantsCreationData {}
   record Container(
@@ -36,7 +36,7 @@ public sealed interface GrantsCreationData {
     }
 
     @Override
-    public List<GrantPrivilege> privileges() {
+    public List<PolicyGrantPrivilege> privileges() {
       return data.privileges();
     }
 

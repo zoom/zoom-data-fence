@@ -16,7 +16,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.FutureGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.shared.models.GrantPrivilege;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
 
 @DisplayName("FutureGrantsProvider")
 class FutureGrantsProviderTest {
@@ -33,7 +33,7 @@ class FutureGrantsProviderTest {
   private static ContainerGrantsCreationData containerData(
       SnowflakeObjectType objectType,
       String normalizedObjectName,
-      List<GrantPrivilege> privileges,
+      List<PolicyGrantPrivilege> privileges,
       String roleName,
       boolean isSchemaObjectWithAllSchemas) {
     return new ContainerGrantsCreationData(
@@ -56,7 +56,7 @@ class FutureGrantsProviderTest {
           containerData(
               SnowflakeObjectType.VIEW,
               "MY_DB",
-              List.of(new GrantPrivilege("SELECT"), new GrantPrivilege("REFERENCES")),
+              List.of(new PolicyGrantPrivilege("SELECT"), new PolicyGrantPrivilege("REFERENCES")),
               "MY_ROLE",
               false);
 
@@ -84,7 +84,7 @@ class FutureGrantsProviderTest {
           containerData(
               SnowflakeObjectType.TABLE,
               "MY_DB",
-              List.of(new GrantPrivilege("SELECT")),
+              List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE",
               true);
 
@@ -106,7 +106,7 @@ class FutureGrantsProviderTest {
           containerData(
               SnowflakeObjectType.VIEW,
               "MY_DB",
-              List.of(new GrantPrivilege("SELECT")),
+              List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE",
               true);
 
@@ -137,7 +137,7 @@ class FutureGrantsProviderTest {
           containerData(
               SnowflakeObjectType.EXTERNAL_TABLE,
               "FOO_DB",
-              List.of(new GrantPrivilege("SELECT")),
+              List.of(new PolicyGrantPrivilege("SELECT")),
               "BAR_ROLE",
               false);
 

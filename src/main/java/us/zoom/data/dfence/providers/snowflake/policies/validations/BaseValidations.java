@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook;
+package us.zoom.data.dfence.providers.snowflake.policies.validations;
 
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
@@ -6,23 +6,23 @@ import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ValidationError;
-import us.zoom.data.dfence.providers.snowflake.shared.PlaybookWildcards;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.PlaybookWildcards;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
 import us.zoom.data.dfence.sql.ObjectName;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BaseValidations {
 
-  public static Validation<ValidationError, String> database(PlaybookPattern pattern) {
+  public static Validation<ValidationError, String> database(PolicyPattern pattern) {
     return db(pattern).validValue("database");
   }
 
-  public static Validation<ValidationError, String> schema(PlaybookPattern pattern) {
+  public static Validation<ValidationError, String> schema(PolicyPattern pattern) {
     return sch(pattern).validValue("schema");
   }
 
-  public static Validation<ValidationError, String> object(PlaybookPattern pattern) {
+  public static Validation<ValidationError, String> object(PolicyPattern pattern) {
     return obj(pattern).validValue("object");
   }
 
@@ -30,15 +30,15 @@ public class BaseValidations {
     return validation.mapError(List::of);
   }
 
-  public static SelectedFieldForValidation db(PlaybookPattern pattern) {
+  public static SelectedFieldForValidation db(PolicyPattern pattern) {
     return new SelectedFieldForValidation(pattern.dbName());
   }
 
-  public static SelectedFieldForValidation sch(PlaybookPattern pattern) {
+  public static SelectedFieldForValidation sch(PolicyPattern pattern) {
     return new SelectedFieldForValidation(pattern.schName());
   }
 
-  public static SelectedFieldForValidation obj(PlaybookPattern pattern) {
+  public static SelectedFieldForValidation obj(PolicyPattern pattern) {
     return new SelectedFieldForValidation(pattern.objName());
   }
   public record SelectedFieldForValidation(Option<String> field) {

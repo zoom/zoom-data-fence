@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.shared;
+package us.zoom.data.dfence.providers.snowflake.policies;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

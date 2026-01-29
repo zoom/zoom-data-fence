@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.shared.companions;
+package us.zoom.data.dfence.providers.snowflake.policies.companions;
 
 import io.vavr.control.Option;
 import io.vavr.control.Try;
@@ -10,19 +10,19 @@ import lombok.extern.slf4j.Slf4j;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.companions.ResolvedPlaybookPatternCompanion;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ValidationError;
-import us.zoom.data.dfence.providers.snowflake.shared.models.GrantPrivilege;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookGrant;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPatternOptions;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.companions.ResolvedPolicyPatternCompanion;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrant;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPatternOptions;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PlaybookGrantCompanion {
 
-  public static PlaybookGrant from(PlaybookPrivilegeGrant grant) {
+  public static PolicyGrant from(PlaybookPrivilegeGrant grant) {
     return getPlaybookGrant(grant)
         .getOrElseThrow(
             err -> {
@@ -33,12 +33,12 @@ public final class PlaybookGrantCompanion {
             });
   }
 
-  private static Try<PlaybookGrant> getPlaybookGrant(PlaybookPrivilegeGrant grant) {
+  private static Try<PolicyGrant> getPlaybookGrant(PlaybookPrivilegeGrant grant) {
     return getSnowflakeObjectType(grant.objectType())
         .flatMap(snowflakeObjectType -> getPlaybookGrant(snowflakeObjectType, grant));
   }
 
-  private static Try<PlaybookGrant> getPlaybookGrant(
+  private static Try<PolicyGrant> getPlaybookGrant(
       SnowflakeObjectType snowflakeObjectType, PlaybookPrivilegeGrant grant) {
     return Try.of(
         () -> {
@@ -49,16 +49,16 @@ public final class PlaybookGrantCompanion {
           Option<String> objName =
               Option.of(grant.objectName()).map(String::trim).filter(s -> !s.isEmpty());
 
-          PlaybookPattern pattern = PlaybookPattern.of(dbName, schName, objName);
-          PlaybookPatternOptions options =
-              new PlaybookPatternOptions(grant.includeFuture(), grant.includeAll());
+          PolicyPattern pattern = PolicyPattern.of(dbName, schName, objName);
+          PolicyPatternOptions options =
+              new PolicyPatternOptions(grant.includeFuture(), grant.includeAll());
           ResolvedPlaybookPattern resolvedPlaybookPattern =
               of(pattern, snowflakeObjectType, options);
 
-          List<GrantPrivilege> privileges =
-              grant.privileges().stream().map(GrantPrivilege::new).collect(Collectors.toList());
+          List<PolicyGrantPrivilege> privileges =
+              grant.privileges().stream().map(PolicyGrantPrivilege::new).collect(Collectors.toList());
 
-          return new PlaybookGrant(
+          return new PolicyGrant(
               snowflakeObjectType, pattern, privileges, resolvedPlaybookPattern, grant.enable());
         });
   }
@@ -68,11 +68,11 @@ public final class PlaybookGrantCompanion {
   }
 
   private static ResolvedPlaybookPattern of(
-      PlaybookPattern pattern,
+      PolicyPattern pattern,
       SnowflakeObjectType snowflakeObjectType,
-      PlaybookPatternOptions options) {
+      PolicyPatternOptions options) {
     return Try.of(
-            () -> ResolvedPlaybookPatternCompanion.from(pattern, snowflakeObjectType, options))
+            () -> ResolvedPolicyPatternCompanion.from(pattern, snowflakeObjectType, options))
         .flatMap(
             validatedPattern ->
                 validatedPattern.fold(
