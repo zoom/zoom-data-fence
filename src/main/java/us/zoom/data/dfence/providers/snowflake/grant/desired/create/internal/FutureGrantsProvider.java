@@ -17,7 +17,7 @@ public final class FutureGrantsProvider {
 
   private final SnowflakeObjectsService snowflakeObjectsService;
 
-  /** Creates future grants on containers using <OBJECT_TYPE> syntax. */
+  /** Creates future grants on containers using OBJECT_TYPE syntax. */
   public List<SnowflakeGrantModel> createGrants(ContainerGrantsCreationData data) {
     if (data.isSchemaObjectWithAllSchemas()) {
       List<String> privileges =

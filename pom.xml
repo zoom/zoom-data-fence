@@ -369,6 +369,7 @@
                         <version>3.11.2</version>
                         <configuration>
                             <failOnWarnings>false</failOnWarnings>
+                            <doclint>all,-missing</doclint>
                         </configuration>
                         <executions>
                             <execution>

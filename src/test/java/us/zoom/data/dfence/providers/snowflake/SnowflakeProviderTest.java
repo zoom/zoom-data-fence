@@ -621,7 +621,7 @@ class SnowflakeProviderTest {
      * The grant creation functionality is now implemented in:
      * - DesiredGrantsProvider: Orchestrates grant creation and delegates to specific providers
      * - StandardGrantsProvider: Creates grants for specific named objects
-     * - FutureGrantsProvider: Creates future grants using <OBJECT_TYPE> syntax
+     * - FutureGrantsProvider: Creates future grants using OBJECT_TYPE syntax
      * - AllGrantsProvider: Expands wildcard grants to all existing objects in containers
      *
      * The new implementation is tested in DesiredGrantsProviderTest and related test classes.
