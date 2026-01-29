@@ -52,14 +52,14 @@ public final class PolicyGrantCompanion {
           PolicyPattern pattern = PolicyPattern.of(dbName, schName, objName);
           PolicyPatternOptions options =
               new PolicyPatternOptions(grant.includeFuture(), grant.includeAll());
-          ResolvedPolicyPattern resolvedPlaybookPattern =
-              of(pattern, snowflakeObjectType, options);
+          ResolvedPolicyPattern resolvedPolicyPattern =
+                  createResolvedPolicyPattern(pattern, snowflakeObjectType, options);
 
           List<PolicyGrantPrivilege> privileges =
               grant.privileges().stream().map(PolicyGrantPrivilege::new).collect(Collectors.toList());
 
           return new PolicyGrant(
-              snowflakeObjectType, privileges, resolvedPlaybookPattern, grant.enable());
+              snowflakeObjectType, privileges, resolvedPolicyPattern, grant.enable());
         });
   }
 
@@ -67,7 +67,7 @@ public final class PolicyGrantCompanion {
     return Try.of(() -> SnowflakeObjectType.fromString(grantObjectType));
   }
 
-  private static ResolvedPolicyPattern of(
+  private static ResolvedPolicyPattern createResolvedPolicyPattern(
       PolicyPattern pattern,
       SnowflakeObjectType snowflakeObjectType,
       PolicyPatternOptions options) {

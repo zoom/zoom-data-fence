@@ -41,12 +41,12 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
   }
 
   public Validation<Seq<ValidationError>, ResolvedPolicyPattern.Container>
-      validateContainerPattern(PolicyPatternOptions playbookPatternOptions) {
+      validateContainerPattern(PolicyPatternOptions patternOptions) {
     ArrayList<ContainerPatternOption> options = new ArrayList<>();
-    if (playbookPatternOptions.all()) {
+    if (patternOptions.all()) {
       options.add(ContainerPatternOption.ALL);
     }
-    if (playbookPatternOptions.future()) {
+    if (patternOptions.future()) {
       options.add(ContainerPatternOption.FUTURE);
     }
 
