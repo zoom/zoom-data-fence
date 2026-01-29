@@ -66,7 +66,9 @@ public final class FutureGrantsProvider {
       List<String> privileges,
       String roleName,
       Boolean grantOption) {
-    String objectName = String.format("%s.<%s>", containerName, objectType.name());
+    String objectName =
+        String.format(
+            "%s.<%s>", containerName, objectType.getObjectType().replace(" ", "_").toUpperCase());
     return privileges.stream()
         .map(
             p ->
