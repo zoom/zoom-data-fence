@@ -42,18 +42,17 @@ public record PlaybookPatternValidations(PlaybookPattern pattern, SnowflakeObjec
 
   public Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Container>
       validateContainerPattern(PlaybookPatternOptions playbookPatternOptions) {
-
-    if (!playbookPatternOptions.future() && !playbookPatternOptions.all()) {
-      String err = "Both include-future and include-all cannot be false for container grants";
-      return Validation.invalid((List.of(ValidationError.of(err))));
-    }
-
     ArrayList<ContainerPatternOption> options = new ArrayList<>();
     if (playbookPatternOptions.all()) {
       options.add(ContainerPatternOption.ALL);
     }
     if (playbookPatternOptions.future()) {
       options.add(ContainerPatternOption.FUTURE);
+    }
+
+    if (options.isEmpty()) {
+      String err = "Both include-future and include-all cannot be false for container grants";
+      return Validation.invalid((List.of(ValidationError.of(err))));
     }
 
     ContainerPatternOptions containerOptions = ContainerPatternOptions.of(options);
