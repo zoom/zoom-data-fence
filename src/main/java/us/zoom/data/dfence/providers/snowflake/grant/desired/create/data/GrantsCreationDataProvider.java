@@ -4,19 +4,19 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import us.zoom.data.dfence.exception.RbacDataError;
+import us.zoom.data.dfence.policies.models.PolicyGrant;
+import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
+import us.zoom.data.dfence.policies.pattern.models.ResolvedPolicyPattern;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.ContainerGrantsCreationData;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.GrantsCreationData;
-import us.zoom.data.dfence.policies.pattern.models.ResolvedPolicyPattern;
-import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
-import us.zoom.data.dfence.policies.models.PolicyGrant;
 import us.zoom.data.dfence.sql.ObjectName;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GrantsCreationDataProvider {
 
   public static GrantsCreationData getGrantsCreationData(
-          ResolvedPolicyPattern target, PolicyGrant grant, String roleName) {
+      ResolvedPolicyPattern target, PolicyGrant grant, String roleName) {
     SnowflakeObjectType objectType = grant.objectType();
     List<PolicyGrantPrivilege> privileges = grant.privileges();
 

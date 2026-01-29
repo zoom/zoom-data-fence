@@ -59,7 +59,7 @@ public final class PolicyGrantCompanion {
               grant.privileges().stream().map(PolicyGrantPrivilege::new).collect(Collectors.toList());
 
           return new PolicyGrant(
-              snowflakeObjectType, pattern, privileges, resolvedPlaybookPattern, grant.enable());
+              snowflakeObjectType, privileges, resolvedPlaybookPattern, grant.enable());
         });
   }
 

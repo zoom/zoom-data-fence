@@ -1,8 +1,8 @@
 package us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models;
 
 import java.util.List;
-import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 
 public record ContainerGrantsCreationData(
     SnowflakeObjectType objectType,

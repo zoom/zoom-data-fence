@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.policies.companions;
+package us.zoom.data.dfence.policies.companions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -126,9 +126,13 @@ class PolicyGrantCompanionTest {
 
     PolicyGrant result = PolicyGrantCompanion.from(grant);
 
-    assertEquals(io.vavr.control.Option.some("MY_TABLE"), result.pattern().objName());
-    assertEquals(io.vavr.control.Option.some("MY_SCHEMA"), result.pattern().schName());
-    assertEquals(io.vavr.control.Option.some("MY_DB"), result.pattern().dbName());
+    // Assert using resolvedPattern properties
+    assertTrue(result.resolvedPattern() instanceof ResolvedPolicyPattern.Standard.SchemaObject);
+    ResolvedPolicyPattern.Standard.SchemaObject pattern =
+        (ResolvedPolicyPattern.Standard.SchemaObject) result.resolvedPattern();
+    assertEquals("MY_TABLE", pattern.objectName());
+    assertEquals("MY_SCHEMA", pattern.schemaName());
+    assertEquals("MY_DB", pattern.databaseName());
   }
 
   @Test
@@ -139,8 +143,10 @@ class PolicyGrantCompanionTest {
 
     PolicyGrant result = PolicyGrantCompanion.from(grant);
 
-    assertTrue(result.pattern().objName().isEmpty());
-    assertTrue(result.pattern().schName().isEmpty());
-    assertTrue(result.pattern().dbName().isDefined());
+    // Assert using resolvedPattern properties
+    assertTrue(result.resolvedPattern() instanceof ResolvedPolicyPattern.Standard.AccountObjectDatabase);
+    ResolvedPolicyPattern.Standard.AccountObjectDatabase pattern =
+        (ResolvedPolicyPattern.Standard.AccountObjectDatabase) result.resolvedPattern();
+    assertEquals("MY_DB", pattern.databaseName());
   }
 }

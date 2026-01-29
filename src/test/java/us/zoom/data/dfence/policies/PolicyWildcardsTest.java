@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.policies;
+package us.zoom.data.dfence.policies;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

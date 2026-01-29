@@ -9,7 +9,6 @@ import us.zoom.data.dfence.policies.pattern.models.ResolvedPolicyPattern;
 
 public record PolicyGrant(
     SnowflakeObjectType objectType,
-    PolicyPattern pattern,
     List<PolicyGrantPrivilege> privileges,
     ResolvedPolicyPattern resolvedPattern,
     boolean enable) {

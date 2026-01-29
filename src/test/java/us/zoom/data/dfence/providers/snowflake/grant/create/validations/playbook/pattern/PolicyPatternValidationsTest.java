@@ -13,7 +13,7 @@ import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PlaybookPatternValidationsTest {
+class PolicyPatternValidationsTest {
 
   @Test
   void validateStandardPattern_shouldReturnAccountObject_whenQualLevelIs0() {

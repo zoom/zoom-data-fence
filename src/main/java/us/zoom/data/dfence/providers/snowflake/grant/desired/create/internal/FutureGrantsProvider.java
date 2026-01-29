@@ -5,11 +5,11 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.ContainerGrantsCreationData;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
@@ -20,7 +20,8 @@ public final class FutureGrantsProvider {
   /** Creates future grants on containers using <OBJECT_TYPE> syntax. */
   public List<SnowflakeGrantModel> createGrants(ContainerGrantsCreationData data) {
     if (data.isSchemaObjectWithAllSchemas()) {
-      List<String> privileges = data.privileges().stream().map(PolicyGrantPrivilege::value).toList();
+      List<String> privileges =
+          data.privileges().stream().map(PolicyGrantPrivilege::value).toList();
       List<SnowflakeGrantModel> grants = new ArrayList<>();
       grants.addAll(
           createFutureGrantsOnContainer(
