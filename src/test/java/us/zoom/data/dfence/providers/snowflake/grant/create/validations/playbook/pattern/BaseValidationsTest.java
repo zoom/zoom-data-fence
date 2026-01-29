@@ -4,8 +4,8 @@ import io.vavr.collection.Seq;
 import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.Test;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.BaseValidations;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.providers.snowflake.policies.validations.BaseValidations;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

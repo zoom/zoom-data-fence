@@ -7,7 +7,7 @@ import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.ContainerGrantsCreationData;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.GrantsCreationData;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ResolvedPlaybookPattern;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrant;
 import us.zoom.data.dfence.sql.ObjectName;

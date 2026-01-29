@@ -17,7 +17,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.AllGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.FutureGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsProvider;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ContainerPatternOption;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOption;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.providers.snowflake.policies.companions.PlaybookGrantCompanion;

@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models;
+package us.zoom.data.dfence.providers.snowflake.policies.pattern.models;
 
 // Wrapper around validation error message for typesafety. Doesn't need to implement throwable.
 public record ValidationError(String message) {

@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models;
+package us.zoom.data.dfence.providers.snowflake.policies.pattern.models;
 
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 

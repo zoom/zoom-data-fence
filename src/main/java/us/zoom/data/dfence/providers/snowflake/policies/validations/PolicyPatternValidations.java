@@ -1,6 +1,6 @@
-package us.zoom.data.dfence.providers.snowflake.policies.policies;
+package us.zoom.data.dfence.providers.snowflake.policies.validations;
 
-import static us.zoom.data.dfence.providers.snowflake.policies.policies.BaseValidations.*;
+import static us.zoom.data.dfence.providers.snowflake.policies.validations.BaseValidations.*;
 
 import io.vavr.Function3;
 import io.vavr.collection.List;
@@ -8,10 +8,10 @@ import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
 import java.util.ArrayList;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ContainerPatternOption;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ContainerPatternOptions;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOption;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOptions;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPatternOptions;
 

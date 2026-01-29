@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ContainerPatternOption;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ContainerPatternOptions;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOption;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOptions;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ResolvedPlaybookPattern;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrant;
 
 class PolicyGrantCompanionTest {

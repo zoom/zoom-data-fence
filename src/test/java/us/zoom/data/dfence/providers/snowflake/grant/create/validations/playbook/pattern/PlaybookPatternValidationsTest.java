@@ -5,9 +5,9 @@ import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.PolicyPatternValidations;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.providers.snowflake.policies.validations.PolicyPatternValidations;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPatternOptions;
 

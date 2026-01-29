@@ -1,13 +1,13 @@
-package us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.companions;
+package us.zoom.data.dfence.providers.snowflake.policies.pattern.companions;
 
 import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.PolicyPatternValidations;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.providers.snowflake.policies.validations.PolicyPatternValidations;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPatternOptions;
 

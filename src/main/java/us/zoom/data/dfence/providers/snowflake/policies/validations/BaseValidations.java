@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.policies.policies;
+package us.zoom.data.dfence.providers.snowflake.policies.validations;
 
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
@@ -6,8 +6,8 @@ import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.policies.PlaybookWildcards;
+import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
 import us.zoom.data.dfence.sql.ObjectName;
 
