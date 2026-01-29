@@ -112,10 +112,10 @@ jobs:
           images: |
             zoomvideo/zoom-data-fence
           tags: |
-            type=raw,value=latest,enable=${{ needs.get-version.outputs.release && matrix.variant == 'standard' }}
+            type=raw,value=latest,enable=${{ needs.get-version.outputs.release == 'true' && matrix.variant == 'standard' }}
             type=raw,value=v${{ needs.get-version.outputs.version }},enable=${{ matrix.variant == 'standard' }}
             type=raw,value=v${{ needs.get-version.outputs.version }}-${{ matrix.variant }},enable=${{ matrix.variant == 'aws-cli' }}
-            type=raw,value=${{ matrix.variant }},enable=${{ matrix.variant == 'aws-cli' && needs.get-version.outputs.release }}
+            type=raw,value=${{ matrix.variant }},enable=${{ matrix.variant == 'aws-cli' && needs.get-version.outputs.release == 'true' }}
       - name: Login to Docker Hub
         if: ${{ fromJSON(needs.get-version.outputs.deploy) }}
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
