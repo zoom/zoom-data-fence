@@ -4,21 +4,22 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import us.zoom.data.dfence.policies.PolicyWildcards;
 
-class PlaybookWildcardsTest {
+class PolicyWildcardsTest {
 
   @Test
   void isWildcard_shouldReturnTrue_whenValueIsWildcard() {
-    assertTrue(PlaybookWildcards.isWildcard("*"));
+    assertTrue(PolicyWildcards.isWildcard("*"));
   }
 
   @Test
   void isWildcard_shouldReturnFalse_whenValueIsNull() {
-    assertFalse(PlaybookWildcards.isWildcard(null));
+    assertFalse(PolicyWildcards.isWildcard(null));
   }
 
   @Test
   void isWildcard_shouldReturnFalse_whenValueIsNotWildcard() {
-    assertFalse(PlaybookWildcards.isWildcard("foo"));
+    assertFalse(PolicyWildcards.isWildcard("foo"));
   }
 }

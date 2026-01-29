@@ -5,11 +5,11 @@ import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.policies.validations.PolicyPatternValidations;
-import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
-import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
-import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPatternOptions;
+import us.zoom.data.dfence.policies.validations.PolicyPatternValidations;
+import us.zoom.data.dfence.policies.pattern.models.ResolvedPolicyPattern;
+import us.zoom.data.dfence.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.policies.models.PolicyPattern;
+import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,11 +21,11 @@ class PlaybookPatternValidationsTest {
 
     PolicyPatternValidations validations =
         new PolicyPatternValidations(pattern, SnowflakeObjectType.ACCOUNT);
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
-    assertInstanceOf(ResolvedPlaybookPattern.Standard.Global.class, result.get());
+    assertInstanceOf(ResolvedPolicyPattern.Standard.Global.class, result.get());
   }
 
   @Test
@@ -35,14 +35,14 @@ class PlaybookPatternValidationsTest {
 
     PolicyPatternValidations validations =
         new PolicyPatternValidations(pattern, SnowflakeObjectType.DATABASE);
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
-    assertInstanceOf(ResolvedPlaybookPattern.Standard.AccountObjectDatabase.class, result.get());
+    assertInstanceOf(ResolvedPolicyPattern.Standard.AccountObjectDatabase.class, result.get());
     assertEquals(
         "MY_DB",
-        ((ResolvedPlaybookPattern.Standard.AccountObjectDatabase) result.get()).databaseName());
+        ((ResolvedPolicyPattern.Standard.AccountObjectDatabase) result.get()).databaseName());
   }
 
   @Test
@@ -52,13 +52,13 @@ class PlaybookPatternValidationsTest {
 
     PolicyPatternValidations validations =
         new PolicyPatternValidations(pattern, SnowflakeObjectType.SCHEMA);
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
-    assertInstanceOf(ResolvedPlaybookPattern.Standard.Schema.class, result.get());
-    ResolvedPlaybookPattern.Standard.Schema schema =
-        (ResolvedPlaybookPattern.Standard.Schema) result.get();
+    assertInstanceOf(ResolvedPolicyPattern.Standard.Schema.class, result.get());
+    ResolvedPolicyPattern.Standard.Schema schema =
+        (ResolvedPolicyPattern.Standard.Schema) result.get();
     assertEquals("MY_DB", schema.databaseName());
     assertEquals("MY_SCHEMA", schema.schemaName());
   }
@@ -71,13 +71,13 @@ class PlaybookPatternValidationsTest {
 
     PolicyPatternValidations validations =
         new PolicyPatternValidations(pattern, SnowflakeObjectType.TABLE);
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
-    assertInstanceOf(ResolvedPlaybookPattern.Standard.SchemaObject.class, result.get());
-    ResolvedPlaybookPattern.Standard.SchemaObject schemaObject =
-        (ResolvedPlaybookPattern.Standard.SchemaObject) result.get();
+    assertInstanceOf(ResolvedPolicyPattern.Standard.SchemaObject.class, result.get());
+    ResolvedPolicyPattern.Standard.SchemaObject schemaObject =
+        (ResolvedPolicyPattern.Standard.SchemaObject) result.get();
     assertEquals("MY_DB", schemaObject.databaseName());
     assertEquals("MY_SCHEMA", schemaObject.schemaName());
     assertEquals("MY_TABLE", schemaObject.objectName());
@@ -91,7 +91,7 @@ class PlaybookPatternValidationsTest {
 
     PolicyPatternValidations validations =
         new PolicyPatternValidations(pattern, SnowflakeObjectType.TABLE);
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Container> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern.Container> result =
         validations.validateContainerPattern(new PolicyPatternOptions(false, false));
     assertTrue(result.isInvalid());
   }

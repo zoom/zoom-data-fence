@@ -17,11 +17,11 @@ import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.AllGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.FutureGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsProvider;
-import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOption;
+import us.zoom.data.dfence.policies.pattern.models.ContainerPatternOption;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.policies.companions.PlaybookGrantCompanion;
-import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrant;
+import us.zoom.data.dfence.policies.companions.PolicyGrantCompanion;
+import us.zoom.data.dfence.policies.models.PolicyGrant;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
@@ -45,7 +45,7 @@ public class DesiredGrantsProvider {
       SnowflakeGrantBuilderOptions options) {
     return Try.of(
             () -> {
-              PolicyGrant grant = PlaybookGrantCompanion.from(playbookPrivilegeGrant);
+              PolicyGrant grant = PolicyGrantCompanion.from(playbookPrivilegeGrant);
               return getGrants(grant, roleName).stream()
                   .map(x -> SnowflakeGrantBuilder.fromGrant(x, options))
                   .filter(Objects::nonNull)

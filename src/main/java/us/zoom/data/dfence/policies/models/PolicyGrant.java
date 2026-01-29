@@ -1,17 +1,17 @@
-package us.zoom.data.dfence.providers.snowflake.policies.models;
+package us.zoom.data.dfence.policies.models;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.policies.pattern.models.ResolvedPolicyPattern;
 
 public record PolicyGrant(
     SnowflakeObjectType objectType,
     PolicyPattern pattern,
     List<PolicyGrantPrivilege> privileges,
-    ResolvedPlaybookPattern resolvedPattern,
+    ResolvedPolicyPattern resolvedPattern,
     boolean enable) {
   public PolicyGrant {
     privileges =

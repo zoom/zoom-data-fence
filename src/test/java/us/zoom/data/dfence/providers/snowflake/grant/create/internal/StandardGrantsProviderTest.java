@@ -11,7 +11,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.GrantsCreationData;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
+import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
 
 @DisplayName("StandardGrantsProvider")
 class StandardGrantsProviderTest {

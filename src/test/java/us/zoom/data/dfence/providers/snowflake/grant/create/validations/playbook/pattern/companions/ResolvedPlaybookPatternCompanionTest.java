@@ -7,15 +7,15 @@ import io.vavr.control.Validation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.policies.pattern.companions.ResolvedPolicyPatternCompanion;
-import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOption;
-import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ContainerPatternOptions;
-import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
-import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
-import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrant;
-import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
-import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPatternOptions;
+import us.zoom.data.dfence.policies.pattern.companions.ResolvedPolicyPatternCompanion;
+import us.zoom.data.dfence.policies.pattern.models.ContainerPatternOption;
+import us.zoom.data.dfence.policies.pattern.models.ContainerPatternOptions;
+import us.zoom.data.dfence.policies.pattern.models.ResolvedPolicyPattern;
+import us.zoom.data.dfence.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
+import us.zoom.data.dfence.policies.models.PolicyGrant;
+import us.zoom.data.dfence.policies.models.PolicyPattern;
+import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -30,14 +30,14 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.none(),
             Option.none(),
             Option.none(),
-            new ResolvedPlaybookPattern.Standard.Global());
+            new ResolvedPolicyPattern.Standard.Global());
 
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern> result =
         ResolvedPolicyPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PolicyPatternOptions(false, false));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof ResolvedPlaybookPattern.Standard.Global);
+    assertTrue(result.get() instanceof ResolvedPolicyPattern.Standard.Global);
   }
 
   @Test
@@ -49,14 +49,14 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.some("MY_DB"),
             Option.none(),
             Option.none(),
-            new ResolvedPlaybookPattern.Standard.AccountObjectDatabase("MY_DB"));
+            new ResolvedPolicyPattern.Standard.AccountObjectDatabase("MY_DB"));
 
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern> result =
         ResolvedPolicyPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PolicyPatternOptions(false, false));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof ResolvedPlaybookPattern.Standard.AccountObjectDatabase);
+    assertTrue(result.get() instanceof ResolvedPolicyPattern.Standard.AccountObjectDatabase);
   }
 
   @Test
@@ -68,14 +68,14 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.some("MY_DB"),
             Option.some("MY_SCHEMA"),
             Option.none(),
-            new ResolvedPlaybookPattern.Standard.Schema("MY_DB", "MY_SCHEMA"));
+            new ResolvedPolicyPattern.Standard.Schema("MY_DB", "MY_SCHEMA"));
 
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern> result =
         ResolvedPolicyPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PolicyPatternOptions(false, false));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof ResolvedPlaybookPattern.Standard.Schema);
+    assertTrue(result.get() instanceof ResolvedPolicyPattern.Standard.Schema);
   }
 
   @Test
@@ -87,14 +87,14 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.some("MY_DB"),
             Option.some("MY_SCHEMA"),
             Option.some("MY_TABLE"),
-            new ResolvedPlaybookPattern.Standard.SchemaObject("MY_DB", "MY_SCHEMA", "MY_TABLE"));
+            new ResolvedPolicyPattern.Standard.SchemaObject("MY_DB", "MY_SCHEMA", "MY_TABLE"));
 
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern> result =
         ResolvedPolicyPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PolicyPatternOptions(false, false));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof ResolvedPlaybookPattern.Standard.SchemaObject);
+    assertTrue(result.get() instanceof ResolvedPolicyPattern.Standard.SchemaObject);
   }
 
   @Test
@@ -107,15 +107,15 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.some("MY_DB"),
             Option.none(), // Missing/wildcard schema implies database level for container
             Option.none(),
-            new ResolvedPlaybookPattern.Container.AccountObjectDatabase(
+            new ResolvedPolicyPattern.Container.AccountObjectDatabase(
                 "MY_DB", ContainerPatternOptions.of(ContainerPatternOption.FUTURE)));
 
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern> result =
         ResolvedPolicyPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PolicyPatternOptions(true, false));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof ResolvedPlaybookPattern.Container.AccountObjectDatabase);
+    assertTrue(result.get() instanceof ResolvedPolicyPattern.Container.AccountObjectDatabase);
   }
 
   @Test
@@ -128,15 +128,15 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.some("MY_DB"),
             Option.some("MY_SCHEMA"),
             Option.none(),
-            new ResolvedPlaybookPattern.Container.Schema(
+            new ResolvedPolicyPattern.Container.Schema(
                 "MY_DB", "MY_SCHEMA", ContainerPatternOptions.of(ContainerPatternOption.ALL)));
 
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern> result =
         ResolvedPolicyPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PolicyPatternOptions(false, true));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof ResolvedPlaybookPattern.Container.Schema);
+    assertTrue(result.get() instanceof ResolvedPolicyPattern.Container.Schema);
   }
 
   @Test
@@ -149,15 +149,15 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.some("MY_DB"),
             Option.none(),
             Option.none(),
-            new ResolvedPlaybookPattern.Container.Schema(
+            new ResolvedPolicyPattern.Container.Schema(
                 "MY_DB", "MY_SCHEMA", ContainerPatternOptions.of(ContainerPatternOption.ALL)));
 
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern> result =
         ResolvedPolicyPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PolicyPatternOptions(false, true));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof ResolvedPlaybookPattern.Container.AccountObjectDatabase);
+    assertTrue(result.get() instanceof ResolvedPolicyPattern.Container.AccountObjectDatabase);
   }
 
   @Test
@@ -169,15 +169,15 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.some("MY_DB"),
             Option.some("MY_SCHEMA"),
             Option.none(),
-            new ResolvedPlaybookPattern.Container.Schema(
+            new ResolvedPolicyPattern.Container.Schema(
                 "MY_DB", "MY_SCHEMA", ContainerPatternOptions.of(ContainerPatternOption.ALL)));
 
-    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPolicyPattern> result =
         ResolvedPolicyPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PolicyPatternOptions(false, true));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof ResolvedPlaybookPattern.Container.Schema);
+    assertTrue(result.get() instanceof ResolvedPolicyPattern.Container.Schema);
   }
 
   private PolicyGrant createGrant(
@@ -185,7 +185,7 @@ class ResolvedPlaybookPatternCompanionTest {
       Option<String> dbName,
       Option<String> schName,
       Option<String> objName,
-      ResolvedPlaybookPattern patternType) {
+      ResolvedPolicyPattern patternType) {
     return new PolicyGrant(
         objectType,
         new PolicyPattern(dbName, schName, objName),

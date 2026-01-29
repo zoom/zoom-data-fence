@@ -1,3 +1,3 @@
-package us.zoom.data.dfence.providers.snowflake.policies.models;
+package us.zoom.data.dfence.policies.models;
 
 public record PolicyPatternOptions(boolean future, boolean all) {}
