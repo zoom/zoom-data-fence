@@ -6,7 +6,7 @@ import io.vavr.Function3;
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
-import java.util.function.Function;
+import java.util.ArrayList;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOption;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOptions;
@@ -38,92 +38,73 @@ public record PlaybookPatternValidations(PlaybookPattern pattern, SnowflakeObjec
 
   public Validation<Seq<String>, ResolvedPlaybookPattern.Container> validateContainerPattern(
       PlaybookPatternOptions playbookPatternOptions) {
-    Validation<Seq<String>, ContainerPatternOptions> validatedContainerOptions;
 
     if (!playbookPatternOptions.future() && !playbookPatternOptions.all()) {
       String err = "Both include-future and include-all cannot be false for container grants";
-      validatedContainerOptions = Validation.invalid(List.of(err));
-    } else if (playbookPatternOptions.future() && playbookPatternOptions.all()) {
-      validatedContainerOptions =
-          Validation.valid(
-              ContainerPatternOptions.of(
-                  ContainerPatternOption.ALL, ContainerPatternOption.FUTURE));
-    } else if (playbookPatternOptions.all()) {
-      validatedContainerOptions =
-          Validation.valid(ContainerPatternOptions.of(ContainerPatternOption.ALL));
-    } else {
-      validatedContainerOptions =
-          Validation.valid(ContainerPatternOptions.of(ContainerPatternOption.FUTURE));
+      return Validation.invalid(List.of(err));
     }
 
-    Function<ContainerPatternOptions, Validation<Seq<String>, ResolvedPlaybookPattern.Container>>
-        createContainerPattern =
-            containerOptions ->
-                switch (objectType.getQualLevel()) {
-                  case 1 -> liftError(database(pattern))
-                      .map(
-                          databaseName ->
-                              new ResolvedPlaybookPattern.Container.AccountObjectDatabase(
-                                  databaseName, containerOptions));
-                  case 2 -> database(pattern)
-                      .combine(sch().emptyOrWildcard("schema").apply(pattern))
-                      .ap(
-                          (databaseName, unusedSchema) ->
-                              new ResolvedPlaybookPattern.Container.AccountObjectDatabase(
-                                  databaseName, containerOptions));
-                  case 3 -> {
-                    Validation<Seq<String>, ResolvedPlaybookPattern.Container>
-                        objectLevelAllSchemasPattern =
-                            database(pattern)
-                                .combine(sch().emptyOrWildcard("schema").apply(pattern))
-                                .combine(object(pattern))
-                                .ap(
-                                    (Function3<
-                                            String,
-                                            Void,
-                                            String,
-                                            ResolvedPlaybookPattern.Container>)
-                                        (databaseName, unusedSchema, objectName) ->
-                                            new ResolvedPlaybookPattern.Container
-                                                .SchemaObjectAllSchemas(
-                                                databaseName, objectName, containerOptions));
+    ArrayList<ContainerPatternOption> options = new ArrayList<>();
+    if (playbookPatternOptions.all()) {
+      options.add(ContainerPatternOption.ALL);
+    }
+    if (playbookPatternOptions.future()) {
+      options.add(ContainerPatternOption.FUTURE);
+    }
 
-                    // Database-level container (empty/wildcard schema and empty/wildcard object)
-                    Validation<Seq<String>, ResolvedPlaybookPattern.Container>
-                        databaseLevelPattern =
-                            database(pattern)
-                                .combine(sch().emptyOrWildcard("schema").apply(pattern))
-                                .combine(obj().emptyOrWildcard("object").apply(pattern))
-                                .ap(
-                                    (Function3<
-                                            String, Void, Void, ResolvedPlaybookPattern.Container>)
-                                        (databaseName, unusedSchema, unusedObject) ->
-                                            new ResolvedPlaybookPattern.Container
-                                                .AccountObjectDatabase(
-                                                databaseName, containerOptions));
+    ContainerPatternOptions containerOptions = ContainerPatternOptions.of(options);
 
-                    // Schema-level container (specific schema, empty/wildcard object)
-                    Validation<Seq<String>, ResolvedPlaybookPattern.Container> schemaLevelPattern =
-                        database(pattern)
-                            .combine(schema(pattern))
-                            .combine(obj().emptyOrWildcard("object").apply(pattern))
-                            .ap(
-                                (Function3<String, String, Void, ResolvedPlaybookPattern.Container>)
-                                    (databaseName, schemaName, unusedObject) ->
-                                        new ResolvedPlaybookPattern.Container.Schema(
-                                            databaseName, schemaName, containerOptions));
+    return switch (objectType.getQualLevel()) {
+      case 1 -> liftError(database(pattern))
+          .map(
+              databaseName ->
+                  new ResolvedPlaybookPattern.Container.AccountObjectDatabase(
+                      databaseName, containerOptions));
+      case 2 -> database(pattern)
+          .combine(sch().emptyOrWildcard("schema").apply(pattern))
+          .ap(
+              (databaseName, unusedSchema) ->
+                  new ResolvedPlaybookPattern.Container.AccountObjectDatabase(
+                      databaseName, containerOptions));
+      case 3 -> {
+        Validation<Seq<String>, ResolvedPlaybookPattern.Container> objectLevelAllSchemasPattern =
+            database(pattern)
+                .combine(sch().emptyOrWildcard("schema").apply(pattern))
+                .combine(object(pattern))
+                .ap(
+                    (Function3<String, Void, String, ResolvedPlaybookPattern.Container>)
+                        (databaseName, unusedSchema, objectName) ->
+                            new ResolvedPlaybookPattern.Container.SchemaObjectAllSchemas(
+                                databaseName, objectName, containerOptions));
 
-                    yield objectLevelAllSchemasPattern
-                        .orElse(databaseLevelPattern)
-                        .orElse(schemaLevelPattern);
-                  }
-                  default -> Validation.invalid(
-                      List.of(
-                          String.format(
-                              "Unknown qual level %s for container grant object",
-                              objectType.getQualLevel())));
-                };
+        // Database-level container (empty/wildcard schema and empty/wildcard object)
+        Validation<Seq<String>, ResolvedPlaybookPattern.Container> databaseLevelPattern =
+            database(pattern)
+                .combine(sch().emptyOrWildcard("schema").apply(pattern))
+                .combine(obj().emptyOrWildcard("object").apply(pattern))
+                .ap(
+                    (Function3<String, Void, Void, ResolvedPlaybookPattern.Container>)
+                        (databaseName, unusedSchema, unusedObject) ->
+                            new ResolvedPlaybookPattern.Container.AccountObjectDatabase(
+                                databaseName, containerOptions));
 
-    return validatedContainerOptions.flatMap(createContainerPattern);
+        // Schema-level container (specific schema, empty/wildcard object)
+        Validation<Seq<String>, ResolvedPlaybookPattern.Container> schemaLevelPattern =
+            database(pattern)
+                .combine(schema(pattern))
+                .combine(obj().emptyOrWildcard("object").apply(pattern))
+                .ap(
+                    (Function3<String, String, Void, ResolvedPlaybookPattern.Container>)
+                        (databaseName, schemaName, unusedObject) ->
+                            new ResolvedPlaybookPattern.Container.Schema(
+                                databaseName, schemaName, containerOptions));
+
+        yield objectLevelAllSchemasPattern.orElse(databaseLevelPattern).orElse(schemaLevelPattern);
+      }
+      default -> Validation.invalid(
+          List.of(
+              String.format(
+                  "Unknown qual level %s for container grant object", objectType.getQualLevel())));
+    };
   }
 }
