@@ -9,7 +9,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.ContainerGrantsCreationData;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.shared.models.GrantPrivilege;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
@@ -22,7 +22,7 @@ public final class AllGrantsProvider {
         data.containerObjectType(),
         data.objectType(),
         data.normalizedObjectName(),
-        data.privileges().stream().map(GrantPrivilege::value).toList(),
+        data.privileges().stream().map(PolicyGrantPrivilege::value).toList(),
         data.roleName(),
         false);
   }

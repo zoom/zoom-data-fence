@@ -5,11 +5,11 @@ import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.PlaybookPatternValidations;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ValidationError;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPatternOptions;
+import us.zoom.data.dfence.providers.snowflake.policies.policies.PolicyPatternValidations;
+import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPatternOptions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,10 +17,10 @@ class PlaybookPatternValidationsTest {
 
   @Test
   void validateStandardPattern_shouldReturnAccountObject_whenQualLevelIs0() {
-    PlaybookPattern pattern = new PlaybookPattern(Option.none(), Option.none(), Option.none());
+    PolicyPattern pattern = new PolicyPattern(Option.none(), Option.none(), Option.none());
 
-    PlaybookPatternValidations validations =
-        new PlaybookPatternValidations(pattern, SnowflakeObjectType.ACCOUNT);
+    PolicyPatternValidations validations =
+        new PolicyPatternValidations(pattern, SnowflakeObjectType.ACCOUNT);
     Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
         validations.validateStandardPattern();
 
@@ -30,11 +30,11 @@ class PlaybookPatternValidationsTest {
 
   @Test
   void validateStandardPattern_shouldReturnDatabaseLevel_whenQualLevelIs1AndDatabase() {
-    PlaybookPattern pattern =
-        new PlaybookPattern(Option.some("MY_DB"), Option.none(), Option.none());
+    PolicyPattern pattern =
+        new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
-    PlaybookPatternValidations validations =
-        new PlaybookPatternValidations(pattern, SnowflakeObjectType.DATABASE);
+    PolicyPatternValidations validations =
+        new PolicyPatternValidations(pattern, SnowflakeObjectType.DATABASE);
     Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
         validations.validateStandardPattern();
 
@@ -47,11 +47,11 @@ class PlaybookPatternValidationsTest {
 
   @Test
   void validateStandardPattern_shouldReturnSchemaLevel_whenQualLevelIs2() {
-    PlaybookPattern pattern =
-        new PlaybookPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
+    PolicyPattern pattern =
+        new PolicyPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
-    PlaybookPatternValidations validations =
-        new PlaybookPatternValidations(pattern, SnowflakeObjectType.SCHEMA);
+    PolicyPatternValidations validations =
+        new PolicyPatternValidations(pattern, SnowflakeObjectType.SCHEMA);
     Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
         validations.validateStandardPattern();
 
@@ -65,12 +65,12 @@ class PlaybookPatternValidationsTest {
 
   @Test
   void validateStandardPattern_shouldReturnObjectLevel_whenQualLevelIs3() {
-    PlaybookPattern pattern =
-        new PlaybookPattern(
+    PolicyPattern pattern =
+        new PolicyPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.some("MY_TABLE"));
 
-    PlaybookPatternValidations validations =
-        new PlaybookPatternValidations(pattern, SnowflakeObjectType.TABLE);
+    PolicyPatternValidations validations =
+        new PolicyPatternValidations(pattern, SnowflakeObjectType.TABLE);
     Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
         validations.validateStandardPattern();
 
@@ -85,14 +85,14 @@ class PlaybookPatternValidationsTest {
 
   @Test
   void validateContainerPattern_shouldReturnInvalid_whenGrantTypeIsStandard() {
-    PlaybookPattern pattern =
-        new PlaybookPattern(
+    PolicyPattern pattern =
+        new PolicyPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.some("MY_TABLE"));
 
-    PlaybookPatternValidations validations =
-        new PlaybookPatternValidations(pattern, SnowflakeObjectType.TABLE);
+    PolicyPatternValidations validations =
+        new PolicyPatternValidations(pattern, SnowflakeObjectType.TABLE);
     Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Container> result =
-        validations.validateContainerPattern(new PlaybookPatternOptions(false, false));
+        validations.validateContainerPattern(new PolicyPatternOptions(false, false));
     assertTrue(result.isInvalid());
   }
 }

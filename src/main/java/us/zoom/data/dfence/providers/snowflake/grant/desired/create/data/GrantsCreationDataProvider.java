@@ -7,18 +7,18 @@ import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.ContainerGrantsCreationData;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.GrantsCreationData;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.shared.models.GrantPrivilege;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookGrant;
+import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrant;
 import us.zoom.data.dfence.sql.ObjectName;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class GrantsCreationDataProvider {
 
   public static GrantsCreationData getGrantsCreationData(
-      ResolvedPlaybookPattern target, PlaybookGrant grant, String roleName) {
+          ResolvedPlaybookPattern target, PolicyGrant grant, String roleName) {
     SnowflakeObjectType objectType = grant.objectType();
-    List<GrantPrivilege> privileges = grant.privileges();
+    List<PolicyGrantPrivilege> privileges = grant.privileges();
 
     if (target instanceof ResolvedPlaybookPattern.Standard s) {
       String normalizedObjectName = normalizeObjectName(s);

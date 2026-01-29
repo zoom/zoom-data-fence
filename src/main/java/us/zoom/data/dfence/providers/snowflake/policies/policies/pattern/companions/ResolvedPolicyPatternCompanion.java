@@ -1,22 +1,22 @@
-package us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.companions;
+package us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.companions;
 
 import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.PlaybookPatternValidations;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ValidationError;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPatternOptions;
+import us.zoom.data.dfence.providers.snowflake.policies.policies.PolicyPatternValidations;
+import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPatternOptions;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ResolvedPlaybookPatternCompanion {
+public final class ResolvedPolicyPatternCompanion {
 
   public static Validation<Seq<ValidationError>, ResolvedPlaybookPattern> from(
-      PlaybookPattern pattern, SnowflakeObjectType objectType, PlaybookPatternOptions options) {
-    PlaybookPatternValidations validators = new PlaybookPatternValidations(pattern, objectType);
+          PolicyPattern pattern, SnowflakeObjectType objectType, PolicyPatternOptions options) {
+    PolicyPatternValidations validators = new PolicyPatternValidations(pattern, objectType);
 
     Validation<Seq<ValidationError>, ResolvedPlaybookPattern> validateStandardPattern =
         lift(validators.validateStandardPattern());

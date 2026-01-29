@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.shared.companions;
+package us.zoom.data.dfence.providers.snowflake.policies.companions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -7,12 +7,12 @@ import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOption;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOptions;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ResolvedPlaybookPattern;
-import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookGrant;
+import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ContainerPatternOption;
+import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ContainerPatternOptions;
+import us.zoom.data.dfence.providers.snowflake.policies.policies.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrant;
 
-class PlaybookGrantCompanionTest {
+class PolicyGrantCompanionTest {
 
   @Test
   void from_shouldReturnStandard_whenBothFlagsAreFalse() {
@@ -27,7 +27,7 @@ class PlaybookGrantCompanionTest {
             false,
             true);
 
-    PlaybookGrant result = PlaybookGrantCompanion.from(grant);
+    PolicyGrant result = PlaybookGrantCompanion.from(grant);
 
     assertTrue(result.resolvedPattern() instanceof ResolvedPlaybookPattern.Standard);
     assertEquals(SnowflakeObjectType.TABLE, result.objectType());
@@ -39,7 +39,7 @@ class PlaybookGrantCompanionTest {
         new PlaybookPrivilegeGrant(
             "table", "*", "MY_SCHEMA", "MY_DB", ImmutableList.of("SELECT"), true, false, true);
 
-    PlaybookGrant result = PlaybookGrantCompanion.from(grant);
+    PolicyGrant result = PlaybookGrantCompanion.from(grant);
 
     assertTrue(result.resolvedPattern() instanceof ResolvedPlaybookPattern.Container);
     ResolvedPlaybookPattern.Container container =
@@ -58,7 +58,7 @@ class PlaybookGrantCompanionTest {
         new PlaybookPrivilegeGrant(
             "table", "*", "MY_SCHEMA", "MY_DB", ImmutableList.of("SELECT"), false, true, true);
 
-    PlaybookGrant result = PlaybookGrantCompanion.from(grant);
+    PolicyGrant result = PlaybookGrantCompanion.from(grant);
 
     assertTrue(result.resolvedPattern() instanceof ResolvedPlaybookPattern.Container);
     ResolvedPlaybookPattern.Container container =
@@ -76,7 +76,7 @@ class PlaybookGrantCompanionTest {
         new PlaybookPrivilegeGrant(
             "table", "*", "*", "MY_DB", ImmutableList.of("SELECT"), true, true, true);
 
-    PlaybookGrant result = PlaybookGrantCompanion.from(grant);
+    PolicyGrant result = PlaybookGrantCompanion.from(grant);
 
     assertTrue(result.resolvedPattern() instanceof ResolvedPlaybookPattern.Container);
     ResolvedPlaybookPattern.Container container =
@@ -95,7 +95,7 @@ class PlaybookGrantCompanionTest {
         new PlaybookPrivilegeGrant(
             "database", null, null, "MY_DB", ImmutableList.of("USAGE"), false, false, true);
 
-    PlaybookGrant result = PlaybookGrantCompanion.from(grant);
+    PolicyGrant result = PlaybookGrantCompanion.from(grant);
 
     assertTrue(result.resolvedPattern() instanceof ResolvedPlaybookPattern.Standard);
     assertEquals(SnowflakeObjectType.DATABASE, result.objectType());
@@ -123,7 +123,7 @@ class PlaybookGrantCompanionTest {
             false,
             true);
 
-    PlaybookGrant result = PlaybookGrantCompanion.from(grant);
+    PolicyGrant result = PlaybookGrantCompanion.from(grant);
 
     assertEquals(io.vavr.control.Option.some("MY_TABLE"), result.pattern().objName());
     assertEquals(io.vavr.control.Option.some("MY_SCHEMA"), result.pattern().schName());
@@ -136,7 +136,7 @@ class PlaybookGrantCompanionTest {
         new PlaybookPrivilegeGrant(
             "database", null, null, "MY_DB", ImmutableList.of("USAGE"), false, false, true);
 
-    PlaybookGrant result = PlaybookGrantCompanion.from(grant);
+    PolicyGrant result = PlaybookGrantCompanion.from(grant);
 
     assertTrue(result.pattern().objName().isEmpty());
     assertTrue(result.pattern().schName().isEmpty());

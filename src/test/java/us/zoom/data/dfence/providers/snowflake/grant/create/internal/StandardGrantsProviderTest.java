@@ -11,7 +11,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.GrantsCreationData;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsProvider;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.shared.models.GrantPrivilege;
+import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyGrantPrivilege;
 
 @DisplayName("StandardGrantsProvider")
 class StandardGrantsProviderTest {
@@ -27,7 +27,7 @@ class StandardGrantsProviderTest {
           new GrantsCreationData.Standard(
               SnowflakeObjectType.TABLE,
               "MY_DB.MY_SCHEMA.MY_TABLE",
-              List.of(new GrantPrivilege("SELECT"), new GrantPrivilege("UPDATE")),
+              List.of(new PolicyGrantPrivilege("SELECT"), new PolicyGrantPrivilege("UPDATE")),
               "MY_ROLE");
 
       List<SnowflakeGrantModel> result = StandardGrantsProvider.createGrants(data);
@@ -52,7 +52,7 @@ class StandardGrantsProviderTest {
           new GrantsCreationData.Standard(
               SnowflakeObjectType.TABLE,
               "MY_DB.MY_SCHEMA.MY_TABLE",
-              List.of(new GrantPrivilege("SELECT")),
+              List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
       List<SnowflakeGrantModel> result = StandardGrantsProvider.createGrants(data);
@@ -69,7 +69,7 @@ class StandardGrantsProviderTest {
           new GrantsCreationData.Standard(
               SnowflakeObjectType.EXTERNAL_TABLE,
               "MY_DB.MY_SCHEMA.MY_TABLE",
-              List.of(new GrantPrivilege("SELECT")),
+              List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
       List<SnowflakeGrantModel> result = StandardGrantsProvider.createGrants(data);

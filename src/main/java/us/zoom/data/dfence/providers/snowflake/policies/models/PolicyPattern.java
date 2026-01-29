@@ -1,11 +1,11 @@
-package us.zoom.data.dfence.providers.snowflake.shared.models;
+package us.zoom.data.dfence.providers.snowflake.policies.models;
 
 import io.vavr.control.Option;
 
-public record PlaybookPattern(
+public record PolicyPattern(
     Option<String> dbName, Option<String> schName, Option<String> objName) {
-  public static PlaybookPattern of(
+  public static PolicyPattern of(
       Option<String> dbName, Option<String> schName, Option<String> objName) {
-    return new PlaybookPattern(dbName, schName, objName);
+    return new PolicyPattern(dbName, schName, objName);
   }
 }
