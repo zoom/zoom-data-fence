@@ -12,6 +12,7 @@ import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.companions.ResolvedPlaybookPatternCompanion;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.shared.models.GrantPrivilege;
 import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookGrant;
 import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPattern;
@@ -79,7 +80,9 @@ public final class PlaybookGrantCompanion {
                         Try.failure(
                             new RbacDataError(
                                 "Playbook pattern validation failed: "
-                                    + errors.mkString("[", ", ", "]"))),
+                                    + errors
+                                        .map(ValidationError::message)
+                                        .mkString("[", ", ", "]"))),
                     Try::success))
         .getOrElseThrow(e -> new RbacDataError("Pattern validation failed: " + e.getMessage(), e));
   }

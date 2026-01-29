@@ -11,6 +11,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOption;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ContainerPatternOptions;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.shared.models.GrantPrivilege;
 import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookGrant;
 import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPattern;
@@ -31,7 +32,7 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.none(),
             new ResolvedPlaybookPattern.Standard.Global());
 
-    Validation<Seq<String>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
         ResolvedPlaybookPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PlaybookPatternOptions(false, false));
 
@@ -50,7 +51,7 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.none(),
             new ResolvedPlaybookPattern.Standard.AccountObjectDatabase("MY_DB"));
 
-    Validation<Seq<String>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
         ResolvedPlaybookPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PlaybookPatternOptions(false, false));
 
@@ -69,7 +70,7 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.none(),
             new ResolvedPlaybookPattern.Standard.Schema("MY_DB", "MY_SCHEMA"));
 
-    Validation<Seq<String>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
         ResolvedPlaybookPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PlaybookPatternOptions(false, false));
 
@@ -88,7 +89,7 @@ class ResolvedPlaybookPatternCompanionTest {
             Option.some("MY_TABLE"),
             new ResolvedPlaybookPattern.Standard.SchemaObject("MY_DB", "MY_SCHEMA", "MY_TABLE"));
 
-    Validation<Seq<String>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
         ResolvedPlaybookPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PlaybookPatternOptions(false, false));
 
@@ -109,7 +110,7 @@ class ResolvedPlaybookPatternCompanionTest {
             new ResolvedPlaybookPattern.Container.AccountObjectDatabase(
                 "MY_DB", ContainerPatternOptions.of(ContainerPatternOption.FUTURE)));
 
-    Validation<Seq<String>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
         ResolvedPlaybookPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PlaybookPatternOptions(true, false));
 
@@ -130,7 +131,7 @@ class ResolvedPlaybookPatternCompanionTest {
             new ResolvedPlaybookPattern.Container.Schema(
                 "MY_DB", "MY_SCHEMA", ContainerPatternOptions.of(ContainerPatternOption.ALL)));
 
-    Validation<Seq<String>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
         ResolvedPlaybookPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PlaybookPatternOptions(false, true));
 
@@ -151,7 +152,7 @@ class ResolvedPlaybookPatternCompanionTest {
             new ResolvedPlaybookPattern.Container.Schema(
                 "MY_DB", "MY_SCHEMA", ContainerPatternOptions.of(ContainerPatternOption.ALL)));
 
-    Validation<Seq<String>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
         ResolvedPlaybookPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PlaybookPatternOptions(false, true));
 
@@ -171,7 +172,7 @@ class ResolvedPlaybookPatternCompanionTest {
             new ResolvedPlaybookPattern.Container.Schema(
                 "MY_DB", "MY_SCHEMA", ContainerPatternOptions.of(ContainerPatternOption.ALL)));
 
-    Validation<Seq<String>, ResolvedPlaybookPattern> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern> result =
         ResolvedPlaybookPatternCompanion.from(
             grant.pattern(), grant.objectType(), new PlaybookPatternOptions(false, true));
 

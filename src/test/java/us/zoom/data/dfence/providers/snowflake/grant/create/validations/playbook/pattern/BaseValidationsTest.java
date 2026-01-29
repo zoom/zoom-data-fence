@@ -5,6 +5,7 @@ import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.BaseValidations;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,20 +15,20 @@ class BaseValidationsTest {
 
   @Test
   void liftError_shouldConvertSingleErrorToSequence() {
-    Validation<String, String> validation = Validation.invalid("Error message");
+    Validation<ValidationError, String> validation = Validation.invalid(ValidationError.of("Error message"));
 
-    Validation<Seq<String>, String> result = BaseValidations.liftError(validation);
+    Validation<Seq<ValidationError>, String> result = BaseValidations.liftError(validation);
 
     assertTrue(result.isInvalid());
     assertEquals(1, result.getError().size());
-    assertEquals("Error message", result.getError().head());
+    assertEquals("Error message", result.getError().head().message());
   }
 
   @Test
   void liftError_shouldPreserveValidValue() {
-    Validation<String, String> validation = Validation.valid("Success");
+    Validation<ValidationError, String> validation = Validation.valid("Success");
 
-    Validation<Seq<String>, String> result = BaseValidations.liftError(validation);
+    Validation<Seq<ValidationError>, String> result = BaseValidations.liftError(validation);
 
     assertTrue(result.isValid());
     assertEquals("Success", result.get());
@@ -38,7 +39,7 @@ class BaseValidationsTest {
     PlaybookPattern pattern =
         new PlaybookPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
-    Validation<String, String> result = BaseValidations.database(pattern);
+    Validation<ValidationError, String> result = BaseValidations.database(pattern);
 
     assertTrue(result.isValid());
     assertEquals("MY_DB", result.get());
@@ -48,20 +49,20 @@ class BaseValidationsTest {
   void database_shouldReturnInvalid_whenDatabaseNameIsEmpty() {
     PlaybookPattern pattern = new PlaybookPattern(Option.none(), Option.none(), Option.none());
 
-    Validation<String, String> result = BaseValidations.database(pattern);
+    Validation<ValidationError, String> result = BaseValidations.database(pattern);
 
     assertTrue(result.isInvalid());
-    assertTrue(result.getError().contains("database is empty"));
+    assertTrue(result.getError().message().contains("database is empty"));
   }
 
   @Test
   void database_shouldReturnInvalid_whenDatabaseNameIsWildcard() {
     PlaybookPattern pattern = new PlaybookPattern(Option.some("*"), Option.none(), Option.none());
 
-    Validation<String, String> result = BaseValidations.database(pattern);
+    Validation<ValidationError, String> result = BaseValidations.database(pattern);
 
     assertTrue(result.isInvalid());
-    assertTrue(result.getError().contains("non-empty and non-wildcard value is expected"));
+    assertTrue(result.getError().message().contains("non-empty and non-wildcard value is expected"));
   }
 
   @Test
@@ -69,7 +70,7 @@ class BaseValidationsTest {
     PlaybookPattern pattern =
         new PlaybookPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
-    Validation<String, String> result = BaseValidations.schema(pattern);
+    Validation<ValidationError, String> result = BaseValidations.schema(pattern);
 
     assertTrue(result.isValid());
     assertEquals("MY_SCHEMA", result.get());
@@ -80,10 +81,10 @@ class BaseValidationsTest {
     PlaybookPattern pattern =
         new PlaybookPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
-    Validation<String, String> result = BaseValidations.schema(pattern);
+    Validation<ValidationError, String> result = BaseValidations.schema(pattern);
 
     assertTrue(result.isInvalid());
-    assertTrue(result.getError().contains("schema is empty"));
+    assertTrue(result.getError().message().contains("schema is empty"));
   }
 
   @Test
@@ -92,7 +93,7 @@ class BaseValidationsTest {
         new PlaybookPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.some("MY_TABLE"));
 
-    Validation<String, String> result = BaseValidations.object(pattern);
+    Validation<ValidationError, String> result = BaseValidations.object(pattern);
 
     assertTrue(result.isValid());
     assertEquals("MY_TABLE", result.get());
@@ -103,9 +104,9 @@ class BaseValidationsTest {
     PlaybookPattern pattern =
         new PlaybookPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
-    Validation<String, String> result = BaseValidations.object(pattern);
+    Validation<ValidationError, String> result = BaseValidations.object(pattern);
 
     assertTrue(result.isInvalid());
-    assertTrue(result.getError().contains("object is empty"));
+    assertTrue(result.getError().message().contains("object is empty"));
   }
 }

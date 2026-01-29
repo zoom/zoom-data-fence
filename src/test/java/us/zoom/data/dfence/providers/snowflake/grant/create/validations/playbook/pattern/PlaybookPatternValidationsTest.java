@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.PlaybookPatternValidations;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ResolvedPlaybookPattern;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.validations.playbook.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPattern;
 import us.zoom.data.dfence.providers.snowflake.shared.models.PlaybookPatternOptions;
 
@@ -20,7 +21,7 @@ class PlaybookPatternValidationsTest {
 
     PlaybookPatternValidations validations =
         new PlaybookPatternValidations(pattern, SnowflakeObjectType.ACCOUNT);
-    Validation<Seq<String>, ResolvedPlaybookPattern.Standard> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
@@ -34,7 +35,7 @@ class PlaybookPatternValidationsTest {
 
     PlaybookPatternValidations validations =
         new PlaybookPatternValidations(pattern, SnowflakeObjectType.DATABASE);
-    Validation<Seq<String>, ResolvedPlaybookPattern.Standard> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
@@ -51,7 +52,7 @@ class PlaybookPatternValidationsTest {
 
     PlaybookPatternValidations validations =
         new PlaybookPatternValidations(pattern, SnowflakeObjectType.SCHEMA);
-    Validation<Seq<String>, ResolvedPlaybookPattern.Standard> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
@@ -70,7 +71,7 @@ class PlaybookPatternValidationsTest {
 
     PlaybookPatternValidations validations =
         new PlaybookPatternValidations(pattern, SnowflakeObjectType.TABLE);
-    Validation<Seq<String>, ResolvedPlaybookPattern.Standard> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
@@ -90,7 +91,7 @@ class PlaybookPatternValidationsTest {
 
     PlaybookPatternValidations validations =
         new PlaybookPatternValidations(pattern, SnowflakeObjectType.TABLE);
-    Validation<Seq<String>, ResolvedPlaybookPattern.Container> result =
+    Validation<Seq<ValidationError>, ResolvedPlaybookPattern.Container> result =
         validations.validateContainerPattern(new PlaybookPatternOptions(false, false));
     assertTrue(result.isInvalid());
   }
