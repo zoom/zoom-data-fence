@@ -4,7 +4,6 @@ import io.vavr.collection.List;
 import io.vavr.collection.Seq;
 import io.vavr.control.Option;
 import io.vavr.control.Validation;
-import java.util.function.Function;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import us.zoom.data.dfence.providers.snowflake.shared.PlaybookWildcards;
@@ -15,84 +14,76 @@ import us.zoom.data.dfence.sql.ObjectName;
 public class BaseValidations {
 
   public static Validation<String, String> database(PlaybookPattern pattern) {
-    return db().validValue("database").apply(pattern);
+    return db(pattern).validValue("database");
   }
 
   public static Validation<String, String> schema(PlaybookPattern pattern) {
-    return sch().validValue("schema").apply(pattern);
+    return sch(pattern).validValue("schema");
   }
 
   public static Validation<String, String> object(PlaybookPattern pattern) {
-    return obj().validValue("object").apply(pattern);
+    return obj(pattern).validValue("object");
   }
 
   public static <E, A> Validation<Seq<E>, A> liftError(Validation<E, A> validation) {
     return validation.mapError(List::of);
   }
 
-  public static SelectedFieldForValidation db() {
-    return new SelectedFieldForValidation(PlaybookPattern::dbName);
+  public static SelectedFieldForValidation db(PlaybookPattern pattern) {
+    return new SelectedFieldForValidation(pattern.dbName());
   }
 
-  public static SelectedFieldForValidation sch() {
-    return new SelectedFieldForValidation(PlaybookPattern::schName);
+  public static SelectedFieldForValidation sch(PlaybookPattern pattern) {
+    return new SelectedFieldForValidation(pattern.schName());
   }
 
-  public static SelectedFieldForValidation obj() {
-    return new SelectedFieldForValidation(PlaybookPattern::objName);
+  public static SelectedFieldForValidation obj(PlaybookPattern pattern) {
+    return new SelectedFieldForValidation(pattern.objName());
   }
-  public record SelectedFieldForValidation(Function<PlaybookPattern, Option<String>> field) {
+  public record SelectedFieldForValidation(Option<String> field) {
 
-    public Function<PlaybookPattern, Validation<String, String>> validValue(String fieldName) {
-      return p ->
-          nonEmpty(fieldName)
-              .apply(p)
-              .flatMap(
-                  value ->
-                      PlaybookWildcards.isWildcard(value)
-                          ? Validation.invalid(
-                              String.format(
-                                  "%s value is %s, non-empty and non-wildcard value is expected.",
-                                  fieldName, value))
-                          : Validation.valid(ObjectName.normalizeObjectName(value)));
+    public Validation<String, String> validValue(String fieldName) {
+      return nonEmpty(fieldName)
+          .flatMap(
+              value ->
+                  PlaybookWildcards.isWildcard(value)
+                      ? Validation.invalid(
+                          String.format(
+                              "%s value is %s, non-empty and non-wildcard value is expected.",
+                              fieldName, value))
+                      : Validation.valid(ObjectName.normalizeObjectName(value)));
     }
 
-    public Function<PlaybookPattern, Validation<String, Void>> emptyOrWildcard(String fieldName) {
-      return p -> empty(fieldName).apply(p).orElse(wildcard(fieldName).apply(p));
+    public Validation<String, Void> emptyOrWildcard(String fieldName) {
+      return empty(fieldName).orElse(wildcard(fieldName));
     }
 
-    public Function<PlaybookPattern, Validation<String, Void>> empty(String fieldName) {
-      return p ->
-          field
-              .apply(p)
-              .<Validation<String, Void>>map(
-                  x ->
-                      Validation.invalid(
-                          String.format("%s is not empty, empty is expected.", fieldName)))
-              .getOrElse(Validation.valid(null));
-    }
-
-    public Function<PlaybookPattern, Validation<String, String>> nonEmpty(String fieldName) {
-      return p ->
-          field
-              .apply(p)
-              .<Validation<String, String>>map(x -> Validation.valid(x.trim()))
-              .getOrElse(
+    public Validation<String, Void> empty(String fieldName) {
+      return field
+          .<Validation<String, Void>>map(
+              x ->
                   Validation.invalid(
-                      String.format("%s is empty, non-empty value is expected.", fieldName)));
+                      String.format("%s is not empty, empty is expected.", fieldName)))
+          .getOrElse(Validation.valid(null));
     }
 
-    public Function<PlaybookPattern, Validation<String, Void>> wildcard(String fieldName) {
-      return p ->
-          nonEmpty(fieldName)
-              .apply(p)
-              .flatMap(
-                  value ->
-                      PlaybookWildcards.isWildcard(value)
-                          ? Validation.valid(null)
-                          : Validation.invalid(
-                              String.format(
-                                  "%s value is %s, wildcard is expected.", fieldName, value)));
+    public Validation<String, String> nonEmpty(String fieldName) {
+      return field
+          .<Validation<String, String>>map(x -> Validation.valid(x.trim()))
+          .getOrElse(
+              Validation.invalid(
+                  String.format("%s is empty, non-empty value is expected.", fieldName)));
+    }
+
+    public Validation<String, Void> wildcard(String fieldName) {
+      return nonEmpty(fieldName)
+          .flatMap(
+              value ->
+                  PlaybookWildcards.isWildcard(value)
+                      ? Validation.valid(null)
+                      : Validation.invalid(
+                          String.format(
+                              "%s value is %s, wildcard is expected.", fieldName, value)));
     }
   }
 }

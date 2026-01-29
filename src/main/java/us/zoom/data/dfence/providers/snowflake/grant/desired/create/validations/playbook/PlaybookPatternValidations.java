@@ -61,7 +61,7 @@ public record PlaybookPatternValidations(PlaybookPattern pattern, SnowflakeObjec
                   new ResolvedPlaybookPattern.Container.AccountObjectDatabase(
                       databaseName, containerOptions));
       case 2 -> database(pattern)
-          .combine(sch().emptyOrWildcard("schema").apply(pattern))
+          .combine(sch(pattern).emptyOrWildcard("schema"))
           .ap(
               (databaseName, unusedSchema) ->
                   new ResolvedPlaybookPattern.Container.AccountObjectDatabase(
@@ -69,7 +69,7 @@ public record PlaybookPatternValidations(PlaybookPattern pattern, SnowflakeObjec
       case 3 -> {
         Validation<Seq<String>, ResolvedPlaybookPattern.Container> objectLevelAllSchemasPattern =
             database(pattern)
-                .combine(sch().emptyOrWildcard("schema").apply(pattern))
+                .combine(sch(pattern).emptyOrWildcard("schema"))
                 .combine(object(pattern))
                 .ap(
                     (Function3<String, Void, String, ResolvedPlaybookPattern.Container>)
@@ -80,8 +80,8 @@ public record PlaybookPatternValidations(PlaybookPattern pattern, SnowflakeObjec
         // Database-level container (empty/wildcard schema and empty/wildcard object)
         Validation<Seq<String>, ResolvedPlaybookPattern.Container> databaseLevelPattern =
             database(pattern)
-                .combine(sch().emptyOrWildcard("schema").apply(pattern))
-                .combine(obj().emptyOrWildcard("object").apply(pattern))
+                .combine(sch(pattern).emptyOrWildcard("schema"))
+                .combine(obj(pattern).emptyOrWildcard("object"))
                 .ap(
                     (Function3<String, Void, Void, ResolvedPlaybookPattern.Container>)
                         (databaseName, unusedSchema, unusedObject) ->
@@ -92,7 +92,7 @@ public record PlaybookPatternValidations(PlaybookPattern pattern, SnowflakeObjec
         Validation<Seq<String>, ResolvedPlaybookPattern.Container> schemaLevelPattern =
             database(pattern)
                 .combine(schema(pattern))
-                .combine(obj().emptyOrWildcard("object").apply(pattern))
+                .combine(obj(pattern).emptyOrWildcard("object"))
                 .ap(
                     (Function3<String, String, Void, ResolvedPlaybookPattern.Container>)
                         (databaseName, schemaName, unusedObject) ->
