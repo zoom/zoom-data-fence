@@ -55,7 +55,7 @@ jobs:
             if (`refs/tags/v${VERSION}` === REF && versionPattern.test(VERSION)) {
               core.setOutput('deploy', true);
               core.setOutput('release', true);
-            } else if (REF === 'refs/heads/main' && snapshotPattern.test(VERSION)) {
+            } else if (snapshotPattern.test(VERSION)) {
               core.setOutput('deploy', true);
               core.setOutput('release', false);
             } else {
