@@ -1,11 +1,11 @@
-package us.zoom.data.dfence.providers.snowflake.policies.pattern.models;
+package us.zoom.data.dfence.policies.pattern.models;
 
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 
 // Check this page for terminology https://docs.snowflake.com/en/sql-reference/sql/grant-privilege
-public sealed interface ResolvedPlaybookPattern {
+public sealed interface ResolvedPolicyPattern {
 
-  sealed interface Standard extends ResolvedPlaybookPattern {
+  sealed interface Standard extends ResolvedPolicyPattern {
     record Global() implements Standard {}
     record AccountObject(String objectName) implements Standard {}
     record AccountObjectDatabase(String databaseName) implements Standard {}
@@ -14,7 +14,7 @@ public sealed interface ResolvedPlaybookPattern {
         implements Standard {}
   }
 
-  sealed interface Container extends ResolvedPlaybookPattern {
+  sealed interface Container extends ResolvedPolicyPattern {
     ContainerPatternOptions containerPatternOptions();
 
     SnowflakeObjectType containerObjectType();

@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.policies.models;
+package us.zoom.data.dfence.policies.models;
 
 import io.vavr.control.Option;
 

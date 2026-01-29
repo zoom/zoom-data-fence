@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.policies.validations;
+package us.zoom.data.dfence.policies.validations;
 
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
@@ -6,9 +6,9 @@ import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import us.zoom.data.dfence.providers.snowflake.policies.PlaybookWildcards;
-import us.zoom.data.dfence.providers.snowflake.policies.pattern.models.ValidationError;
-import us.zoom.data.dfence.providers.snowflake.policies.models.PolicyPattern;
+import us.zoom.data.dfence.policies.PolicyWildcards;
+import us.zoom.data.dfence.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.policies.models.PolicyPattern;
 import us.zoom.data.dfence.sql.ObjectName;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -47,7 +47,7 @@ public class BaseValidations {
       return nonEmpty(fieldName)
           .flatMap(
               value ->
-                  PlaybookWildcards.isWildcard(value)
+                  PolicyWildcards.isWildcard(value)
                       ? Validation.invalid(
                           ValidationError.of(
                               String.format(
@@ -83,7 +83,7 @@ public class BaseValidations {
       return nonEmpty(fieldName)
           .flatMap(
               value ->
-                  PlaybookWildcards.isWildcard(value)
+                  PolicyWildcards.isWildcard(value)
                       ? Validation.valid(null)
                       : Validation.invalid(
                           ValidationError.of(
