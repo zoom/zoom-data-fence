@@ -18,6 +18,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.options.Unsupported
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.DesiredGrantsFactory;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.PartitionedGrantStatements;
+import us.zoom.data.dfence.providers.snowflake.revoke.SnowflakeRevokeGrantsCompiler;
 import us.zoom.data.dfence.sql.ObjectName;
 
 import java.util.*;
@@ -242,7 +243,7 @@ public class SnowflakeProvider implements Provider {
         return new CompiledChanges(roleId, role.name(), ownershipGrantStatements, roleCreationStatements, nonOwnershipGrantStatements);
     }
 
-    PartitionedGrantStatements compilePlaybookPrivilegeGrants(
+    public PartitionedGrantStatements compilePlaybookPrivilegeGrants(
             List<PlaybookPrivilegeGrant> privilegeGrants,
             String roleName,
             Boolean roleExists,
@@ -275,8 +276,12 @@ public class SnowflakeProvider implements Provider {
                     desiredGrantBuilders);
             List<SnowflakeGrantBuilder> revokeGrantBuilders = new ArrayList<>();
             if (revokeOtherGrants) {
-                revokeGrantBuilders.addAll(diff.entriesOnlyOnLeft().values().stream()
-                        .sorted(Comparator.comparing(SnowflakeGrantBuilder::getKey)).toList());
+                // Use SnowflakeRevokeGrantsCompiler to identify grants that should be revoked.
+                // This compares current grants against playbook privilege grants to find grants
+                // that are not allowed by the playbook.
+                List<SnowflakeGrantBuilder> grantsToRevoke = SnowflakeRevokeGrantsCompiler
+                        .compileRevokeGrants(privilegeGrants, currentGrantBuilders).stream().toList();
+                revokeGrantBuilders.addAll(grantsToRevoke);
             }
             List<SnowflakeGrantBuilder> grantBuilders = diff.entriesOnlyOnRight().values().stream()
                     .sorted(Comparator.comparing(SnowflakeGrantBuilder::getKey)).toList();

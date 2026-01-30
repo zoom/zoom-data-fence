@@ -10,4 +10,12 @@ public record ContainerPolicyOptions(List<ContainerPolicyOption> options) {
   public static ContainerPolicyOptions of(java.util.List<ContainerPolicyOption> options) {
     return new ContainerPolicyOptions(List.ofAll(options));
   }
+
+  public boolean all() {
+      return options.contains(ContainerPolicyOption.ALL);
+  }
+
+  public boolean future() {
+      return options.contains(ContainerPolicyOption.FUTURE);
+  }
 }
