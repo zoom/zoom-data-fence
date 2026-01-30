@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
-import us.zoom.data.dfence.policies.factories.PolicyGrantFactory;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOption;
 import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOptions;
@@ -82,9 +81,9 @@ class PolicyGrantFactoryTest {
     assertTrue(result.policyType() instanceof PolicyType.Container);
     PolicyType.Container container =
         (PolicyType.Container) result.policyType();
-    assertTrue(container instanceof PolicyType.Container.AccountObjectDatabase);
-    PolicyType.Container.AccountObjectDatabase dbLevel =
-        (PolicyType.Container.AccountObjectDatabase) container;
+    assertTrue(container instanceof PolicyType.Container.AccountObject);
+    PolicyType.Container.AccountObject dbLevel =
+        (PolicyType.Container.AccountObject) container;
     assertEquals(
         ContainerPolicyOptions.of(ContainerPolicyOption.ALL, ContainerPolicyOption.FUTURE),
         dbLevel.containerPolicyOptions());
@@ -144,9 +143,9 @@ class PolicyGrantFactoryTest {
     PolicyGrant result = PolicyGrantFactory.createFrom(grant);
 
     // Assert using policyType properties
-    assertTrue(result.policyType() instanceof PolicyType.Standard.AccountObjectDatabase);
-    PolicyType.Standard.AccountObjectDatabase pattern =
-        (PolicyType.Standard.AccountObjectDatabase) result.policyType();
-    assertEquals("MY_DB", pattern.databaseName());
+    assertTrue(result.policyType() instanceof PolicyType.Standard.AccountObject);
+    PolicyType.Standard.AccountObject pattern =
+        (PolicyType.Standard.AccountObject) result.policyType();
+    assertEquals("MY_DB", pattern.objectName());
   }
 }

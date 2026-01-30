@@ -39,10 +39,10 @@ class PolicyPatternValidationsTest {
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
-    assertInstanceOf(PolicyType.Standard.AccountObjectDatabase.class, result.get());
+    assertInstanceOf(PolicyType.Standard.AccountObject.class, result.get());
     assertEquals(
         "MY_DB",
-        ((PolicyType.Standard.AccountObjectDatabase) result.get()).databaseName());
+        ((PolicyType.Standard.AccountObject) result.get()).objectName());
   }
 
   @Test

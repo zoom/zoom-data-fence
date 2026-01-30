@@ -3,6 +3,8 @@ package us.zoom.data.dfence.providers.snowflake.revoke.evaluator;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
+
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.Test;
@@ -13,7 +15,6 @@ import us.zoom.data.dfence.policies.pattern.models.PolicyType;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PolicyGrantHashIndex;
-import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.SnowflakeObjectTypeAlias;
 
 class GrantRevocationEvaluatorTest {
 
@@ -168,42 +169,12 @@ class GrantRevocationEvaluatorTest {
   }
 
   @Test
-  void needsRevoke_shouldReturnTrue_whenCandidatesSetIsEmpty() {
-    // Critical: When intersection of object type and privilege grants is empty, should revoke
-    PolicyGrant privilegeGrant =
-        createPolicyGrant(
-            "SELECT",
-            SnowflakeObjectType.VIEW, // Different object type
-            "DB",
-            "SCHEMA",
-            "TABLE");
-    PolicyGrant objectTypeGrant =
-        createPolicyGrant(
-            "UPDATE", // Different privilege
-            SnowflakeObjectType.TABLE,
-            "DB",
-            "SCHEMA",
-            "TABLE");
-    // Create index with grants that don't intersect
-    PolicyGrantHashIndex index =
-        createIndexWithNonIntersectingGrants(privilegeGrant, objectTypeGrant);
-    GrantRevocationEvaluator evaluator = new GrantRevocationEvaluator(index);
-    SnowflakeGrantModel grantToCheck = createGrantModel("SELECT", "TABLE", "DB.SCHEMA.TABLE");
-
-    boolean actualNeedsRevoke = evaluator.needsRevoke(grantToCheck);
-
-    assertTrue(
-        actualNeedsRevoke,
-        "Should revoke when intersection of object type and privilege grants is empty");
-  }
-
-  @Test
   void needsRevoke_shouldReturnFalse_whenObjectTypeIndexAndAliasIndexBothContainMatchingGrant() {
-    // Critical: Both object type index and alias index are checked, then unioned
-    // This test verifies that grants in the alias index are properly included
+    // Critical: Both object type kv and alias kv are checked, then unioned
+    // This test verifies that grants in the alias kv are properly included
     PolicyGrant grant =
         createPolicyGrant("SELECT", SnowflakeObjectType.TABLE, "DB", "SCHEMA", "TABLE");
-    // Create index with grant in both indexes
+    // Create kv with grant in both indexes
     PolicyGrantHashIndex index = createIndexWith(grant);
     GrantRevocationEvaluator evaluator = new GrantRevocationEvaluator(index);
     SnowflakeGrantModel grantToCheck = createGrantModel("SELECT", "TABLE", "DB.SCHEMA.TABLE");
@@ -255,55 +226,18 @@ class GrantRevocationEvaluatorTest {
   }
 
   private PolicyGrantHashIndex createEmptyIndex() {
-    return new PolicyGrantHashIndex(
-        new ConcurrentHashMap<>(), new ConcurrentHashMap<>(), new ConcurrentHashMap<>());
+    return new PolicyGrantHashIndex(new ConcurrentHashMap<>());
   }
 
   private PolicyGrantHashIndex createIndexWith(PolicyGrant grant) {
-    PolicyGrantPrivilege priv = grant.privileges().get(0);
-    SnowflakeObjectType objType = grant.objectType();
-    SnowflakeObjectTypeAlias alias = SnowflakeObjectTypeAlias.of(grant.objectType());
+      ConcurrentHashMap<String, ConcurrentHashMap<PolicyGrantPrivilege, Set<PolicyGrant>>> index = new ConcurrentHashMap<>();
 
-    ConcurrentHashMap<PolicyGrantPrivilege, Set<PolicyGrant>> privilegeIndex =
-        new ConcurrentHashMap<>();
-    privilegeIndex.put(priv, Set.of(grant));
+      String alias = grant.objectType().getAliasFor();
+      index.computeIfAbsent(alias, k -> new ConcurrentHashMap<>());
+      for (PolicyGrantPrivilege privilege : grant.privileges()) {
+          index.get(alias).computeIfAbsent(privilege, k -> new HashSet<>()).add(grant);
+      }
 
-    ConcurrentHashMap<SnowflakeObjectType, Set<PolicyGrant>> objectTypeIndex =
-        new ConcurrentHashMap<>();
-    objectTypeIndex.put(objType, Set.of(grant));
-
-    ConcurrentHashMap<SnowflakeObjectTypeAlias, Set<PolicyGrant>> objectAliasIndex =
-        new ConcurrentHashMap<>();
-    objectAliasIndex.put(alias, Set.of(grant));
-
-    return new PolicyGrantHashIndex(privilegeIndex, objectTypeIndex, objectAliasIndex);
-  }
-
-  private PolicyGrantHashIndex createIndexWithNonIntersectingGrants(
-      PolicyGrant privilegeGrant, PolicyGrant objectTypeGrant) {
-    // Create index where grants don't intersect (different privileges and object types)
-    PolicyGrantPrivilege priv1 = privilegeGrant.privileges().get(0);
-    PolicyGrantPrivilege priv2 = objectTypeGrant.privileges().get(0);
-    SnowflakeObjectType objType1 = privilegeGrant.objectType();
-    SnowflakeObjectType objType2 = objectTypeGrant.objectType();
-    SnowflakeObjectTypeAlias alias1 = SnowflakeObjectTypeAlias.of(privilegeGrant.objectType());
-    SnowflakeObjectTypeAlias alias2 = SnowflakeObjectTypeAlias.of(objectTypeGrant.objectType());
-
-    ConcurrentHashMap<PolicyGrantPrivilege, Set<PolicyGrant>> privilegeIndex =
-        new ConcurrentHashMap<>();
-    privilegeIndex.put(priv1, Set.of(privilegeGrant));
-    privilegeIndex.put(priv2, Set.of(objectTypeGrant));
-
-    ConcurrentHashMap<SnowflakeObjectType, Set<PolicyGrant>> objectTypeIndex =
-        new ConcurrentHashMap<>();
-    objectTypeIndex.put(objType1, Set.of(privilegeGrant));
-    objectTypeIndex.put(objType2, Set.of(objectTypeGrant));
-
-    ConcurrentHashMap<SnowflakeObjectTypeAlias, Set<PolicyGrant>> objectAliasIndex =
-        new ConcurrentHashMap<>();
-    objectAliasIndex.put(alias1, Set.of(privilegeGrant));
-    objectAliasIndex.put(alias2, Set.of(objectTypeGrant));
-
-    return new PolicyGrantHashIndex(privilegeIndex, objectTypeIndex, objectAliasIndex);
+      return new PolicyGrantHashIndex(index);
   }
 }

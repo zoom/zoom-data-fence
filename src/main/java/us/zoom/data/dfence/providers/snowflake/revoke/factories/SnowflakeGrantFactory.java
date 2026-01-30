@@ -58,9 +58,7 @@ public final class SnowflakeGrantFactory {
     List<String> parts = ObjectName.splitObjectName(model.name());
     return switch (objectType.getQualLevel()) {
       case 0 -> new SnowflakeGrantType.Standard.Global();
-      case 1 -> objectType == SnowflakeObjectType.DATABASE
-          ? new SnowflakeGrantType.Standard.AccountObjectDatabase(parts.get(0))
-          : new SnowflakeGrantType.Standard.AccountObject(parts.get(0));
+      case 1 -> new SnowflakeGrantType.Standard.AccountObject(parts.get(0));
       case 2 -> new SnowflakeGrantType.Standard.Schema(parts.get(0), parts.get(1));
       case 3 -> new SnowflakeGrantType.Standard.SchemaObject(
           parts.get(0), parts.get(1), parts.get(2));
