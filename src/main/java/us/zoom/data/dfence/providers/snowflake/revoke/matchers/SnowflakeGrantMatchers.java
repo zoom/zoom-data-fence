@@ -17,14 +17,11 @@ import us.zoom.data.dfence.sql.ObjectName;
 public class SnowflakeGrantMatchers {
 
   public static BiPredicate<PolicyGrant, SnowflakeGrant> matchesSnowflakeGrant() {
-    return (policyGrant, snowflakeGrant) -> {
-      System.out.println("result " + matchesGrantType(snowflakeGrant.type()).test(policyGrant));
-
-      return matchesGrantObjectType(snowflakeGrant.snowflakeObjectType())
-          .and(matchesGrantPrivilege(snowflakeGrant.privilege()))
-          .and(matchesGrantType(snowflakeGrant.type()))
-          .test(policyGrant);
-    };
+    return (policyGrant, snowflakeGrant) ->
+        matchesGrantObjectType(snowflakeGrant.snowflakeObjectType())
+            .and(matchesGrantPrivilege(snowflakeGrant.privilege()))
+            .and(matchesGrantType(snowflakeGrant.type()))
+            .test(policyGrant);
   }
 
   public static Predicate<PolicyGrant> matchesGrantObjectType(
@@ -42,7 +39,6 @@ public class SnowflakeGrantMatchers {
 
   private static Predicate<PolicyGrant> matchesGrantType(SnowflakeGrantType grantType) {
     return policyGrant -> {
-      System.out.println(policyGrant.policyType() + " " + grantType);
       PolicyType policyType = policyGrant.policyType();
       if (policyType instanceof PolicyType.Standard) {
         // Standard matches Standard
@@ -72,9 +68,7 @@ public class SnowflakeGrantMatchers {
     List<String> policyParts = getParts(policyType);
     List<String> grantParts = getParts(grantType);
 
-    boolean a = policyParts.zip(grantParts).forAll(t -> ObjectName.equalObjectName(t._1(), t._2()));
-    System.out.println("A: " + a);
-    return a;
+    return policyParts.zip(grantParts).forAll(t -> ObjectName.equalObjectName(t._1(), t._2()));
   }
 
   private static List<String> getParts(PolicyType policyType) {
