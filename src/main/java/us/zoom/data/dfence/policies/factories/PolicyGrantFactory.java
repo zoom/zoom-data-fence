@@ -79,11 +79,11 @@ public final class PolicyGrantFactory {
                     errors ->
                         Try.failure(
                             new RbacDataError(
-                                "Playbook pattern validation failed: "
+                                "Policy pattern validation failed: "
                                     + errors
                                         .map(ValidationError::message)
                                         .mkString("[", ", ", "]"))),
                     Try::success))
-        .getOrElseThrow(e -> new RbacDataError("Pattern validation failed: " + e.getMessage(), e));
+        .getOrElseThrow(e -> new RbacDataError("Policy validation failed: " + e.getMessage(), e));
   }
 }

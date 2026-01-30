@@ -1,9 +1,10 @@
 package us.zoom.data.dfence.providers.snowflake.revoke.evaluator;
 
 import io.vavr.control.Try;
-import java.util.HashSet;
+
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,6 @@ import us.zoom.data.dfence.providers.snowflake.revoke.factories.SnowflakeGrantFa
 import us.zoom.data.dfence.providers.snowflake.revoke.matchers.SnowflakeGrantMatchers;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PolicyGrantHashIndex;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrant;
-import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.SnowflakeObjectTypeAlias;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
@@ -47,32 +47,6 @@ public class GrantRevocationEvaluator {
 
   private Set<PolicyGrant> getCandidates(
       SnowflakeObjectType grantObjectType, PolicyGrantPrivilege grantPrivilege) {
-    Set<PolicyGrant> objectTypeGrants =
-        getObjectTypeAndObjectTypeAliasMatchedGrants(grantObjectType);
-    Set<PolicyGrant> privilegeGrants = getPrivilegeMatchedGrants(grantPrivilege);
-
-    return objectTypeGrants.stream().filter(privilegeGrants::contains).collect(Collectors.toSet());
-  }
-
-  private Set<PolicyGrant> getObjectTypeAndObjectTypeAliasMatchedGrants(
-      SnowflakeObjectType grantObjectType) {
-    Set<PolicyGrant> baseGrants =
-        index.snowflakeObjectTypeIndex().getOrDefault(grantObjectType, Set.of());
-
-    Set<PolicyGrant> specificGrants =
-        index
-            .snowflakeObjectTypeAliasIndex()
-            .getOrDefault(SnowflakeObjectTypeAlias.of(grantObjectType), Set.of())
-            .stream()
-            .filter(grant -> grant.objectType() == grantObjectType)
-            .collect(Collectors.toSet());
-
-    Set<PolicyGrant> result = new HashSet<>(baseGrants);
-    result.addAll(specificGrants);
-    return result;
-  }
-
-  private Set<PolicyGrant> getPrivilegeMatchedGrants(PolicyGrantPrivilege grantPrivilege) {
-    return index.privilegeIndex().getOrDefault(grantPrivilege, Set.of());
+    return index.kv().getOrDefault(grantObjectType.getAliasFor(), new ConcurrentHashMap<>()).getOrDefault(grantPrivilege, Set.of());
   }
 }

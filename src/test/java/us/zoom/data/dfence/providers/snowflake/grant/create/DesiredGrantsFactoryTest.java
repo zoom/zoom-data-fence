@@ -91,7 +91,7 @@ class DesiredGrantsFactoryTest {
 
   @Test
   @DisplayName(
-      "createFrom should use databaseName when objectName is null for qualLevel 1")
+      "createFrom should use objectName when objectName is null for qualLevel 1")
   void createFrom_usesDatabaseNameWhenObjectNameIsNullForQualLevel1() {
     PlaybookPrivilegeGrant playbookGrant =
         new PlaybookPrivilegeGrant(

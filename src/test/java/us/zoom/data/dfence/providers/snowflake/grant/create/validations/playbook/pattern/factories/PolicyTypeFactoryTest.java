@@ -1,6 +1,5 @@
 package us.zoom.data.dfence.providers.snowflake.grant.create.validations.playbook.pattern.providers;
 
-import com.google.common.collect.ImmutableList;
 import io.vavr.collection.Seq;
 import io.vavr.control.Option;
 import io.vavr.control.Validation;
@@ -8,12 +7,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.policies.pattern.factories.PolicyTypeFactory;
-import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOption;
-import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOptions;
 import us.zoom.data.dfence.policies.pattern.models.PolicyType;
 import us.zoom.data.dfence.policies.pattern.models.ValidationError;
-import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
-import us.zoom.data.dfence.policies.models.PolicyGrant;
 import us.zoom.data.dfence.policies.models.PolicyPattern;
 import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
@@ -44,7 +39,7 @@ class PolicyTypeFactoryTest {
             pattern, SnowflakeObjectType.DATABASE, new PolicyPatternOptions(false, false));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof PolicyType.Standard.AccountObjectDatabase);
+    assertTrue(result.get() instanceof PolicyType.Standard.AccountObject);
   }
 
   @Test
@@ -86,7 +81,7 @@ class PolicyTypeFactoryTest {
             pattern, SnowflakeObjectType.SCHEMA, new PolicyPatternOptions(true, false));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof PolicyType.Container.AccountObjectDatabase);
+    assertTrue(result.get() instanceof PolicyType.Container.AccountObject);
   }
 
   @Test
@@ -115,7 +110,7 @@ class PolicyTypeFactoryTest {
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, true));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof PolicyType.Container.AccountObjectDatabase);
+    assertTrue(result.get() instanceof PolicyType.Container.AccountObject);
   }
 
   @Test
