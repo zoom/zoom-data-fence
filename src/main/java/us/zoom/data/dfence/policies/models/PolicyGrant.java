@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.policies.pattern.models.ResolvedPolicyPattern;
+import us.zoom.data.dfence.policies.pattern.models.PolicyType;
 
 public record PolicyGrant(
     SnowflakeObjectType objectType,
     List<PolicyGrantPrivilege> privileges,
-    ResolvedPolicyPattern resolvedPattern,
+    PolicyType policyType,
     boolean enable) {
   public PolicyGrant {
     privileges =

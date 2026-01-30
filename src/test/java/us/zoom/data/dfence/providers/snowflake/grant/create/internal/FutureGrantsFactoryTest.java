@@ -13,21 +13,21 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.ContainerGrantsCreationData;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.FutureGrantsProvider;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.FutureGrantsFactory;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
 
-@DisplayName("FutureGrantsProvider")
-class FutureGrantsProviderTest {
+@DisplayName("FutureGrantsFactory")
+class FutureGrantsFactoryTest {
 
   private SnowflakeObjectsService mockObjectsService;
-  private FutureGrantsProvider provider;
+  private FutureGrantsFactory provider;
 
   @BeforeEach
   void setUp() {
     mockObjectsService = mock(SnowflakeObjectsService.class);
-    provider = new FutureGrantsProvider(mockObjectsService);
+    provider = new FutureGrantsFactory(mockObjectsService);
   }
 
   private static ContainerGrantsCreationData containerData(
@@ -46,7 +46,7 @@ class FutureGrantsProviderTest {
   }
 
   @Nested
-  @DisplayName("createGrants")
+  @DisplayName("createFrom")
   class CreateGrants {
 
     @Test
@@ -60,7 +60,7 @@ class FutureGrantsProviderTest {
               "MY_ROLE",
               false);
 
-      List<SnowflakeGrantModel> result = provider.createGrants(data);
+      List<SnowflakeGrantModel> result = provider.createFrom(data);
 
       assertEquals(2, result.size());
       result.forEach(
@@ -88,7 +88,7 @@ class FutureGrantsProviderTest {
               "MY_ROLE",
               true);
 
-      List<SnowflakeGrantModel> result = provider.createGrants(data);
+      List<SnowflakeGrantModel> result = provider.createFrom(data);
 
       assertEquals(1, result.size());
       assertTrue(result.get(0).name().contains("MY_DB.<TABLE>"));
@@ -110,7 +110,7 @@ class FutureGrantsProviderTest {
               "MY_ROLE",
               true);
 
-      List<SnowflakeGrantModel> result = provider.createGrants(data);
+      List<SnowflakeGrantModel> result = provider.createFrom(data);
 
       assertEquals(3, result.size());
       long databaseLevel =
@@ -141,7 +141,7 @@ class FutureGrantsProviderTest {
               "BAR_ROLE",
               false);
 
-      List<SnowflakeGrantModel> result = provider.createGrants(data);
+      List<SnowflakeGrantModel> result = provider.createFrom(data);
 
       assertEquals(1, result.size());
       assertTrue(result.get(0).name().startsWith("FOO_DB.<"));

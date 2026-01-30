@@ -13,12 +13,12 @@ import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public final class FutureGrantsProvider {
+public final class FutureGrantsFactory {
 
   private final SnowflakeObjectsService snowflakeObjectsService;
 
   /** Creates future grants on containers using OBJECT_TYPE syntax. */
-  public List<SnowflakeGrantModel> createGrants(ContainerGrantsCreationData data) {
+  public List<SnowflakeGrantModel> createFrom(ContainerGrantsCreationData data) {
     if (data.isSchemaObjectWithAllSchemas()) {
       List<String> privileges =
           data.privileges().stream().map(PolicyGrantPrivilege::value).toList();
