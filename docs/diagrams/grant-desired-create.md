@@ -174,7 +174,7 @@ Output: Future grant + grants for all existing tables
 - `ContainerPolicyOptions`: Record holding `List<ContainerPolicyOption> options`, built via `of(ContainerPolicyOption...)`
 - `ContainerPolicyOption`: Enum `FUTURE`, `ALL`
 
-### Companions
+### Providers
 - `PolicyGrantProvider`: Factory and validation for PolicyGrant
 - `PolicyTypeProvider`: Pattern resolution to PolicyType
 
@@ -195,4 +195,4 @@ Each component has dedicated tests:
 - `PolicyPatternValidationsTest`: Validation logic tests
 - `BaseValidationsTest`: Base validation (e.g. liftError) tests
 - `PolicyTypeProviderTest`: Pattern resolution to `PolicyType` tests
-- `PolicyGrantProviderTest`: Companion logic tests
+- `PolicyGrantProviderTest`: Provider logic tests
