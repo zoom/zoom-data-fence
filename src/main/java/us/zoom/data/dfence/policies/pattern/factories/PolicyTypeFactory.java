@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.policies.pattern.providers;
+package us.zoom.data.dfence.policies.pattern.factories;
 
 import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
@@ -12,9 +12,9 @@ import us.zoom.data.dfence.policies.models.PolicyPattern;
 import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class PolicyTypeProvider {
+public final class PolicyTypeFactory {
 
-  public static Validation<Seq<ValidationError>, PolicyType> getPolicyType(
+  public static Validation<Seq<ValidationError>, PolicyType> createFrom(
           PolicyPattern pattern, SnowflakeObjectType objectType, PolicyPatternOptions options) {
     PolicyPatternValidations validators = new PolicyPatternValidations(pattern, objectType);
 

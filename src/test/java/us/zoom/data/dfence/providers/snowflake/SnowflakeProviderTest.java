@@ -79,7 +79,7 @@ class SnowflakeProviderTest {
                 new PlaybookPrivilegeGrant("account", null, null, null, List.of("monitor"), false, false));
         String roleName = "mock_role_name";
         String roleId = "mock-role-id";
-        // Grant creation (DesiredGrantsProvider) resolves view.*.*.mock_db_name as database-level
+        // Grant creation (DesiredGrantsFactory) resolves view.*.*.mock_db_name as database-level
         // container only; schema-level future grants are not produced for this pattern.
         List<List<String>> expectedRoleGrantStatements = List.of(
                 List.of("GRANT MONITOR ON ACCOUNT TO ROLE MOCK_ROLE_NAME;"),
@@ -610,21 +610,21 @@ class SnowflakeProviderTest {
 
     /*
      * Tests removed: compilePlaybookPrivilegeGrants, compilePlaybookPrivilegeGrantsFuture,
-     * playbookGrantToSnowflakeGrants, standardGrants, standardGrantsWildcard, containerGrants,
+     * createFrom, standardGrants, standardGrantsWildcard, containerGrants,
      * containerGrantsMultipleWordObjectName, createFutureGrants
      *
-     * Reason: These tests have been moved to DesiredGrantsProviderTest and related test classes
+     * Reason: These tests have been moved to DesiredGrantsFactoryTest and related test classes
      * as part of the refactoring that extracted grant creation logic from SnowflakeProvider
-     * to DesiredGrantsProvider and its internal components (StandardGrantsProvider,
-     * FutureGrantsProvider, AllGrantsProvider).
+     * to DesiredGrantsFactory and its internal components (StandardGrantsFactory,
+     * FutureGrantsFactory, AllGrantsFactory).
      *
      * The grant creation functionality is now implemented in:
-     * - DesiredGrantsProvider: Orchestrates grant creation and delegates to specific providers
-     * - StandardGrantsProvider: Creates grants for specific named objects
-     * - FutureGrantsProvider: Creates future grants using OBJECT_TYPE syntax
-     * - AllGrantsProvider: Expands wildcard grants to all existing objects in containers
+     * - DesiredGrantsFactory: Orchestrates grant creation and delegates to specific providers
+     * - StandardGrantsFactory: Creates grants for specific named objects
+     * - FutureGrantsFactory: Creates future grants using OBJECT_TYPE syntax
+     * - AllGrantsFactory: Expands wildcard grants to all existing objects in containers
      *
-     * The new implementation is tested in DesiredGrantsProviderTest and related test classes.
+     * The new implementation is tested in DesiredGrantsFactoryTest and related test classes.
      */
 
     public record CompilePlaybookPrivilegeGrantsTestParams(

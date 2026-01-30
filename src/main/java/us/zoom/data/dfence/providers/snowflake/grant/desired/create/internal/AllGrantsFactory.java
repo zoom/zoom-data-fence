@@ -13,11 +13,11 @@ import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public final class AllGrantsProvider {
+public final class AllGrantsFactory {
 
   private final SnowflakeObjectsService snowflakeObjectsService;
 
-  public List<SnowflakeGrantModel> createGrants(ContainerGrantsCreationData data) {
+  public List<SnowflakeGrantModel> createFrom(ContainerGrantsCreationData data) {
     return expandAllGrants(
         data.containerObjectType(),
         data.objectType(),

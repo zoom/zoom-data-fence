@@ -7,7 +7,7 @@ import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.DesiredGrantsProvider;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.DesiredGrantsFactory;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
@@ -18,28 +18,28 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@DisplayName("DesiredGrantsProvider")
-class DesiredGrantsProviderTest {
+@DisplayName("DesiredGrantsFactory")
+class DesiredGrantsFactoryTest {
 
   private SnowflakeObjectsService mockObjectsService;
-  private DesiredGrantsProvider grantProvider;
+  private DesiredGrantsFactory grantProvider;
   private SnowflakeGrantBuilderOptions options;
 
   @BeforeEach
   void setUp() {
     mockObjectsService = mock(SnowflakeObjectsService.class);
-    grantProvider = new DesiredGrantsProvider(mockObjectsService);
+    grantProvider = new DesiredGrantsFactory(mockObjectsService);
     options = new SnowflakeGrantBuilderOptions();
   }
 
   @Test
-  @DisplayName("playbookGrantToSnowflakeGrants should create grant for specific table")
-  void playbookGrantToSnowflakeGrants_createsGrantForSpecificTable() {
+  @DisplayName("createFrom should create grant for specific table")
+  void createFrom_createsGrantForSpecificTable() {
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("table", "MY_TABLE", "MY_SCHEMA", "MY_DB", List.of("SELECT"));
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     SnowflakeGrantBuilder builder = actualBuilders.get(0);
@@ -49,13 +49,13 @@ class DesiredGrantsProviderTest {
 
   @Test
   @DisplayName(
-      "playbookGrantToSnowflakeGrants should normalize object names using ObjectName.normalize")
-  void playbookGrantToSnowflakeGrants_normalizesObjectNames() {
+      "createFrom should normalize object names using ObjectName.normalize")
+  void createFrom_normalizesObjectNames() {
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("table", "my_table", "my_schema", "my_db", List.of("SELECT"));
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     String key = actualBuilders.get(0).getKey();
@@ -64,49 +64,49 @@ class DesiredGrantsProviderTest {
 
   @Test
   @DisplayName(
-      "playbookGrantToSnowflakeGrants should create multiple grants for multiple privileges")
-  void playbookGrantToSnowflakeGrants_createsMultipleGrantsForMultiplePrivileges() {
+      "createFrom should create multiple grants for multiple privileges")
+  void createFrom_createsMultipleGrantsForMultiplePrivileges() {
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant(
             "table", "MY_TABLE", "MY_SCHEMA", "MY_DB", List.of("SELECT", "INSERT", "UPDATE"));
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(3, actualBuilders.size());
   }
 
   @Test
   @DisplayName(
-      "playbookGrantToSnowflakeGrants should throw when wildcard is used with standard grant type")
-  void playbookGrantToSnowflakeGrants_throwsWhenWildcardUsedWithStandardGrant() {
+      "createFrom should throw when wildcard is used with standard grant type")
+  void createFrom_throwsWhenWildcardUsedWithStandardGrant() {
     PlaybookPrivilegeGrant playbookGrant =
         new PlaybookPrivilegeGrant(
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT"), false, false, true);
 
     assertThrows(
         Exception.class,
-        () -> grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options));
+        () -> grantProvider.createFrom(playbookGrant, "ROLE1", options));
   }
 
   @Test
   @DisplayName(
-      "playbookGrantToSnowflakeGrants should use databaseName when objectName is null for qualLevel 1")
-  void playbookGrantToSnowflakeGrants_usesDatabaseNameWhenObjectNameIsNullForQualLevel1() {
+      "createFrom should use databaseName when objectName is null for qualLevel 1")
+  void createFrom_usesDatabaseNameWhenObjectNameIsNullForQualLevel1() {
     PlaybookPrivilegeGrant playbookGrant =
         new PlaybookPrivilegeGrant(
             "database", null, null, "MY_DB", List.of("USAGE"), false, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getKey().contains("MY_DB"));
   }
 
   @Test
-  @DisplayName("playbookGrantToSnowflakeGrants should throw when validation fails")
-  void playbookGrantToSnowflakeGrants_throwsWhenValidationFails() {
+  @DisplayName("createFrom should throw when validation fails")
+  void createFrom_throwsWhenValidationFails() {
     // Create a grant with missing schema name for a table (qualLevel 3 requires schema)
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("table", "MY_TABLE", null, "MY_DB", List.of("SELECT"));
@@ -114,7 +114,7 @@ class DesiredGrantsProviderTest {
     Exception actualException =
         assertThrows(
             Exception.class,
-            () -> grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options),
+            () -> grantProvider.createFrom(playbookGrant, "ROLE1", options),
             "Should throw when object name validation fails");
 
     assertTrue(
@@ -124,8 +124,8 @@ class DesiredGrantsProviderTest {
   }
 
   @Test
-  @DisplayName("playbookGrantToSnowflakeGrants should create future grants for database container")
-  void playbookGrantToSnowflakeGrants_createsFutureGrantsForDatabaseContainer() {
+  @DisplayName("createFrom should create future grants for database container")
+  void createFrom_createsFutureGrantsForDatabaseContainer() {
     when(mockObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class)))
         .thenReturn(true);
     PlaybookPrivilegeGrant playbookGrant =
@@ -133,15 +133,15 @@ class DesiredGrantsProviderTest {
             "table", "*", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getKey().contains("MY_DB.<TABLE>"));
   }
 
   @Test
-  @DisplayName("playbookGrantToSnowflakeGrants should create all grants when includeAll is true")
-  void playbookGrantToSnowflakeGrants_createsAllGrantsWhenIncludeAllIsTrue() {
+  @DisplayName("createFrom should create all grants when includeAll is true")
+  void createFrom_createsAllGrantsWhenIncludeAllIsTrue() {
     when(mockObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class)))
         .thenReturn(true);
     when(mockObjectsService.getContainerObjectQualNames(
@@ -152,7 +152,7 @@ class DesiredGrantsProviderTest {
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT"), false, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(2, actualBuilders.size());
     assertTrue(actualBuilders.stream().anyMatch(g -> g.getKey().contains("TABLE1")));
@@ -160,8 +160,8 @@ class DesiredGrantsProviderTest {
   }
 
   @Test
-  @DisplayName("playbookGrantToSnowflakeGrants should create both future and all grants")
-  void playbookGrantToSnowflakeGrants_createsBothFutureAndAllGrants() {
+  @DisplayName("createFrom should create both future and all grants")
+  void createFrom_createsBothFutureAndAllGrants() {
     when(mockObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class)))
         .thenReturn(true);
     when(mockObjectsService.getContainerObjectQualNames(
@@ -174,7 +174,7 @@ class DesiredGrantsProviderTest {
         new PlaybookPrivilegeGrant("table", "*", "*", "MY_DB", List.of("SELECT"), true, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(2, actualBuilders.size());
     assertTrue(
@@ -186,15 +186,15 @@ class DesiredGrantsProviderTest {
   }
 
   @Test
-  @DisplayName("playbookGrantToSnowflakeGrants should throw when database name is wildcard")
-  void playbookGrantToSnowflakeGrants_throwsWhenDatabaseNameIsWildcard() {
+  @DisplayName("createFrom should throw when database name is wildcard")
+  void createFrom_throwsWhenDatabaseNameIsWildcard() {
     PlaybookPrivilegeGrant playbookGrant =
         new PlaybookPrivilegeGrant("table", "*", "*", "*", List.of("SELECT"), true, false, true);
 
     Exception actualException =
         assertThrows(
             Exception.class,
-            () -> grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options));
+            () -> grantProvider.createFrom(playbookGrant, "ROLE1", options));
 
     assertTrue(
         actualException.getMessage().contains("non-empty and non-wildcard value is expected")
@@ -208,8 +208,8 @@ class DesiredGrantsProviderTest {
   }
 
   @Test
-  @DisplayName("playbookGrantToSnowflakeGrants should create future grants with future flag")
-  void playbookGrantToSnowflakeGrants_createsFutureGrantsWithFutureFlag() {
+  @DisplayName("createFrom should create future grants with future flag")
+  void createFrom_createsFutureGrantsWithFutureFlag() {
     when(mockObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class)))
         .thenReturn(true);
     PlaybookPrivilegeGrant playbookGrant =
@@ -217,7 +217,7 @@ class DesiredGrantsProviderTest {
             "table", "*", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     SnowflakeGrantModel grant = actualBuilders.get(0).getGrant();
@@ -229,8 +229,8 @@ class DesiredGrantsProviderTest {
 
   @Test
   @DisplayName(
-      "playbookGrantToSnowflakeGrants should handle future grants for object types with spaces")
-  void playbookGrantToSnowflakeGrants_handlesFutureGrantsForObjectTypesWithSpaces() {
+      "createFrom should handle future grants for object types with spaces")
+  void createFrom_handlesFutureGrantsForObjectTypesWithSpaces() {
     when(mockObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class)))
         .thenReturn(true);
     PlaybookPrivilegeGrant playbookGrant =
@@ -238,7 +238,7 @@ class DesiredGrantsProviderTest {
             "external_table", "*", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getGrant().name().contains("MY_DB.<EXTERNAL_TABLE>"));
@@ -246,8 +246,8 @@ class DesiredGrantsProviderTest {
 
   @Test
   @DisplayName(
-      "playbookGrantToSnowflakeGrants should return empty when database does not exist for future schema grants")
-  void playbookGrantToSnowflakeGrants_returnsEmptyWhenDatabaseDoesNotExistForFutureSchemaGrants() {
+      "createFrom should return empty when database does not exist for future schema grants")
+  void createFrom_returnsEmptyWhenDatabaseDoesNotExistForFutureSchemaGrants() {
     when(mockObjectsService.objectExists("\"MY_DB\"", SnowflakeObjectType.DATABASE))
         .thenReturn(false);
     PlaybookPrivilegeGrant playbookGrant =
@@ -255,7 +255,7 @@ class DesiredGrantsProviderTest {
             "table", "MY_TABLE", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getGrant().name().contains("MY_DB.<TABLE>"));
@@ -263,8 +263,8 @@ class DesiredGrantsProviderTest {
 
   @Test
   @DisplayName(
-      "playbookGrantToSnowflakeGrants should create future grants for all schemas in database")
-  void playbookGrantToSnowflakeGrants_createsFutureGrantsForAllSchemasInDatabase() {
+      "createFrom should create future grants for all schemas in database")
+  void createFrom_createsFutureGrantsForAllSchemasInDatabase() {
     when(mockObjectsService.objectExists(anyString(), eq(SnowflakeObjectType.DATABASE)))
         .thenReturn(true);
     when(mockObjectsService.getContainerObjectQualNames(
@@ -275,7 +275,7 @@ class DesiredGrantsProviderTest {
             "table", "MY_TABLE", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertTrue(actualBuilders.size() >= 1);
     assertTrue(
@@ -294,8 +294,8 @@ class DesiredGrantsProviderTest {
 
   @Test
   @DisplayName(
-      "playbookGrantToSnowflakeGrants should return empty when container does not exist for all grants")
-  void playbookGrantToSnowflakeGrants_returnsEmptyWhenContainerDoesNotExistForAllGrants() {
+      "createFrom should return empty when container does not exist for all grants")
+  void createFrom_returnsEmptyWhenContainerDoesNotExistForAllGrants() {
     when(mockObjectsService.objectExists("\"MY_DB\".\"MY_SCHEMA\"", SnowflakeObjectType.SCHEMA))
         .thenReturn(false);
     PlaybookPrivilegeGrant playbookGrant =
@@ -303,14 +303,14 @@ class DesiredGrantsProviderTest {
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT"), false, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(0, actualBuilders.size());
   }
 
   @Test
-  @DisplayName("playbookGrantToSnowflakeGrants should create grants for all objects in container")
-  void playbookGrantToSnowflakeGrants_createsGrantsForAllObjectsInContainer() {
+  @DisplayName("createFrom should create grants for all objects in container")
+  void createFrom_createsGrantsForAllObjectsInContainer() {
     when(mockObjectsService.objectExists(anyString(), eq(SnowflakeObjectType.SCHEMA)))
         .thenReturn(true);
     when(mockObjectsService.getContainerObjectQualNames(
@@ -321,7 +321,7 @@ class DesiredGrantsProviderTest {
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT", "INSERT"), false, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(4, actualBuilders.size());
     assertTrue(
@@ -352,7 +352,7 @@ class DesiredGrantsProviderTest {
             "schema", null, "my_schema", "my_db", List.of("USAGE"), false, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.playbookGrantToSnowflakeGrants(playbookGrant, "ROLE1", options);
+        grantProvider.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     String key = actualBuilders.get(0).getKey();
