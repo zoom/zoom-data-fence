@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.policies.companions;
+package us.zoom.data.dfence.policies.providers;
 
 import io.vavr.control.Option;
 import io.vavr.control.Try;
@@ -10,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.policies.pattern.companions.ResolvedPolicyPatternCompanion;
-import us.zoom.data.dfence.policies.pattern.models.ResolvedPolicyPattern;
+import us.zoom.data.dfence.policies.pattern.providers.PolicyTypeProvider;
+import us.zoom.data.dfence.policies.pattern.models.PolicyType;
 import us.zoom.data.dfence.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
 import us.zoom.data.dfence.policies.models.PolicyGrant;
@@ -20,9 +20,9 @@ import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class PolicyGrantCompanion {
+public final class PolicyGrantProvider {
 
-  public static PolicyGrant from(PlaybookPrivilegeGrant grant) {
+  public static PolicyGrant getPolicyGrant(PlaybookPrivilegeGrant grant) {
     return getPlaybookGrant(grant)
         .getOrElseThrow(
             err -> {
@@ -52,14 +52,14 @@ public final class PolicyGrantCompanion {
           PolicyPattern pattern = PolicyPattern.of(dbName, schName, objName);
           PolicyPatternOptions options =
               new PolicyPatternOptions(grant.includeFuture(), grant.includeAll());
-          ResolvedPolicyPattern resolvedPolicyPattern =
-                  createResolvedPolicyPattern(pattern, snowflakeObjectType, options);
+          PolicyType policyType =
+                  createPolicyType(pattern, snowflakeObjectType, options);
 
           List<PolicyGrantPrivilege> privileges =
               grant.privileges().stream().map(PolicyGrantPrivilege::new).collect(Collectors.toList());
 
           return new PolicyGrant(
-              snowflakeObjectType, privileges, resolvedPolicyPattern, grant.enable());
+              snowflakeObjectType, privileges, policyType, grant.enable());
         });
   }
 
@@ -67,12 +67,12 @@ public final class PolicyGrantCompanion {
     return Try.of(() -> SnowflakeObjectType.fromString(grantObjectType));
   }
 
-  private static ResolvedPolicyPattern createResolvedPolicyPattern(
+  private static PolicyType createPolicyType(
       PolicyPattern pattern,
       SnowflakeObjectType snowflakeObjectType,
       PolicyPatternOptions options) {
     return Try.of(
-            () -> ResolvedPolicyPatternCompanion.from(pattern, snowflakeObjectType, options))
+            () -> PolicyTypeProvider.getPolicyType(pattern, snowflakeObjectType, options))
         .flatMap(
             validatedPattern ->
                 validatedPattern.fold(

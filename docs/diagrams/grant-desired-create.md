@@ -16,12 +16,12 @@ The grant creation system is responsible for:
 flowchart TD
     Start([PlaybookPrivilegeGrant]) --> DGP[DesiredGrantsProvider]
     
-    DGP --> PGC[PolicyGrantCompanion.from]
+    DGP --> PGC[PolicyGrantProvider.getPolicyGrant]
     PGC --> PG[PolicyGrant]
     
     PGC -.-> PPV[PolicyPatternValidations]
     PPV -.-> BV[BaseValidations]
-    PPV -.-> RPP[ResolvedPolicyPattern]
+    PPV -.-> RPP[PolicyType]
     
     PG --> GCDP[GrantsCreationDataProvider]
     GCDP --> GCD{GrantsCreationData}
@@ -30,7 +30,7 @@ flowchart TD
     GCD -->|Container| CGD[GrantsCreationData.Container]
     
     CGD --> CGDATA[ContainerGrantsCreationData]
-    CGD --> CPO[ContainerPatternOptions]
+    CGD --> CPO[ContainerPolicyOptions]
     
     subgraph providers [Grant creation providers]
         direction LR
@@ -65,7 +65,7 @@ flowchart TD
     style SOS fill:#f5f5f5
 ```
 
-**Flow note:** Validation (PolicyPatternValidations, BaseValidations) runs inside `PolicyGrantCompanion.from` when building `PolicyGrant`; `ResolvedPolicyPattern` is produced via `ResolvedPolicyPatternCompanion` and stored on `PolicyGrant`. `GrantsCreationDataProvider.getGrantsCreationData(grant.resolvedPattern(), grant, roleName)` returns either `GrantsCreationData.Standard` or `GrantsCreationData.Container`. For Container, `DesiredGrantsProvider` iterates over `containerPatternOptions().options()` (each a `ContainerPatternOption`: FUTURE or ALL) and calls `FutureGrantsProvider.createGrants(containerGrantsCreationData)` or `AllGrantsProvider.createGrants(containerGrantsCreationData)` with the inner `ContainerGrantsCreationData`.
+**Flow note:** Validation (PolicyPatternValidations, BaseValidations) runs inside `PolicyGrantProvider.getPolicyGrant` when building `PolicyGrant`; `PolicyType` is produced via `PolicyTypeProvider` and stored on `PolicyGrant`. `GrantsCreationDataProvider.getGrantsCreationData(grant.policyType(), grant, roleName)` returns either `GrantsCreationData.Standard` or `GrantsCreationData.Container`. For Container, `DesiredGrantsProvider` iterates over `containerPolicyOptions().options()` (each a `ContainerPolicyOption`: FUTURE or ALL) and calls `FutureGrantsProvider.createGrants(containerGrantsCreationData)` or `AllGrantsProvider.createGrants(containerGrantsCreationData)` with the inner `ContainerGrantsCreationData`.
 
 ## Component Descriptions
 
@@ -73,21 +73,21 @@ flowchart TD
 - **DesiredGrantsProvider**: Main entry point that orchestrates the grant creation process
 
 ### Validation & Pattern Resolution
-- **PolicyGrantCompanion**: Converts `PlaybookPrivilegeGrant` to `PolicyGrant` with validation
+- **PolicyGrantProvider**: Converts `PlaybookPrivilegeGrant` to `PolicyGrant` with validation
 - **PolicyPatternValidations**: Validates playbook patterns and resolves them to specific types
 - **BaseValidations**: Performs basic validation on grant patterns
-- **ResolvedPolicyPattern**: Sealed interface representing resolved pattern types:
+- **PolicyType**: Sealed interface representing resolved pattern types:
   - `Standard`: Sub-types (Global, AccountObject, AccountObjectDatabase, Schema, SchemaObject) for direct grants to specific objects.
-  - `Container`: Sub-types (AccountObjectDatabase, Schema, SchemaObjectAllSchemas) for wildcard grants (future/all) on containers; each holds `ContainerPatternOptions`.
+  - `Container`: Sub-types (AccountObjectDatabase, Schema, SchemaObjectAllSchemas) for wildcard grants (future/all) on containers; each holds `ContainerPolicyOptions`.
 
 ### Data Preparation
-- **GrantsCreationDataProvider**: Creates appropriate data structures for grant creation from a `ResolvedPolicyPattern`, `PolicyGrant`, and role name.
+- **GrantsCreationDataProvider**: Creates appropriate data structures for grant creation from a `PolicyType`, `PolicyGrant`, and role name.
 - **GrantsCreationData**: Sealed interface with two variants:
   - `Standard`: For direct object grants; passed to `StandardGrantsProvider.createGrants(GrantsCreationData.Standard)`.
-  - `Container`: Wraps `ContainerGrantsCreationData` and `ContainerPatternOptions`; used for future/all container grants.
+  - `Container`: Wraps `ContainerGrantsCreationData` and `ContainerPolicyOptions`; used for future/all container grants.
 - **ContainerGrantsCreationData**: Record passed to `FutureGrantsProvider` and `AllGrantsProvider`. Fields: `objectType`, `containerObjectType`, `normalizedObjectName`, `isSchemaObjectWithAllSchemas`, `privileges`, `roleName`.
-- **ContainerPatternOptions**: Record holding `List<ContainerPatternOption> options`, built via `ContainerPatternOptions.of(ContainerPatternOption...)`. DesiredGrantsProvider iterates over `options()` and invokes FGP or AGP per option.
-- **ContainerPatternOption**: Enum with `FUTURE` and `ALL`. “Future and all” is represented by options containing both (e.g. `ContainerPatternOptions.of(ALL, FUTURE)`).
+- **ContainerPolicyOptions**: Record holding `List<ContainerPolicyOption> options`, built via `ContainerPolicyOptions.of(ContainerPolicyOption...)`. DesiredGrantsProvider iterates over `options()` and invokes FGP or AGP per option.
+- **ContainerPolicyOption**: Enum with `FUTURE` and `ALL`. “Future and all” is represented by options containing both (e.g. `ContainerPolicyOptions.of(ALL, FUTURE)`).
 
 ### Grant Creation
 - **StandardGrantsProvider**: Creates grants for specific named objects; accepts `GrantsCreationData.Standard`. Does not call SnowflakeObjectsService.
@@ -118,9 +118,9 @@ Output: GRANT SELECT ON TABLE "MY_DB"."MY_SCHEMA"."MY_TABLE" TO ROLE ROLE_NAME;
 ```
 Input: table.*.*.my_db [SELECT] (future=true)
 ↓
-PolicyGrant → ResolvedPolicyPattern.Container (options: FUTURE)
+PolicyGrant → PolicyType.Container (options: FUTURE)
 ↓
-GrantsCreationData.Container(ContainerGrantsCreationData, ContainerPatternOptions.of(FUTURE))
+GrantsCreationData.Container(ContainerGrantsCreationData, ContainerPolicyOptions.of(FUTURE))
 ↓
 FutureGrantsProvider.createGrants(ContainerGrantsCreationData)
 ↓
@@ -131,9 +131,9 @@ Output: GRANT SELECT ON FUTURE TABLES IN DATABASE "MY_DB" TO ROLE ROLE_NAME;
 ```
 Input: table.*.my_schema.my_db [SELECT] (includeAll=true)
 ↓
-PolicyGrant → ResolvedPolicyPattern.Container (options: ALL)
+PolicyGrant → PolicyType.Container (options: ALL)
 ↓
-GrantsCreationData.Container(ContainerGrantsCreationData, ContainerPatternOptions.of(ALL))
+GrantsCreationData.Container(ContainerGrantsCreationData, ContainerPolicyOptions.of(ALL))
 ↓
 AllGrantsProvider.createGrants(ContainerGrantsCreationData) → Queries existing tables
 ↓
@@ -144,9 +144,9 @@ Output: Multiple grants for each existing table in the schema
 ```
 Input: table.*.*.my_db [SELECT] (future=true, includeAll=true)
 ↓
-PolicyGrant → ResolvedPolicyPattern.Container (options: ALL, FUTURE)
+PolicyGrant → PolicyType.Container (options: ALL, FUTURE)
 ↓
-GrantsCreationData.Container(ContainerGrantsCreationData, ContainerPatternOptions.of(ALL, FUTURE))
+GrantsCreationData.Container(ContainerGrantsCreationData, ContainerPolicyOptions.of(ALL, FUTURE))
 ↓
 DesiredGrantsProvider iterates options: FutureGrantsProvider + AllGrantsProvider (each receives same ContainerGrantsCreationData)
 ↓
@@ -169,14 +169,14 @@ Output: Future grant + grants for all existing tables
 - `PolicyPatternOptions`: Options for pattern resolution (e.g. future, includeAll)
 - `GrantPrivilege`: Privilege information with validation
 - `GrantsCreationData.Standard`: Direct grant data (objectType, normalizedObjectName, privileges, roleName)
-- `GrantsCreationData.Container`: Wraps `ContainerGrantsCreationData` and `ContainerPatternOptions`
+- `GrantsCreationData.Container`: Wraps `ContainerGrantsCreationData` and `ContainerPolicyOptions`
 - `ContainerGrantsCreationData`: Container grant data passed to FutureGrantsProvider and AllGrantsProvider
-- `ContainerPatternOptions`: Record holding `List<ContainerPatternOption> options`, built via `of(ContainerPatternOption...)`
-- `ContainerPatternOption`: Enum `FUTURE`, `ALL`
+- `ContainerPolicyOptions`: Record holding `List<ContainerPolicyOption> options`, built via `of(ContainerPolicyOption...)`
+- `ContainerPolicyOption`: Enum `FUTURE`, `ALL`
 
 ### Companions
-- `PolicyGrantCompanion`: Factory and validation for PolicyGrant
-- `ResolvedPolicyPatternCompanion`: Pattern resolution to ResolvedPolicyPattern
+- `PolicyGrantProvider`: Factory and validation for PolicyGrant
+- `PolicyTypeProvider`: Pattern resolution to PolicyType
 
 ### Utilities
 - `PolicyWildcards`: Constants and utilities for wildcard handling
@@ -194,5 +194,5 @@ Each component has dedicated tests:
 - `AllGrantsProviderTest`: Unit tests for all grants
 - `PolicyPatternValidationsTest`: Validation logic tests
 - `BaseValidationsTest`: Base validation (e.g. liftError) tests
-- `ResolvedPolicyPatternCompanionTest`: Pattern resolution to `ResolvedPolicyPattern` tests
-- `PolicyGrantCompanionTest`: Companion logic tests
+- `PolicyTypeProviderTest`: Pattern resolution to `PolicyType` tests
+- `PolicyGrantProviderTest`: Companion logic tests

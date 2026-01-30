@@ -1,6 +1,6 @@
 package us.zoom.data.dfence.policies.pattern.models;
 
-public enum ContainerPatternOption {
+public enum ContainerPolicyOption {
   FUTURE,
   ALL
 }
