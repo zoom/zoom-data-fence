@@ -7,7 +7,7 @@ import io.vavr.control.Validation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.policies.pattern.providers.PolicyTypeProvider;
+import us.zoom.data.dfence.policies.pattern.factories.PolicyTypeFactory;
 import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOption;
 import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOptions;
 import us.zoom.data.dfence.policies.pattern.models.PolicyType;
@@ -19,7 +19,7 @@ import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PolicyTypeProviderTest {
+class PolicyTypeFactoryTest {
 
   @Test
   @DisplayName("Standard Target - Account Level (qualLevel 0)")
@@ -27,7 +27,7 @@ class PolicyTypeProviderTest {
     PolicyPattern pattern = new PolicyPattern(Option.none(), Option.none(), Option.none());
 
     Validation<Seq<ValidationError>, PolicyType> result =
-        PolicyTypeProvider.getPolicyType(
+        PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.ACCOUNT, new PolicyPatternOptions(false, false));
 
     assertTrue(result.isValid());
@@ -40,7 +40,7 @@ class PolicyTypeProviderTest {
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
     Validation<Seq<ValidationError>, PolicyType> result =
-        PolicyTypeProvider.getPolicyType(
+        PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.DATABASE, new PolicyPatternOptions(false, false));
 
     assertTrue(result.isValid());
@@ -53,7 +53,7 @@ class PolicyTypeProviderTest {
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
     Validation<Seq<ValidationError>, PolicyType> result =
-        PolicyTypeProvider.getPolicyType(
+        PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.SCHEMA, new PolicyPatternOptions(false, false));
 
     assertTrue(result.isValid());
@@ -67,7 +67,7 @@ class PolicyTypeProviderTest {
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.some("MY_TABLE"));
 
     Validation<Seq<ValidationError>, PolicyType> result =
-        PolicyTypeProvider.getPolicyType(
+        PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, false));
 
     assertTrue(result.isValid());
@@ -82,7 +82,7 @@ class PolicyTypeProviderTest {
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
     Validation<Seq<ValidationError>, PolicyType> result =
-        PolicyTypeProvider.getPolicyType(
+        PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.SCHEMA, new PolicyPatternOptions(true, false));
 
     assertTrue(result.isValid());
@@ -97,7 +97,7 @@ class PolicyTypeProviderTest {
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
     Validation<Seq<ValidationError>, PolicyType> result =
-        PolicyTypeProvider.getPolicyType(
+        PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, true));
 
     assertTrue(result.isValid());
@@ -111,7 +111,7 @@ class PolicyTypeProviderTest {
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
     Validation<Seq<ValidationError>, PolicyType> result =
-        PolicyTypeProvider.getPolicyType(
+        PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, true));
 
     assertTrue(result.isValid());
@@ -125,7 +125,7 @@ class PolicyTypeProviderTest {
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
     Validation<Seq<ValidationError>, PolicyType> result =
-        PolicyTypeProvider.getPolicyType(
+        PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, true));
 
     assertTrue(result.isValid());

@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.policies.providers;
+package us.zoom.data.dfence.policies.factories;
 
 import io.vavr.control.Option;
 import io.vavr.control.Try;
@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.policies.pattern.providers.PolicyTypeProvider;
+import us.zoom.data.dfence.policies.pattern.factories.PolicyTypeFactory;
 import us.zoom.data.dfence.policies.pattern.models.PolicyType;
 import us.zoom.data.dfence.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
@@ -20,9 +20,9 @@ import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class PolicyGrantProvider {
+public final class PolicyGrantFactory {
 
-  public static PolicyGrant getPolicyGrant(PlaybookPrivilegeGrant grant) {
+  public static PolicyGrant createFrom(PlaybookPrivilegeGrant grant) {
     return getPlaybookGrant(grant)
         .getOrElseThrow(
             err -> {
@@ -72,7 +72,7 @@ public final class PolicyGrantProvider {
       SnowflakeObjectType snowflakeObjectType,
       PolicyPatternOptions options) {
     return Try.of(
-            () -> PolicyTypeProvider.getPolicyType(pattern, snowflakeObjectType, options))
+            () -> PolicyTypeFactory.createFrom(pattern, snowflakeObjectType, options))
         .flatMap(
             validatedPattern ->
                 validatedPattern.fold(

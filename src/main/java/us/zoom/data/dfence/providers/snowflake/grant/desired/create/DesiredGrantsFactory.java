@@ -11,41 +11,41 @@ import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.policies.models.PolicyGrant;
 import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOption;
-import us.zoom.data.dfence.policies.providers.PolicyGrantProvider;
+import us.zoom.data.dfence.policies.factories.PolicyGrantFactory;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.GrantsCreationDataProvider;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.GrantsCreationDataFactory;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.ContainerGrantsCreationData;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.GrantsCreationData;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.AllGrantsProvider;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.FutureGrantsProvider;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsProvider;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.AllGrantsFactory;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.FutureGrantsFactory;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsFactory;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public class DesiredGrantsProvider {
+public class DesiredGrantsFactory {
 
-  private final FutureGrantsProvider futureGrantsProvider;
-  private final AllGrantsProvider allGrantsProvider;
+  private final FutureGrantsFactory futureGrantsFactory;
+  private final AllGrantsFactory allGrantsFactory;
 
-  public DesiredGrantsProvider(SnowflakeObjectsService snowflakeObjectsService) {
-    this.futureGrantsProvider = new FutureGrantsProvider(snowflakeObjectsService);
-    this.allGrantsProvider = new AllGrantsProvider(snowflakeObjectsService);
+  public DesiredGrantsFactory(SnowflakeObjectsService snowflakeObjectsService) {
+    this.futureGrantsFactory = new FutureGrantsFactory(snowflakeObjectsService);
+    this.allGrantsFactory = new AllGrantsFactory(snowflakeObjectsService);
   }
 
   /**
    * Converts a playbook grant to Snowflake grant builders. Handles standard grants and container
    * grants (future/all).
    */
-  public List<SnowflakeGrantBuilder> playbookGrantToSnowflakeGrants(
+  public List<SnowflakeGrantBuilder> createFrom(
       PlaybookPrivilegeGrant playbookPrivilegeGrant,
       String roleName,
       SnowflakeGrantBuilderOptions options) {
     return Try.of(
             () -> {
-              PolicyGrant grant = PolicyGrantProvider.getPolicyGrant(playbookPrivilegeGrant);
+              PolicyGrant grant = PolicyGrantFactory.createFrom(playbookPrivilegeGrant);
               return getGrants(grant, roleName).stream()
                   .map(x -> SnowflakeGrantBuilder.fromGrant(x, options))
                   .filter(Objects::nonNull)
@@ -65,10 +65,10 @@ public class DesiredGrantsProvider {
 
   private List<SnowflakeGrantModel> getGrants(PolicyGrant grant, String roleName) {
     GrantsCreationData data =
-        GrantsCreationDataProvider.getGrantsCreationData(grant.policyType(), grant, roleName);
+        GrantsCreationDataFactory.createFrom(grant.policyType(), grant, roleName);
 
     if (data instanceof GrantsCreationData.Standard s) {
-      return StandardGrantsProvider.createGrants(s);
+      return StandardGrantsFactory.createFrom(s);
     } else if (data instanceof GrantsCreationData.Container c) {
       return createContainerGrants(c);
     } else {
@@ -92,8 +92,8 @@ public class DesiredGrantsProvider {
   private List<SnowflakeGrantModel> getContainerGrantsForOption(
       ContainerGrantsCreationData c, ContainerPolicyOption option) {
     return switch (option) {
-      case FUTURE -> futureGrantsProvider.createGrants(c);
-      case ALL -> allGrantsProvider.createGrants(c);
+      case FUTURE -> futureGrantsFactory.createFrom(c);
+      case ALL -> allGrantsFactory.createFrom(c);
     };
   }
 }

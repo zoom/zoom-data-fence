@@ -13,9 +13,9 @@ import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.
 import us.zoom.data.dfence.sql.ObjectName;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class GrantsCreationDataProvider {
+public final class GrantsCreationDataFactory {
 
-  public static GrantsCreationData getGrantsCreationData(
+  public static GrantsCreationData createFrom(
       PolicyType target, PolicyGrant grant, String roleName) {
     SnowflakeObjectType objectType = grant.objectType();
     List<PolicyGrantPrivilege> privileges = grant.privileges();
