@@ -9,9 +9,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
-import us.zoom.data.dfence.policies.companions.PolicyGrantCompanion;
 import us.zoom.data.dfence.policies.models.PolicyGrant;
-import us.zoom.data.dfence.policies.pattern.models.ContainerPatternOption;
+import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOption;
+import us.zoom.data.dfence.policies.providers.PolicyGrantProvider;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.GrantsCreationDataProvider;
@@ -45,7 +45,7 @@ public class DesiredGrantsProvider {
       SnowflakeGrantBuilderOptions options) {
     return Try.of(
             () -> {
-              PolicyGrant grant = PolicyGrantCompanion.from(playbookPrivilegeGrant);
+              PolicyGrant grant = PolicyGrantProvider.getPolicyGrant(playbookPrivilegeGrant);
               return getGrants(grant, roleName).stream()
                   .map(x -> SnowflakeGrantBuilder.fromGrant(x, options))
                   .filter(Objects::nonNull)
@@ -65,7 +65,7 @@ public class DesiredGrantsProvider {
 
   private List<SnowflakeGrantModel> getGrants(PolicyGrant grant, String roleName) {
     GrantsCreationData data =
-        GrantsCreationDataProvider.getGrantsCreationData(grant.resolvedPattern(), grant, roleName);
+        GrantsCreationDataProvider.getGrantsCreationData(grant.policyType(), grant, roleName);
 
     if (data instanceof GrantsCreationData.Standard s) {
       return StandardGrantsProvider.createGrants(s);
@@ -79,7 +79,7 @@ public class DesiredGrantsProvider {
 
   private List<SnowflakeGrantModel> createContainerGrants(GrantsCreationData.Container container) {
     return container
-        .containerPatternOptions()
+        .containerPolicyOptions()
         .options()
         .foldLeft(
             new ArrayList<>(),
@@ -90,7 +90,7 @@ public class DesiredGrantsProvider {
   }
 
   private List<SnowflakeGrantModel> getContainerGrantsForOption(
-      ContainerGrantsCreationData c, ContainerPatternOption option) {
+      ContainerGrantsCreationData c, ContainerPolicyOption option) {
     return switch (option) {
       case FUTURE -> futureGrantsProvider.createGrants(c);
       case ALL -> allGrantsProvider.createGrants(c);
