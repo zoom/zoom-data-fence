@@ -1,6 +1,10 @@
 package us.zoom.data.dfence.providers.snowflake.revoke;
 
 import io.vavr.control.Try;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,11 +13,6 @@ import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.revoke.evaluator.GrantRevocationEvaluator;
 import us.zoom.data.dfence.providers.snowflake.revoke.index.PolicyGrantHashIndexer;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

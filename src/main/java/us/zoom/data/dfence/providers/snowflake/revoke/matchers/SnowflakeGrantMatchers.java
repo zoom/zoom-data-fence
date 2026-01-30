@@ -1,6 +1,8 @@
 package us.zoom.data.dfence.providers.snowflake.revoke.matchers;
 
 import io.vavr.collection.List;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import us.zoom.data.dfence.policies.models.PolicyGrant;
@@ -11,22 +13,19 @@ import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrant;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrantType;
 import us.zoom.data.dfence.sql.ObjectName;
 
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SnowflakeGrantMatchers {
 
-    public static BiPredicate<PolicyGrant, SnowflakeGrant> matchesSnowflakeGrant() {
-        return (policyGrant, snowflakeGrant) -> {
-            System.out.println("result " + matchesGrantType(snowflakeGrant.type()).test(policyGrant));
+  public static BiPredicate<PolicyGrant, SnowflakeGrant> matchesSnowflakeGrant() {
+    return (policyGrant, snowflakeGrant) -> {
+      System.out.println("result " + matchesGrantType(snowflakeGrant.type()).test(policyGrant));
 
-            return matchesGrantObjectType(snowflakeGrant.snowflakeObjectType())
-                    .and(matchesGrantPrivilege(snowflakeGrant.privilege()))
-                    .and(matchesGrantType(snowflakeGrant.type()))
-                    .test(policyGrant);
-        };
-    }
+      return matchesGrantObjectType(snowflakeGrant.snowflakeObjectType())
+          .and(matchesGrantPrivilege(snowflakeGrant.privilege()))
+          .and(matchesGrantType(snowflakeGrant.type()))
+          .test(policyGrant);
+    };
+  }
 
   public static Predicate<PolicyGrant> matchesGrantObjectType(
       SnowflakeObjectType snowflakeGrantObjectType) {
@@ -42,42 +41,40 @@ public class SnowflakeGrantMatchers {
   }
 
   private static Predicate<PolicyGrant> matchesGrantType(SnowflakeGrantType grantType) {
-      return policyGrant -> {
-          System.out.println(policyGrant.policyType() + " " + grantType);
-          PolicyType policyType = policyGrant.policyType();
-          if (policyType instanceof PolicyType.Standard) {
-              // Standard matches Standard
-              return grantType instanceof SnowflakeGrantType.Standard &&
-                      getParts(policyType).size() == getParts(grantType).size() &&
-                      matchesParts(policyGrant.policyType(), grantType);
-          } else if (policyType instanceof PolicyType.Container c) {
-              if (c.containerPolicyOptions().all()) {
-                  if (grantType instanceof SnowflakeGrantType.Standard &&
-                          matchesParts(policyGrant.policyType(), grantType)) return true;
-              }
+    return policyGrant -> {
+      System.out.println(policyGrant.policyType() + " " + grantType);
+      PolicyType policyType = policyGrant.policyType();
+      if (policyType instanceof PolicyType.Standard) {
+        // Standard matches Standard
+        return grantType instanceof SnowflakeGrantType.Standard
+            && getParts(policyType).size() == getParts(grantType).size()
+            && matchesParts(policyGrant.policyType(), grantType);
+      } else if (policyType instanceof PolicyType.Container c) {
+        if (c.containerPolicyOptions().all()) {
+          if (grantType instanceof SnowflakeGrantType.Standard
+              && matchesParts(policyGrant.policyType(), grantType)) return true;
+        }
 
-              if (c.containerPolicyOptions().future()) {
-                  return (grantType instanceof SnowflakeGrantType.Standard
-                          || grantType instanceof SnowflakeGrantType.Container) &&
-                          matchesParts(policyGrant.policyType(), grantType);
-              }
+        if (c.containerPolicyOptions().future()) {
+          return (grantType instanceof SnowflakeGrantType.Standard
+                  || grantType instanceof SnowflakeGrantType.Container)
+              && matchesParts(policyGrant.policyType(), grantType);
+        }
 
-              return false;
-          } else {
-              return false;
-          }
-      };
+        return false;
+      } else {
+        return false;
+      }
+    };
   }
 
   private static boolean matchesParts(PolicyType policyType, SnowflakeGrantType grantType) {
-      List<String> policyParts = getParts(policyType);
-      List<String> grantParts = getParts(grantType);
-      
-      boolean a = policyParts
-              .zip(grantParts)
-              .forAll(t -> ObjectName.equalObjectName(t._1(), t._2()));
-      System.out.println("A: " + a);
-      return a;
+    List<String> policyParts = getParts(policyType);
+    List<String> grantParts = getParts(grantType);
+
+    boolean a = policyParts.zip(grantParts).forAll(t -> ObjectName.equalObjectName(t._1(), t._2()));
+    System.out.println("A: " + a);
+    return a;
   }
 
   private static List<String> getParts(PolicyType policyType) {

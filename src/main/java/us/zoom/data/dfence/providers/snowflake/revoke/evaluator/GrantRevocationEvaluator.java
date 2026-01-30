@@ -1,6 +1,9 @@
 package us.zoom.data.dfence.providers.snowflake.revoke.evaluator;
 
 import io.vavr.control.Try;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +17,6 @@ import us.zoom.data.dfence.providers.snowflake.revoke.matchers.SnowflakeGrantMat
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PolicyGrantHashIndex;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrant;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.SnowflakeObjectTypeAlias;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
@@ -36,8 +35,8 @@ public class GrantRevocationEvaluator {
                   .stream()
                   .noneMatch(
                       policyGrant ->
-                          SnowflakeGrantMatchers.matchesSnowflakeGrant().test(policyGrant, snowflakeGrant)
-                  );
+                          SnowflakeGrantMatchers.matchesSnowflakeGrant()
+                              .test(policyGrant, snowflakeGrant));
             })
         .getOrElseThrow(
             e -> {

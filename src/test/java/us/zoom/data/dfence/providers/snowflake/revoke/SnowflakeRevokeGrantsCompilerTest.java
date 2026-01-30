@@ -1,16 +1,14 @@
 package us.zoom.data.dfence.providers.snowflake.revoke;
 
-import org.junit.jupiter.api.Test;
-import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
-import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
-import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-import us.zoom.data.dfence.providers.snowflake.revoke.SnowflakeRevokeGrantsCompiler;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
+import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 class SnowflakeRevokeGrantsCompilerTest {
 
@@ -98,7 +96,7 @@ class SnowflakeRevokeGrantsCompilerTest {
     // When
     List<SnowflakeGrantBuilder> actualRevokes =
         SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
-      System.out.println(actualRevokes);
+    System.out.println(actualRevokes);
     // Then
     assertTrue(actualRevokes.isEmpty());
   }
@@ -141,12 +139,11 @@ class SnowflakeRevokeGrantsCompilerTest {
 
     // When
 
-
-      assertThrows(
-              Exception.class,
-              () ->
-                      SnowflakeRevokeGrantsCompiler.compileRevokeGrants(
-                              List.of(playbookGrant), currentGrants));
+    assertThrows(
+        Exception.class,
+        () ->
+            SnowflakeRevokeGrantsCompiler.compileRevokeGrants(
+                List.of(playbookGrant), currentGrants));
   }
 
   @Test

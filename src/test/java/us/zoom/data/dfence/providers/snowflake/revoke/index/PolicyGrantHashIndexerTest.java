@@ -1,5 +1,9 @@
 package us.zoom.data.dfence.providers.snowflake.revoke.index;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
@@ -10,11 +14,6 @@ import us.zoom.data.dfence.policies.pattern.models.PolicyType;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PolicyGrantHashIndex;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.SnowflakeObjectTypeAlias;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class PolicyGrantHashIndexerTest {
 
@@ -192,8 +191,7 @@ class PolicyGrantHashIndexerTest {
     assertNotNull(selectGrants);
     assertEquals(1, selectGrants.size());
     assertTrue(
-        selectGrants.iterator().next().policyType()
-            instanceof PolicyType.Standard,
+        selectGrants.iterator().next().policyType() instanceof PolicyType.Standard,
         "Should create Standard pattern type when both future and all are false");
   }
 
@@ -221,11 +219,9 @@ class PolicyGrantHashIndexerTest {
     assertTrue(
         policyGrant.policyType() instanceof PolicyType.Container,
         "Should create Container pattern type when only includeFuture is true");
-    PolicyType.Container container =
-        (PolicyType.Container) policyGrant.policyType();
+    PolicyType.Container container = (PolicyType.Container) policyGrant.policyType();
     assertTrue(container instanceof PolicyType.Container.Schema);
-    PolicyType.Container.Schema schema =
-        (PolicyType.Container.Schema) container;
+    PolicyType.Container.Schema schema = (PolicyType.Container.Schema) container;
     assertTrue(schema.containerPolicyOptions().future());
   }
 
@@ -253,11 +249,9 @@ class PolicyGrantHashIndexerTest {
     assertTrue(
         policyGrant.policyType() instanceof PolicyType.Container,
         "Should create Container pattern type when only includeAll is true");
-    PolicyType.Container container =
-        (PolicyType.Container) policyGrant.policyType();
+    PolicyType.Container container = (PolicyType.Container) policyGrant.policyType();
     assertTrue(container instanceof PolicyType.Container.Schema);
-    PolicyType.Container.Schema schema =
-        (PolicyType.Container.Schema) container;
+    PolicyType.Container.Schema schema = (PolicyType.Container.Schema) container;
     assertTrue(schema.containerPolicyOptions().all());
   }
 
@@ -285,11 +279,9 @@ class PolicyGrantHashIndexerTest {
     assertTrue(
         policyGrant.policyType() instanceof PolicyType.Container,
         "Should create Container pattern type when both future and all are true");
-    PolicyType.Container container =
-        (PolicyType.Container) policyGrant.policyType();
+    PolicyType.Container container = (PolicyType.Container) policyGrant.policyType();
     assertTrue(container instanceof PolicyType.Container.Schema);
-    PolicyType.Container.Schema schema =
-        (PolicyType.Container.Schema) container;
+    PolicyType.Container.Schema schema = (PolicyType.Container.Schema) container;
     assertTrue(schema.containerPolicyOptions().future());
     assertTrue(schema.containerPolicyOptions().all());
   }
@@ -330,8 +322,9 @@ class PolicyGrantHashIndexerTest {
     PolicyGrant policyGrant = selectGrants.iterator().next();
     // Assuming PolicyType.Standard.SchemaObject
     assertTrue(policyGrant.policyType() instanceof PolicyType.Standard.SchemaObject);
-    PolicyType.Standard.SchemaObject schemaObject = (PolicyType.Standard.SchemaObject) policyGrant.policyType();
-    
+    PolicyType.Standard.SchemaObject schemaObject =
+        (PolicyType.Standard.SchemaObject) policyGrant.policyType();
+
     assertEquals("DB", schemaObject.databaseName(), "Database name should be trimmed");
     assertEquals("SCHEMA", schemaObject.schemaName(), "Schema name should be trimmed");
     assertEquals("T1", schemaObject.objectName(), "Object name should be trimmed");

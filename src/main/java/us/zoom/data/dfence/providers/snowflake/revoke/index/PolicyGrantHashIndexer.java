@@ -1,6 +1,11 @@
 package us.zoom.data.dfence.providers.snowflake.revoke.index;
 
 import io.vavr.control.Try;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,12 +18,6 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PolicyGrantHashIndex;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeObjectTypeAndAliasIndex;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.SnowflakeObjectTypeAlias;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

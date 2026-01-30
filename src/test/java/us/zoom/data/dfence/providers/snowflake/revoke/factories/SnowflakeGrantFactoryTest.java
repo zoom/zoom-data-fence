@@ -1,14 +1,14 @@
 package us.zoom.data.dfence.providers.snowflake.revoke.factories;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrant;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.SnowflakeGrantType;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SnowflakeGrantFactoryTest {
 

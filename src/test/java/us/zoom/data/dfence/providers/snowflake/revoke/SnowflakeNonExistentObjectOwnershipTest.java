@@ -1,5 +1,20 @@
 package us.zoom.data.dfence.providers.snowflake.revoke;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -13,22 +28,6 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuild
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.PartitionedGrantStatements;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ForkJoinPool;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests that revoke statements (GRANT OWNERSHIP ... TO ROLE SECURITYADMIN) are not generated when
@@ -131,7 +130,8 @@ class SnowflakeNonExistentObjectOwnershipTest {
     var resourceUrl =
         getClass()
             .getClassLoader()
-            .getResource("test-data/system-test/revoke-grants/snowflake-non-existent-object-ownership-test.yml");
+            .getResource(
+                "test-data/system-test/revoke-grants/snowflake-non-existent-object-ownership-test.yml");
     if (resourceUrl == null) {
       throw new RuntimeException(
           "Could not find snowflake-non-existent-object-ownership-test.yml in test resources");

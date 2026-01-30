@@ -1,7 +1,10 @@
 package us.zoom.data.dfence.providers.snowflake.revoke.evaluator;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.google.common.collect.ImmutableList;
-import io.vavr.control.Option;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.policies.models.PolicyGrant;
@@ -11,11 +14,6 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.PolicyGrantHashIndex;
 import us.zoom.data.dfence.providers.snowflake.revoke.models.wrappers.SnowflakeObjectTypeAlias;
-
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class GrantRevocationEvaluatorTest {
 
@@ -85,8 +83,7 @@ class GrantRevocationEvaluatorTest {
     // Critical: Grant with AGENT string (mapped to CORTEX_AGENT) should match CORTEX_AGENT playbook
     // grants
     PolicyGrant playbookGrant =
-        createPolicyGrant(
-            "USAGE", SnowflakeObjectType.CORTEX_AGENT, "DB", "SCHEMA", "AGENT_NAME");
+        createPolicyGrant("USAGE", SnowflakeObjectType.CORTEX_AGENT, "DB", "SCHEMA", "AGENT_NAME");
     PolicyGrantHashIndex index = createIndexWith(playbookGrant);
     GrantRevocationEvaluator evaluator = new GrantRevocationEvaluator(index);
     SnowflakeGrantModel grantToCheck =
@@ -103,8 +100,7 @@ class GrantRevocationEvaluatorTest {
   void needsRevoke_shouldReturnTrue_whenPlaybookHasAgentButPrivilegeDiffers() {
     // Critical: Even if object types match, privilege mismatch should cause revocation
     PolicyGrant playbookGrant =
-        createPolicyGrant(
-            "USAGE", SnowflakeObjectType.CORTEX_AGENT, "DB", "SCHEMA", "AGENT_NAME");
+        createPolicyGrant("USAGE", SnowflakeObjectType.CORTEX_AGENT, "DB", "SCHEMA", "AGENT_NAME");
     PolicyGrantHashIndex index = createIndexWith(playbookGrant);
     GrantRevocationEvaluator evaluator = new GrantRevocationEvaluator(index);
     SnowflakeGrantModel grantToCheck =
