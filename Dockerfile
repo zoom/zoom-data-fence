@@ -1,4 +1,4 @@
-FROM amazoncorretto:17.0.17-al2023 AS runtime
+FROM amazoncorretto:17.0.18-al2023 AS runtime
 ARG INSTALL_AWS_CLI=false
 ARG JAR_PATH=target/zoom-data-fence-jar-with-dependencies.jar
 ENV DFENCE_JAR_PATH="/app/app.jar"
