@@ -6,7 +6,7 @@
 
     <groupId>us.zoom.data</groupId>
     <artifactId>zoom-data-fence</artifactId>
-    <version>3.2.1</version>
+    <version>3.3.0</version>
     <description>
         Data warehouse security infrastructure as code.
     </description>
