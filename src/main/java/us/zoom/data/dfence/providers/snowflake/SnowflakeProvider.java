@@ -5,6 +5,7 @@ import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import us.zoom.data.dfence.CompiledChanges;
 import us.zoom.data.dfence.Provider;
+import us.zoom.data.dfence.consistency.GrantRevokeConsistencyChecker;
 import us.zoom.data.dfence.exception.DatabaseError;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookModel;
@@ -261,6 +262,22 @@ public class SnowflakeProvider implements Provider {
                     .flatMap(x -> desiredGrantsFactory.createFrom(x, roleName, options).stream())
                     .collect(Collectors.toMap(SnowflakeGrantBuilder::getKey, x -> x, (x0, x1) -> x0))
             ).join();
+            try {
+                GrantRevokeConsistencyChecker.check(
+                        privilegeGrants,
+                        desiredGrantBuilders,
+                        roleName);
+            } catch (RbacDataError e) {
+                throw new RbacDataError(
+                        String.format(
+                                "Grant-Revoke consistency check failed for role %s. "
+                                        + "Application aborted to prevent data inconsistency. "
+                                        + "Please fix the matching logic divergence before proceeding. "
+                                        + "%s",
+                                roleName,
+                                e.getMessage()),
+                        e);
+            }
             Map<String, SnowflakeGrantBuilder> currentGrantBuilders = new HashMap<>();
             if (roleExists) {
                 log.debug("Role exists so we are going to get the current grants.");
