@@ -656,14 +656,10 @@ class SnowflakeRevokeGrantsCompilerTest {
   private Map<String, SnowflakeGrantBuilder> createCurrentGrants(SnowflakeGrantModel... grants) {
     Map<String, SnowflakeGrantBuilder> currentGrants = new HashMap<>();
     for (SnowflakeGrantModel grant : grants) {
-      try {
         SnowflakeGrantBuilder builder = SnowflakeGrantBuilder.fromGrant(grant);
         if (builder != null) {
           currentGrants.put(builder.getKey(), builder);
         }
-      } catch (Exception e) {
-        // Skip grants that cannot be built
-      }
     }
     return currentGrants;
   }
@@ -811,6 +807,23 @@ class SnowflakeRevokeGrantsCompilerTest {
     assertTrue(
         actualRevokes.isEmpty(),
         "Should not revoke when playbook has AGENT with wildcard object name");
+  }
+
+  @Test
+  void compileRevokeGrantsFuture_whenPlaybookHasAgentWithWildcard_shouldNotRevoke() {
+    // Critical: Wildcard object name should match any agent name
+    PlaybookPrivilegeGrant playbookGrant =
+            createPlaybookGrant("AGENT", "TEST_DB2", "TEST_SCHEMA", "*", List.of("USAGE"));
+    SnowflakeGrantModel currentGrant =
+            new SnowflakeGrantModel("USAGE", "CORTEX_AGENT", "TEST_DB.TEST_SCHEMA.<CORTEX_AGENT>", "ROLE", "TEST_ROLE", false, true, true);
+    Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
+
+    List<SnowflakeGrantBuilder> actualRevokes =
+            SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
+
+    assertTrue(
+            actualRevokes.isEmpty(),
+            "Should not revoke when playbook has AGENT with wildcard object name");
   }
 
   @Test

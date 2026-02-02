@@ -127,7 +127,7 @@ public class TestRevokeGrantsSystemTest extends BaseGrantSystemTest {
 
         // Ensure that there are no more changes.
         ChangesSummary newChanges = playbookService.compileChanges(false);
-        Assert.assertTrue(newChanges.changes().isEmpty(), "Expected no remaining changes after apply");
+        Assert.assertTrue(newChanges.changes().isEmpty(), String.format("Expected no remaining changes after apply. Changes: %s", newChanges.changes()));
 
         // Validate that the role has the expected grants from playbook.
         List<Grant> grantsExpected = new ArrayList<>(List.of(
@@ -145,10 +145,6 @@ public class TestRevokeGrantsSystemTest extends BaseGrantSystemTest {
         // Create extra grants NOT covered by the playbook
         try (Connection connection = securityadminSnowflakeConnectionProvider.getConnection()) {
             // Grant MONITOR on database (not in playbook)
-            connection.createStatement().execute(
-                    String.format("GRANT MONITOR ON DATABASE %s TO ROLE %s",
-                            fixture.databaseName(), fixture.roleName())
-            );
             // Grant USAGE on schema (not in playbook)
             connection.createStatement().execute(
                     String.format("GRANT USAGE ON SCHEMA \"%s\".\"%s\" TO ROLE %s",

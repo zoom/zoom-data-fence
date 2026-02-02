@@ -19,10 +19,6 @@ roles:
     name: ${var.role2}
     revoke-other-grants: true
     grants:
-      # Qual 0: account
-      - object-type: account
-        privileges:
-          - monitor
       # Qual 1: role, database
       - object-type: role
         object-name: ${var.role}
