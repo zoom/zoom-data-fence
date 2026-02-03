@@ -127,7 +127,6 @@ class GrantRevocationEvaluatorTest {
 
   @Test
   void needsRevoke_shouldReturnTrue_whenPrivilegeMatchesButObjectTypeDoesNot() {
-    // Critical: Intersection logic - both privilege AND object type must match
     PolicyGrant playbookGrant =
         createPolicyGrant(
             "SELECT",
@@ -148,7 +147,6 @@ class GrantRevocationEvaluatorTest {
 
   @Test
   void needsRevoke_shouldReturnTrue_whenObjectTypeMatchesButPrivilegeDoesNot() {
-    // Critical: Intersection logic - both privilege AND object type must match
     PolicyGrant playbookGrant =
         createPolicyGrant(
             "UPDATE", // Different privilege
@@ -168,21 +166,16 @@ class GrantRevocationEvaluatorTest {
   }
 
   @Test
-  void needsRevoke_shouldReturnFalse_whenObjectTypeIndexAndAliasIndexBothContainMatchingGrant() {
-    // Critical: Both object type kv and alias kv are checked, then unioned
-    // This test verifies that grants in the alias kv are properly included
+  void needsRevoke_shouldReturnFalse_whenIndexContainsMatchingGrant() {
     PolicyGrant grant =
         createPolicyGrant("SELECT", SnowflakeObjectType.TABLE, "DB", "SCHEMA", "TABLE");
-    // Create kv with grant in both indexes
     PolicyGrantHashIndex index = createIndexWith(grant);
     GrantRevocationEvaluator evaluator = new GrantRevocationEvaluator(index);
     SnowflakeGrantModel grantToCheck = createGrantModel("SELECT", "TABLE", "DB.SCHEMA.TABLE");
 
     boolean actualNeedsRevoke = evaluator.needsRevoke(grantToCheck);
 
-    assertFalse(
-        actualNeedsRevoke,
-        "Should not revoke when both object type and alias indexes contain matching grant");
+    assertFalse(actualNeedsRevoke, "Should not revoke when index contains matching grant");
   }
 
   @Test
