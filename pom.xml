@@ -223,8 +223,10 @@
                         <includes>
                             <include>src/main/java/us/zoom/data/dfence/providers/snowflake/grant/desired/**/*.java</include>
                             <include>src/main/java/us/zoom/data/dfence/providers/snowflake/revoke/**/*.java</include>
+                            <include>src/main/java/us/zoom/data/dfence/providers/snowflake/consistency/**/*.java</include>
                             <include>src/test/java/us/zoom/data/dfence/providers/snowflake/grant/desired/**/*.java</include>
                             <include>src/test/java/us/zoom/data/dfence/providers/snowflake/revoke/**/*.java</include>
+                            <include>src/test/java/us/zoom/data/dfence/providers/snowflake/consistency/**/*.java</include>
                         </includes>
                     </java>
                 </configuration>

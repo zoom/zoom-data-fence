@@ -14,21 +14,21 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.ContainerGrantsCreationData;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.AllGrantsFactory;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.AllGrantsCompiler;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
 
 @DisplayName("AllGrantsFactory")
-class AllGrantsFactoryTest {
+class AllGrantsCompilerTest {
 
   private SnowflakeObjectsService mockObjectsService;
-  private AllGrantsFactory provider;
+  private AllGrantsCompiler provider;
 
   @BeforeEach
   void setUp() {
     mockObjectsService = mock(SnowflakeObjectsService.class);
-    provider = new AllGrantsFactory(mockObjectsService);
+    provider = new AllGrantsCompiler(mockObjectsService);
   }
 
   private static ContainerGrantsCreationData containerData(
@@ -63,7 +63,7 @@ class AllGrantsFactoryTest {
               List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = provider.createFrom(data);
+      List<SnowflakeGrantModel> result = provider.compileGrants(data);
 
       assertEquals(0, result.size());
     }
@@ -87,7 +87,7 @@ class AllGrantsFactoryTest {
               List.of(new PolicyGrantPrivilege("SELECT"), new PolicyGrantPrivilege("INSERT")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = provider.createFrom(data);
+      List<SnowflakeGrantModel> result = provider.compileGrants(data);
 
       assertEquals(4, result.size());
       result.forEach(
@@ -123,7 +123,7 @@ class AllGrantsFactoryTest {
               List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = provider.createFrom(data);
+      List<SnowflakeGrantModel> result = provider.compileGrants(data);
 
       assertEquals(1, result.size());
       assertEquals("VIEW", result.get(0).grantedOn());

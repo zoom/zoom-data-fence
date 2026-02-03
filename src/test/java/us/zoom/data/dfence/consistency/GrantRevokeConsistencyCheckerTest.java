@@ -8,7 +8,7 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuild
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakePermissionGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.DesiredGrantsFactory;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.DesiredGrantsCompiler;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
@@ -29,11 +29,11 @@ class GrantRevokeConsistencyCheckerTest {
 
   private static Map<String, SnowflakeGrantBuilder> compileDesiredGrantBuilders(
       List<PlaybookPrivilegeGrant> playbookGrants,
-      DesiredGrantsFactory desiredGrantsFactory,
+      DesiredGrantsCompiler desiredGrantsCompiler,
       String roleName) {
     SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
     return playbookGrants.stream()
-        .flatMap(g -> desiredGrantsFactory.createFrom(g, roleName, options).stream())
+        .flatMap(g -> desiredGrantsCompiler.compileGrants(g, roleName, options).stream())
         .collect(Collectors.toMap(SnowflakeGrantBuilder::getKey, x -> x, (x0, x1) -> x0));
   }
 
@@ -42,7 +42,7 @@ class GrantRevokeConsistencyCheckerTest {
   void check_succeedsWhenDesiredGrantsMatchPlaybook() {
     SnowflakeObjectsService objectsService = mock(SnowflakeObjectsService.class);
     when(objectsService.objectExists(anyString(), any(SnowflakeObjectType.class))).thenReturn(true);
-    DesiredGrantsFactory desiredGrantsFactory = new DesiredGrantsFactory(objectsService);
+    DesiredGrantsCompiler desiredGrantsCompiler = new DesiredGrantsCompiler(objectsService);
 
     PlaybookPrivilegeGrant playbookGrant =
         new PlaybookPrivilegeGrant(
@@ -50,7 +50,7 @@ class GrantRevokeConsistencyCheckerTest {
     List<PlaybookPrivilegeGrant> playbookGrants = List.of(playbookGrant);
 
     Map<String, SnowflakeGrantBuilder> desiredGrantBuilders =
-        compileDesiredGrantBuilders(playbookGrants, desiredGrantsFactory, "ROLE1");
+        compileDesiredGrantBuilders(playbookGrants, desiredGrantsCompiler, "ROLE1");
 
     assertDoesNotThrow(
         () -> GrantRevokeConsistencyChecker.check(playbookGrants, desiredGrantBuilders, "ROLE1"));

@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.GrantsCreationData;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsFactory;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsCompiler;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
 
 @DisplayName("StandardGrantsFactory")
-class StandardGrantsFactoryTest {
+class StandardGrantsCompilerTest {
 
   @Nested
   @DisplayName("createFrom")
@@ -30,7 +30,7 @@ class StandardGrantsFactoryTest {
               List.of(new PolicyGrantPrivilege("SELECT"), new PolicyGrantPrivilege("UPDATE")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = StandardGrantsFactory.createFrom(data);
+      List<SnowflakeGrantModel> result = StandardGrantsCompiler.compileGrants(data);
 
       assertEquals(2, result.size());
       SnowflakeGrantModel selectGrant = result.get(0);
@@ -55,7 +55,7 @@ class StandardGrantsFactoryTest {
               List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = StandardGrantsFactory.createFrom(data);
+      List<SnowflakeGrantModel> result = StandardGrantsCompiler.compileGrants(data);
 
       assertEquals(1, result.size());
       assertEquals("MY_DB.MY_SCHEMA.MY_TABLE", result.get(0).name());
@@ -72,7 +72,7 @@ class StandardGrantsFactoryTest {
               List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = StandardGrantsFactory.createFrom(data);
+      List<SnowflakeGrantModel> result = StandardGrantsCompiler.compileGrants(data);
 
       assertEquals(1, result.size());
       assertEquals("EXTERNAL_TABLE", result.get(0).grantedOn());
@@ -88,7 +88,7 @@ class StandardGrantsFactoryTest {
               List.of(),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = StandardGrantsFactory.createFrom(data);
+      List<SnowflakeGrantModel> result = StandardGrantsCompiler.compileGrants(data);
 
       assertEquals(0, result.size());
     }
