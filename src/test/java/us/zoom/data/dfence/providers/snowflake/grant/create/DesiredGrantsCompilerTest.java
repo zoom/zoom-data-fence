@@ -34,12 +34,12 @@ class DesiredGrantsCompilerTest {
 
   @Test
   @DisplayName("createFrom should create grant for specific table")
-  void createFrom_createsGrantForSpecificTable() {
+  void compileGrants_createsGrantForSpecificTable() {
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("table", "MY_TABLE", "MY_SCHEMA", "MY_DB", List.of("SELECT"));
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     SnowflakeGrantBuilder builder = actualBuilders.get(0);
@@ -50,12 +50,12 @@ class DesiredGrantsCompilerTest {
   @Test
   @DisplayName(
       "createFrom should normalize object names using ObjectName.normalize")
-  void createFrom_normalizesObjectNames() {
+  void compileGrants_normalizesObjectNames() {
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("table", "my_table", "my_schema", "my_db", List.of("SELECT"));
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     String key = actualBuilders.get(0).getKey();
@@ -65,13 +65,13 @@ class DesiredGrantsCompilerTest {
   @Test
   @DisplayName(
       "createFrom should create multiple grants for multiple privileges")
-  void createFrom_createsMultipleGrantsForMultiplePrivileges() {
+  void compileGrants_createsMultipleGrantsForMultiplePrivileges() {
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant(
             "table", "MY_TABLE", "MY_SCHEMA", "MY_DB", List.of("SELECT", "INSERT", "UPDATE"));
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(3, actualBuilders.size());
   }
@@ -79,26 +79,26 @@ class DesiredGrantsCompilerTest {
   @Test
   @DisplayName(
       "createFrom should throw when wildcard is used with standard grant type")
-  void createFrom_throwsWhenWildcardUsedWithStandardGrant() {
+  void compileGrants_throwsWhenWildcardUsedWithStandardGrant() {
     PlaybookPrivilegeGrant playbookGrant =
         new PlaybookPrivilegeGrant(
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT"), false, false, true);
 
     assertThrows(
         Exception.class,
-        () -> desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options));
+        () -> desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options));
   }
 
   @Test
   @DisplayName(
       "createFrom should use objectName when objectName is null for qualLevel 1")
-  void createFrom_usesDatabaseNameWhenObjectNameIsNullForQualLevel1() {
+  void compileGrants_usesDatabaseNameWhenObjectNameIsNullForQualLevel1() {
     PlaybookPrivilegeGrant playbookGrant =
         new PlaybookPrivilegeGrant(
             "database", null, null, "MY_DB", List.of("USAGE"), false, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getKey().contains("MY_DB"));
@@ -106,7 +106,7 @@ class DesiredGrantsCompilerTest {
 
   @Test
   @DisplayName("createFrom should throw when validation fails")
-  void createFrom_throwsWhenValidationFails() {
+  void compileGrants_throwsWhenValidationFails() {
     // Create a grant with missing schema name for a table (qualLevel 3 requires schema)
     PlaybookPrivilegeGrant playbookGrant =
         createPlaybookGrant("table", "MY_TABLE", null, "MY_DB", List.of("SELECT"));
@@ -114,7 +114,7 @@ class DesiredGrantsCompilerTest {
     Exception actualException =
         assertThrows(
             Exception.class,
-            () -> desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options),
+            () -> desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options),
             "Should throw when object name validation fails");
 
     assertTrue(
@@ -125,7 +125,7 @@ class DesiredGrantsCompilerTest {
 
   @Test
   @DisplayName("createFrom should create future grants for database container")
-  void createFrom_createsFutureGrantsForDatabaseContainer() {
+  void compileGrants_createsFutureGrantsForDatabaseContainer() {
     when(mockObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class)))
         .thenReturn(true);
     PlaybookPrivilegeGrant playbookGrant =
@@ -133,7 +133,7 @@ class DesiredGrantsCompilerTest {
             "table", "*", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getKey().contains("MY_DB.<TABLE>"));
@@ -141,7 +141,7 @@ class DesiredGrantsCompilerTest {
 
   @Test
   @DisplayName("createFrom should create all grants when includeAll is true")
-  void createFrom_createsAllGrantsWhenIncludeAllIsTrue() {
+  void compileGrants_createsAllGrantsWhenIncludeAllIsTrue() {
     when(mockObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class)))
         .thenReturn(true);
     when(mockObjectsService.getContainerObjectQualNames(
@@ -152,7 +152,7 @@ class DesiredGrantsCompilerTest {
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT"), false, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(2, actualBuilders.size());
     assertTrue(actualBuilders.stream().anyMatch(g -> g.getKey().contains("TABLE1")));
@@ -161,7 +161,7 @@ class DesiredGrantsCompilerTest {
 
   @Test
   @DisplayName("createFrom should create both future and all grants")
-  void createFrom_createsBothFutureAndAllGrants() {
+  void compileGrants_createsBothFutureAndAllGrants() {
     when(mockObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class)))
         .thenReturn(true);
     when(mockObjectsService.getContainerObjectQualNames(
@@ -174,7 +174,7 @@ class DesiredGrantsCompilerTest {
         new PlaybookPrivilegeGrant("table", "*", "*", "MY_DB", List.of("SELECT"), true, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(2, actualBuilders.size());
     assertTrue(
@@ -187,14 +187,14 @@ class DesiredGrantsCompilerTest {
 
   @Test
   @DisplayName("createFrom should throw when database name is wildcard")
-  void createFrom_throwsWhenDatabaseNameIsWildcard() {
+  void compileGrants_throwsWhenDatabaseNameIsWildcard() {
     PlaybookPrivilegeGrant playbookGrant =
         new PlaybookPrivilegeGrant("table", "*", "*", "*", List.of("SELECT"), true, false, true);
 
     Exception actualException =
         assertThrows(
             Exception.class,
-            () -> desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options));
+            () -> desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options));
 
     assertTrue(
         actualException.getMessage().contains("non-empty and non-wildcard value is expected")
@@ -209,7 +209,7 @@ class DesiredGrantsCompilerTest {
 
   @Test
   @DisplayName("createFrom should create future grants with future flag")
-  void createFrom_createsFutureGrantsWithFutureFlag() {
+  void compileGrants_createsFutureGrantsWithFutureFlag() {
     when(mockObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class)))
         .thenReturn(true);
     PlaybookPrivilegeGrant playbookGrant =
@@ -217,7 +217,7 @@ class DesiredGrantsCompilerTest {
             "table", "*", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     SnowflakeGrantModel grant = actualBuilders.get(0).getGrant();
@@ -230,7 +230,7 @@ class DesiredGrantsCompilerTest {
   @Test
   @DisplayName(
       "createFrom should handle future grants for object types with spaces")
-  void createFrom_handlesFutureGrantsForObjectTypesWithSpaces() {
+  void compileGrants_handlesFutureGrantsForObjectTypesWithSpaces() {
     when(mockObjectsService.objectExists(anyString(), any(SnowflakeObjectType.class)))
         .thenReturn(true);
     PlaybookPrivilegeGrant playbookGrant =
@@ -238,7 +238,7 @@ class DesiredGrantsCompilerTest {
             "external_table", "*", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getGrant().name().contains("MY_DB.<EXTERNAL_TABLE>"));
@@ -247,7 +247,7 @@ class DesiredGrantsCompilerTest {
   @Test
   @DisplayName(
       "createFrom should return empty when database does not exist for future schema grants")
-  void createFrom_returnsEmptyWhenDatabaseDoesNotExistForFutureSchemaGrants() {
+  void compileGrants_returnsEmptyWhenDatabaseDoesNotExistForFutureSchemaGrants() {
     when(mockObjectsService.objectExists("\"MY_DB\"", SnowflakeObjectType.DATABASE))
         .thenReturn(false);
     PlaybookPrivilegeGrant playbookGrant =
@@ -255,7 +255,7 @@ class DesiredGrantsCompilerTest {
             "table", "MY_TABLE", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getGrant().name().contains("MY_DB.<TABLE>"));
@@ -264,7 +264,7 @@ class DesiredGrantsCompilerTest {
   @Test
   @DisplayName(
       "createFrom should create future grants for all schemas in database")
-  void createFrom_createsFutureGrantsForAllSchemasInDatabase() {
+  void compileGrants_createsFutureGrantsForAllSchemasInDatabase() {
     when(mockObjectsService.objectExists(anyString(), eq(SnowflakeObjectType.DATABASE)))
         .thenReturn(true);
     when(mockObjectsService.getContainerObjectQualNames(
@@ -275,7 +275,7 @@ class DesiredGrantsCompilerTest {
             "table", "MY_TABLE", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertTrue(actualBuilders.size() >= 1);
     assertTrue(
@@ -295,7 +295,7 @@ class DesiredGrantsCompilerTest {
   @Test
   @DisplayName(
       "createFrom should return empty when container does not exist for all grants")
-  void createFrom_returnsEmptyWhenContainerDoesNotExistForAllGrants() {
+  void compileGrants_returnsEmptyWhenContainerDoesNotExistForAllGrants() {
     when(mockObjectsService.objectExists("\"MY_DB\".\"MY_SCHEMA\"", SnowflakeObjectType.SCHEMA))
         .thenReturn(false);
     PlaybookPrivilegeGrant playbookGrant =
@@ -303,14 +303,14 @@ class DesiredGrantsCompilerTest {
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT"), false, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(0, actualBuilders.size());
   }
 
   @Test
   @DisplayName("createFrom should create grants for all objects in container")
-  void createFrom_createsGrantsForAllObjectsInContainer() {
+  void compileGrants_createsGrantsForAllObjectsInContainer() {
     when(mockObjectsService.objectExists(anyString(), eq(SnowflakeObjectType.SCHEMA)))
         .thenReturn(true);
     when(mockObjectsService.getContainerObjectQualNames(
@@ -321,7 +321,7 @@ class DesiredGrantsCompilerTest {
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT", "INSERT"), false, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(4, actualBuilders.size());
     assertTrue(
@@ -352,7 +352,7 @@ class DesiredGrantsCompilerTest {
             "schema", null, "my_schema", "my_db", List.of("USAGE"), false, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.compileGrants(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     String key = actualBuilders.get(0).getKey();

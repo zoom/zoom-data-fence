@@ -33,7 +33,7 @@ class GrantRevokeConsistencyCheckerTest {
       String roleName) {
     SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
     return playbookGrants.stream()
-        .flatMap(g -> desiredGrantsCompiler.createFrom(g, roleName, options).stream())
+        .flatMap(g -> desiredGrantsCompiler.compileGrants(g, roleName, options).stream())
         .collect(Collectors.toMap(SnowflakeGrantBuilder::getKey, x -> x, (x0, x1) -> x0));
   }
 

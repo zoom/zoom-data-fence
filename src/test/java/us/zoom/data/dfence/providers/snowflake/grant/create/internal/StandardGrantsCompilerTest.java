@@ -30,7 +30,7 @@ class StandardGrantsCompilerTest {
               List.of(new PolicyGrantPrivilege("SELECT"), new PolicyGrantPrivilege("UPDATE")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = StandardGrantsCompiler.createFrom(data);
+      List<SnowflakeGrantModel> result = StandardGrantsCompiler.compileGrants(data);
 
       assertEquals(2, result.size());
       SnowflakeGrantModel selectGrant = result.get(0);
@@ -55,7 +55,7 @@ class StandardGrantsCompilerTest {
               List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = StandardGrantsCompiler.createFrom(data);
+      List<SnowflakeGrantModel> result = StandardGrantsCompiler.compileGrants(data);
 
       assertEquals(1, result.size());
       assertEquals("MY_DB.MY_SCHEMA.MY_TABLE", result.get(0).name());
@@ -72,7 +72,7 @@ class StandardGrantsCompilerTest {
               List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = StandardGrantsCompiler.createFrom(data);
+      List<SnowflakeGrantModel> result = StandardGrantsCompiler.compileGrants(data);
 
       assertEquals(1, result.size());
       assertEquals("EXTERNAL_TABLE", result.get(0).grantedOn());
@@ -88,7 +88,7 @@ class StandardGrantsCompilerTest {
               List.of(),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = StandardGrantsCompiler.createFrom(data);
+      List<SnowflakeGrantModel> result = StandardGrantsCompiler.compileGrants(data);
 
       assertEquals(0, result.size());
     }

@@ -258,7 +258,7 @@ public class SnowflakeProvider implements Provider {
             options.setUnsupportedRevokeBehavior(unsupportedRevokeBehavior);
             Map<String, SnowflakeGrantBuilder> desiredGrantBuilders = forkJoinPool.submit(() -> 
                 privilegeGrants.parallelStream()
-                    .flatMap(x -> desiredGrantsCompiler.createFrom(x, roleName, options).stream())
+                    .flatMap(x -> desiredGrantsCompiler.compileGrants(x, roleName, options).stream())
                     .collect(Collectors.toMap(SnowflakeGrantBuilder::getKey, x -> x, (x0, x1) -> x0))
             ).join();
             try {

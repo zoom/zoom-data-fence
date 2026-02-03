@@ -18,7 +18,7 @@ public final class FutureGrantsCompiler {
   private final SnowflakeObjectsService snowflakeObjectsService;
 
   /** Creates future grants on containers using OBJECT_TYPE syntax. */
-  public List<SnowflakeGrantModel> createFrom(ContainerGrantsCreationData data) {
+  public List<SnowflakeGrantModel> compileGrants(ContainerGrantsCreationData data) {
     if (data.isSchemaObjectWithAllSchemas()) {
       List<String> privileges =
           data.privileges().stream().map(PolicyGrantPrivilege::value).toList();

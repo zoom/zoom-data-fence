@@ -63,7 +63,7 @@ class AllGrantsCompilerTest {
               List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = provider.createFrom(data);
+      List<SnowflakeGrantModel> result = provider.compileGrants(data);
 
       assertEquals(0, result.size());
     }
@@ -87,7 +87,7 @@ class AllGrantsCompilerTest {
               List.of(new PolicyGrantPrivilege("SELECT"), new PolicyGrantPrivilege("INSERT")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = provider.createFrom(data);
+      List<SnowflakeGrantModel> result = provider.compileGrants(data);
 
       assertEquals(4, result.size());
       result.forEach(
@@ -123,7 +123,7 @@ class AllGrantsCompilerTest {
               List.of(new PolicyGrantPrivilege("SELECT")),
               "MY_ROLE");
 
-      List<SnowflakeGrantModel> result = provider.createFrom(data);
+      List<SnowflakeGrantModel> result = provider.compileGrants(data);
 
       assertEquals(1, result.size());
       assertEquals("VIEW", result.get(0).grantedOn());

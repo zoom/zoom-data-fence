@@ -39,14 +39,14 @@ public class DesiredGrantsCompiler {
    * Converts a playbook grant to Snowflake grant builders. Handles standard grants and container
    * grants (future/all).
    */
-  public List<SnowflakeGrantBuilder> createFrom(
+  public List<SnowflakeGrantBuilder> compileGrants(
       PlaybookPrivilegeGrant playbookPrivilegeGrant,
       String roleName,
       SnowflakeGrantBuilderOptions options) {
     return Try.of(
             () -> {
               PolicyGrant grant = PolicyGrantFactory.createFrom(playbookPrivilegeGrant);
-              return getGrants(grant, roleName).stream()
+              return compileGrants(grant, roleName).stream()
                   .map(x -> SnowflakeGrantBuilder.fromGrant(x, options))
                   .filter(Objects::nonNull)
                   .toList();
@@ -63,12 +63,12 @@ public class DesiredGrantsCompiler {
             });
   }
 
-  private List<SnowflakeGrantModel> getGrants(PolicyGrant grant, String roleName) {
+  private List<SnowflakeGrantModel> compileGrants(PolicyGrant grant, String roleName) {
     GrantsCreationData data =
         GrantsCreationDataFactory.createFrom(grant.policyType(), grant, roleName);
 
     if (data instanceof GrantsCreationData.Standard s) {
-      return StandardGrantsCompiler.createFrom(s);
+      return StandardGrantsCompiler.compileGrants(s);
     } else if (data instanceof GrantsCreationData.Container c) {
       return createContainerGrants(c);
     } else {
@@ -92,8 +92,8 @@ public class DesiredGrantsCompiler {
   private List<SnowflakeGrantModel> getContainerGrantsForOption(
       ContainerGrantsCreationData c, ContainerPolicyOption option) {
     return switch (option) {
-      case FUTURE -> futureGrantsCompiler.createFrom(c);
-      case ALL -> allGrantsCompiler.createFrom(c);
+      case FUTURE -> futureGrantsCompiler.compileGrants(c);
+      case ALL -> allGrantsCompiler.compileGrants(c);
     };
   }
 }

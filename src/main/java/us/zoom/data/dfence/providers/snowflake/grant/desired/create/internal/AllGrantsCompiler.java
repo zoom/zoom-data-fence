@@ -17,7 +17,7 @@ public final class AllGrantsCompiler {
 
   private final SnowflakeObjectsService snowflakeObjectsService;
 
-  public List<SnowflakeGrantModel> createFrom(ContainerGrantsCreationData data) {
+  public List<SnowflakeGrantModel> compileGrants(ContainerGrantsCreationData data) {
     return expandAllGrants(
         data.containerObjectType(),
         data.objectType(),

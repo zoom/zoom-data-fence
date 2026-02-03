@@ -60,7 +60,7 @@ class FutureGrantsCompilerTest {
               "MY_ROLE",
               false);
 
-      List<SnowflakeGrantModel> result = provider.createFrom(data);
+      List<SnowflakeGrantModel> result = provider.compileGrants(data);
 
       assertEquals(2, result.size());
       result.forEach(
@@ -88,7 +88,7 @@ class FutureGrantsCompilerTest {
               "MY_ROLE",
               true);
 
-      List<SnowflakeGrantModel> result = provider.createFrom(data);
+      List<SnowflakeGrantModel> result = provider.compileGrants(data);
 
       assertEquals(1, result.size());
       assertTrue(result.get(0).name().contains("MY_DB.<TABLE>"));
@@ -110,7 +110,7 @@ class FutureGrantsCompilerTest {
               "MY_ROLE",
               true);
 
-      List<SnowflakeGrantModel> result = provider.createFrom(data);
+      List<SnowflakeGrantModel> result = provider.compileGrants(data);
 
       assertEquals(3, result.size());
       long databaseLevel =
@@ -141,7 +141,7 @@ class FutureGrantsCompilerTest {
               "BAR_ROLE",
               false);
 
-      List<SnowflakeGrantModel> result = provider.createFrom(data);
+      List<SnowflakeGrantModel> result = provider.compileGrants(data);
 
       assertEquals(1, result.size());
       assertTrue(result.get(0).name().startsWith("FOO_DB.<"));

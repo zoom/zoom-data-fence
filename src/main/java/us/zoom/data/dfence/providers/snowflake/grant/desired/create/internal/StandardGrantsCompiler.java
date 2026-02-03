@@ -9,7 +9,7 @@ import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StandardGrantsCompiler {
 
-  public static List<SnowflakeGrantModel> createFrom(GrantsCreationData.Standard data) {
+  public static List<SnowflakeGrantModel> compileGrants(GrantsCreationData.Standard data) {
     return data.privileges().stream()
         .map(
             p ->
