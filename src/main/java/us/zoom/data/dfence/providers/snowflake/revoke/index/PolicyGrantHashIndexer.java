@@ -1,7 +1,6 @@
 package us.zoom.data.dfence.providers.snowflake.revoke.index;
 
 import io.vavr.control.Try;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -44,16 +43,17 @@ public final class PolicyGrantHashIndexer {
   }
 
   public static PolicyGrantHashIndex createFromGrants(List<PolicyGrant> allPolicyGrants) {
-      ConcurrentHashMap<String, ConcurrentHashMap<PolicyGrantPrivilege, Set<PolicyGrant>>> kv = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, ConcurrentHashMap<PolicyGrantPrivilege, Set<PolicyGrant>>> kv =
+        new ConcurrentHashMap<>();
 
-      for (PolicyGrant grant : allPolicyGrants) {
-          String alias = grant.objectType().getAliasFor();
-          kv.computeIfAbsent(alias, k -> new ConcurrentHashMap<>());
-          for (PolicyGrantPrivilege privilege : grant.privileges()) {
-              kv.get(alias).computeIfAbsent(privilege, k -> new HashSet<>()).add(grant);
-          }
+    for (PolicyGrant grant : allPolicyGrants) {
+      String alias = grant.objectType().getAliasFor();
+      kv.computeIfAbsent(alias, k -> new ConcurrentHashMap<>());
+      for (PolicyGrantPrivilege privilege : grant.privileges()) {
+        kv.get(alias).computeIfAbsent(privilege, k -> new HashSet<>()).add(grant);
       }
+    }
 
-      return new PolicyGrantHashIndex(kv);
+    return new PolicyGrantHashIndex(kv);
   }
 }

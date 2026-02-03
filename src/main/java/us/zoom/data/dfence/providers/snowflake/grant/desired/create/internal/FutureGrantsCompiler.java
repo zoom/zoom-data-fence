@@ -13,7 +13,7 @@ import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public final class FutureGrantsFactory {
+public final class FutureGrantsCompiler {
 
   private final SnowflakeObjectsService snowflakeObjectsService;
 

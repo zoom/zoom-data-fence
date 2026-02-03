@@ -3,7 +3,6 @@ package us.zoom.data.dfence.providers.snowflake.revoke.evaluator;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -230,14 +229,15 @@ class GrantRevocationEvaluatorTest {
   }
 
   private PolicyGrantHashIndex createIndexWith(PolicyGrant grant) {
-      ConcurrentHashMap<String, ConcurrentHashMap<PolicyGrantPrivilege, Set<PolicyGrant>>> index = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, ConcurrentHashMap<PolicyGrantPrivilege, Set<PolicyGrant>>> index =
+        new ConcurrentHashMap<>();
 
-      String alias = grant.objectType().getAliasFor();
-      index.computeIfAbsent(alias, k -> new ConcurrentHashMap<>());
-      for (PolicyGrantPrivilege privilege : grant.privileges()) {
-          index.get(alias).computeIfAbsent(privilege, k -> new HashSet<>()).add(grant);
-      }
+    String alias = grant.objectType().getAliasFor();
+    index.computeIfAbsent(alias, k -> new ConcurrentHashMap<>());
+    for (PolicyGrantPrivilege privilege : grant.privileges()) {
+      index.get(alias).computeIfAbsent(privilege, k -> new HashSet<>()).add(grant);
+    }
 
-      return new PolicyGrantHashIndex(index);
+    return new PolicyGrantHashIndex(index);
   }
 }

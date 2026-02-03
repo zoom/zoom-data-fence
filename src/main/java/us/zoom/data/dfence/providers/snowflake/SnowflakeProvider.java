@@ -16,11 +16,10 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuild
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.UnsupportedRevokeBehavior;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.DesiredGrantsFactory;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.DesiredGrantsCompiler;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.PartitionedGrantStatements;
 import us.zoom.data.dfence.providers.snowflake.revoke.SnowflakeRevokeGrantsCompiler;
-import us.zoom.data.dfence.sql.ObjectName;
 
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
@@ -36,7 +35,7 @@ public class SnowflakeProvider implements Provider {
 
     private final SnowflakeObjectsService snowflakeObjectsService;
 
-    private final DesiredGrantsFactory desiredGrantsFactory;
+    private final DesiredGrantsCompiler desiredGrantsCompiler;
 
     private final ForkJoinPool forkJoinPool;
 
@@ -70,7 +69,7 @@ public class SnowflakeProvider implements Provider {
         this.snowflakeStatementsService = snowflakeStatementsService;
         this.snowflakeGrantsService = snowflakeGrantsService;
         this.snowflakeObjectsService = snowflakeObjectsService;
-        this.desiredGrantsFactory = new DesiredGrantsFactory(snowflakeObjectsService);
+        this.desiredGrantsCompiler = new DesiredGrantsCompiler(snowflakeObjectsService);
         this.forkJoinPool = forkJoinPool;
     }
 
@@ -259,7 +258,7 @@ public class SnowflakeProvider implements Provider {
             options.setUnsupportedRevokeBehavior(unsupportedRevokeBehavior);
             Map<String, SnowflakeGrantBuilder> desiredGrantBuilders = forkJoinPool.submit(() -> 
                 privilegeGrants.parallelStream()
-                    .flatMap(x -> desiredGrantsFactory.createFrom(x, roleName, options).stream())
+                    .flatMap(x -> desiredGrantsCompiler.createFrom(x, roleName, options).stream())
                     .collect(Collectors.toMap(SnowflakeGrantBuilder::getKey, x -> x, (x0, x1) -> x0))
             ).join();
             try {

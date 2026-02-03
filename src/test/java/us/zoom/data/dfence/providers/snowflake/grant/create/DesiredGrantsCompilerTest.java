@@ -7,7 +7,7 @@ import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeGrantBuilder;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGrantBuilderOptions;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.DesiredGrantsFactory;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.DesiredGrantsCompiler;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
@@ -19,16 +19,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @DisplayName("DesiredGrantsFactory")
-class DesiredGrantsFactoryTest {
+class DesiredGrantsCompilerTest {
 
   private SnowflakeObjectsService mockObjectsService;
-  private DesiredGrantsFactory grantProvider;
+  private DesiredGrantsCompiler desiredGrantsCompiler;
   private SnowflakeGrantBuilderOptions options;
 
   @BeforeEach
   void setUp() {
     mockObjectsService = mock(SnowflakeObjectsService.class);
-    grantProvider = new DesiredGrantsFactory(mockObjectsService);
+    desiredGrantsCompiler = new DesiredGrantsCompiler(mockObjectsService);
     options = new SnowflakeGrantBuilderOptions();
   }
 
@@ -39,7 +39,7 @@ class DesiredGrantsFactoryTest {
         createPlaybookGrant("table", "MY_TABLE", "MY_SCHEMA", "MY_DB", List.of("SELECT"));
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     SnowflakeGrantBuilder builder = actualBuilders.get(0);
@@ -55,7 +55,7 @@ class DesiredGrantsFactoryTest {
         createPlaybookGrant("table", "my_table", "my_schema", "my_db", List.of("SELECT"));
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     String key = actualBuilders.get(0).getKey();
@@ -71,7 +71,7 @@ class DesiredGrantsFactoryTest {
             "table", "MY_TABLE", "MY_SCHEMA", "MY_DB", List.of("SELECT", "INSERT", "UPDATE"));
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(3, actualBuilders.size());
   }
@@ -86,7 +86,7 @@ class DesiredGrantsFactoryTest {
 
     assertThrows(
         Exception.class,
-        () -> grantProvider.createFrom(playbookGrant, "ROLE1", options));
+        () -> desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options));
   }
 
   @Test
@@ -98,7 +98,7 @@ class DesiredGrantsFactoryTest {
             "database", null, null, "MY_DB", List.of("USAGE"), false, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getKey().contains("MY_DB"));
@@ -114,7 +114,7 @@ class DesiredGrantsFactoryTest {
     Exception actualException =
         assertThrows(
             Exception.class,
-            () -> grantProvider.createFrom(playbookGrant, "ROLE1", options),
+            () -> desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options),
             "Should throw when object name validation fails");
 
     assertTrue(
@@ -133,7 +133,7 @@ class DesiredGrantsFactoryTest {
             "table", "*", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getKey().contains("MY_DB.<TABLE>"));
@@ -152,7 +152,7 @@ class DesiredGrantsFactoryTest {
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT"), false, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(2, actualBuilders.size());
     assertTrue(actualBuilders.stream().anyMatch(g -> g.getKey().contains("TABLE1")));
@@ -174,7 +174,7 @@ class DesiredGrantsFactoryTest {
         new PlaybookPrivilegeGrant("table", "*", "*", "MY_DB", List.of("SELECT"), true, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(2, actualBuilders.size());
     assertTrue(
@@ -194,7 +194,7 @@ class DesiredGrantsFactoryTest {
     Exception actualException =
         assertThrows(
             Exception.class,
-            () -> grantProvider.createFrom(playbookGrant, "ROLE1", options));
+            () -> desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options));
 
     assertTrue(
         actualException.getMessage().contains("non-empty and non-wildcard value is expected")
@@ -217,7 +217,7 @@ class DesiredGrantsFactoryTest {
             "table", "*", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     SnowflakeGrantModel grant = actualBuilders.get(0).getGrant();
@@ -238,7 +238,7 @@ class DesiredGrantsFactoryTest {
             "external_table", "*", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getGrant().name().contains("MY_DB.<EXTERNAL_TABLE>"));
@@ -255,7 +255,7 @@ class DesiredGrantsFactoryTest {
             "table", "MY_TABLE", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     assertTrue(actualBuilders.get(0).getGrant().name().contains("MY_DB.<TABLE>"));
@@ -275,7 +275,7 @@ class DesiredGrantsFactoryTest {
             "table", "MY_TABLE", "*", "MY_DB", List.of("SELECT"), true, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertTrue(actualBuilders.size() >= 1);
     assertTrue(
@@ -303,7 +303,7 @@ class DesiredGrantsFactoryTest {
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT"), false, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(0, actualBuilders.size());
   }
@@ -321,7 +321,7 @@ class DesiredGrantsFactoryTest {
             "table", "*", "MY_SCHEMA", "MY_DB", List.of("SELECT", "INSERT"), false, true, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(4, actualBuilders.size());
     assertTrue(
@@ -352,7 +352,7 @@ class DesiredGrantsFactoryTest {
             "schema", null, "my_schema", "my_db", List.of("USAGE"), false, false, true);
 
     List<SnowflakeGrantBuilder> actualBuilders =
-        grantProvider.createFrom(playbookGrant, "ROLE1", options);
+        desiredGrantsCompiler.createFrom(playbookGrant, "ROLE1", options);
 
     assertEquals(1, actualBuilders.size());
     String key = actualBuilders.get(0).getKey();

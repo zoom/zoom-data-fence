@@ -26,10 +26,7 @@ public class SnowflakeGrantMatchers {
   public static Predicate<PolicyGrant> matchesGrantAlias(
       SnowflakeObjectType snowflakeGrantObjectType) {
     return policyGrant ->
-            policyGrant.objectType().getAliasFor().equals(
-                            snowflakeGrantObjectType
-                                    .getAliasFor()
-                    );
+        policyGrant.objectType().getAliasFor().equals(snowflakeGrantObjectType.getAliasFor());
   }
 
   public static Predicate<PolicyGrant> matchesGrantPrivilege(PolicyGrantPrivilege privilege) {
@@ -59,7 +56,9 @@ public class SnowflakeGrantMatchers {
   }
 
   private static boolean matchesParts(PolicyType policyType, SnowflakeGrantType grantType) {
-    return policyType.parts().zip(grantType.parts())
-            .forAll(t -> ObjectName.equalObjectName(t._1(), t._2()));
+    return policyType
+        .parts()
+        .zip(grantType.parts())
+        .forAll(t -> ObjectName.equalObjectName(t._1(), t._2()));
   }
 }

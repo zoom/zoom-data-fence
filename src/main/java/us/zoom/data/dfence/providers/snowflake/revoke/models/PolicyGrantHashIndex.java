@@ -6,5 +6,4 @@ import us.zoom.data.dfence.policies.models.PolicyGrant;
 import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
 
 public record PolicyGrantHashIndex(
-        ConcurrentHashMap<String, ConcurrentHashMap<PolicyGrantPrivilege, Set<PolicyGrant>>> kv
-    ) {}
+    ConcurrentHashMap<String, ConcurrentHashMap<PolicyGrantPrivilege, Set<PolicyGrant>>> kv) {}

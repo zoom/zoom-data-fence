@@ -1,10 +1,8 @@
 package us.zoom.data.dfence.providers.snowflake.revoke.evaluator;
 
 import io.vavr.control.Try;
-
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +45,9 @@ public class GrantRevocationEvaluator {
 
   private Set<PolicyGrant> getCandidates(
       SnowflakeObjectType grantObjectType, PolicyGrantPrivilege grantPrivilege) {
-    return index.kv().getOrDefault(grantObjectType.getAliasFor(), new ConcurrentHashMap<>()).getOrDefault(grantPrivilege, Set.of());
+    return index
+        .kv()
+        .getOrDefault(grantObjectType.getAliasFor(), new ConcurrentHashMap<>())
+        .getOrDefault(grantPrivilege, Set.of());
   }
 }

@@ -17,22 +17,22 @@ import us.zoom.data.dfence.providers.snowflake.grant.builder.options.SnowflakeGr
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.GrantsCreationDataFactory;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.ContainerGrantsCreationData;
 import us.zoom.data.dfence.providers.snowflake.grant.desired.create.data.models.GrantsCreationData;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.AllGrantsFactory;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.FutureGrantsFactory;
-import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsFactory;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.AllGrantsCompiler;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.FutureGrantsCompiler;
+import us.zoom.data.dfence.providers.snowflake.grant.desired.create.internal.StandardGrantsCompiler;
 import us.zoom.data.dfence.providers.snowflake.informationschema.SnowflakeObjectsService;
 import us.zoom.data.dfence.providers.snowflake.models.SnowflakeGrantModel;
 
 @Slf4j
 @AllArgsConstructor(access = AccessLevel.PUBLIC)
-public class DesiredGrantsFactory {
+public class DesiredGrantsCompiler {
 
-  private final FutureGrantsFactory futureGrantsFactory;
-  private final AllGrantsFactory allGrantsFactory;
+  private final FutureGrantsCompiler futureGrantsCompiler;
+  private final AllGrantsCompiler allGrantsCompiler;
 
-  public DesiredGrantsFactory(SnowflakeObjectsService snowflakeObjectsService) {
-    this.futureGrantsFactory = new FutureGrantsFactory(snowflakeObjectsService);
-    this.allGrantsFactory = new AllGrantsFactory(snowflakeObjectsService);
+  public DesiredGrantsCompiler(SnowflakeObjectsService snowflakeObjectsService) {
+    this.futureGrantsCompiler = new FutureGrantsCompiler(snowflakeObjectsService);
+    this.allGrantsCompiler = new AllGrantsCompiler(snowflakeObjectsService);
   }
 
   /**
@@ -68,7 +68,7 @@ public class DesiredGrantsFactory {
         GrantsCreationDataFactory.createFrom(grant.policyType(), grant, roleName);
 
     if (data instanceof GrantsCreationData.Standard s) {
-      return StandardGrantsFactory.createFrom(s);
+      return StandardGrantsCompiler.createFrom(s);
     } else if (data instanceof GrantsCreationData.Container c) {
       return createContainerGrants(c);
     } else {
@@ -92,8 +92,8 @@ public class DesiredGrantsFactory {
   private List<SnowflakeGrantModel> getContainerGrantsForOption(
       ContainerGrantsCreationData c, ContainerPolicyOption option) {
     return switch (option) {
-      case FUTURE -> futureGrantsFactory.createFrom(c);
-      case ALL -> allGrantsFactory.createFrom(c);
+      case FUTURE -> futureGrantsCompiler.createFrom(c);
+      case ALL -> allGrantsCompiler.createFrom(c);
     };
   }
 }
