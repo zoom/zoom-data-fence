@@ -111,7 +111,6 @@ roles:
         privileges:
           - select
           - references
-          - monitor
       - object-type: function
         database-name: ${var.database}
         schema-name: ${var.schema}

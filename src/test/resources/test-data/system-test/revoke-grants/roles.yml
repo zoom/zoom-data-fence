@@ -76,4 +76,3 @@ roles:
         privileges:
           - select
           - references
-          - monitor
