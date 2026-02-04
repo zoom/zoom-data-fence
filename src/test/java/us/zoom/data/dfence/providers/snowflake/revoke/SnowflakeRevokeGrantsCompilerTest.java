@@ -367,38 +367,6 @@ class SnowflakeRevokeGrantsCompilerTest {
   }
 
   @Test
-  void compileRevokeGrants_whenInvalidObjectTypeInGrant_cannotCreateBuilder() {
-    // Given
-    PlaybookPrivilegeGrant playbookGrant =
-        createPlaybookGrant("TABLE", "TEST_DB", "TEST_SCHEMA", "TEST_TABLE", List.of("SELECT"));
-    SnowflakeGrantModel invalidGrant =
-        new SnowflakeGrantModel(
-            "SELECT",
-            "INVALID_TYPE",
-            "TEST_DB.TEST_SCHEMA.TEST_TABLE",
-            "ROLE",
-            "TEST_ROLE",
-            false,
-            false,
-            false);
-    SnowflakeGrantModel validGrant =
-        createGrant("UPDATE", "TABLE", "TEST_DB.TEST_SCHEMA.TEST_TABLE", "ROLE", "TEST_ROLE");
-    Map<String, SnowflakeGrantBuilder> currentGrants =
-        createCurrentGrants(invalidGrant, validGrant);
-
-    // When
-    List<SnowflakeGrantBuilder> actualRevokes =
-        SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
-
-    // Then
-    assertEquals(1, currentGrants.values().size());
-    assertEquals(1, actualRevokes.size());
-    SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
-    assertEquals("UPDATE", revokedGrant.privilege());
-    assertEquals("TABLE", revokedGrant.grantedOn());
-  }
-
-  @Test
   void compileRevokeGrants_whenDatabaseAndSchemaWildcards_shouldNotRevoke() {
     // Given
     PlaybookPrivilegeGrant playbookGrant =

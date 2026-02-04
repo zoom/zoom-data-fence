@@ -60,11 +60,14 @@ public class SnowflakeWildcardAllGrantFilter {
                         playbookPrivilegeGrant.databaseName(),
                         playbookPrivilegeGrant.schemaName()));
             }
-            String objectName = String.format("%s.<%s>", containerName, objectType.getObjectType().replace(" ", "_"));
+            // Use grant name object type so desired state matches what Snowflake returns (e.g.
+            // CORTEX_AGENT not AGENT), avoiding spurious revokes.
+            String grantNameObjectType = objectType.getGrantNameObjectType();
+            String objectName = String.format("%s.<%s>", containerName, grantNameObjectType);
             List<SnowflakeGrantModel> grants = playbookPrivilegeGrant.privileges().stream()
                     .map(p -> new SnowflakeGrantModel(
                             p,
-                            objectType.getObjectType().replace(" ", "_"),
+                            grantNameObjectType,
                             objectName,
                             "ROLE",
                             roleName,

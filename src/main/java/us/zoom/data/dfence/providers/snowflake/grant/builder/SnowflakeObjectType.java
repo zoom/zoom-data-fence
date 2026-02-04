@@ -97,6 +97,17 @@ public enum SnowflakeObjectType {
         return this.aliasFor;
     }
 
+    /**
+     * Returns the object type string as Snowflake returns it in grant output (e.g. {@code name} for
+     * future grants, {@code granted_on}). Use this when building grant names so desired state
+     * matches current state from Snowflake. Do not use {@link #getObjectType()} for grant names,
+     * since that is the user-facing alias (e.g. "AGENT") and would mismatch Snowflake's
+     * "CORTEX_AGENT".
+     */
+    public String getGrantNameObjectType() {
+        return this.name();
+    }
+
     public static SnowflakeObjectType fromString(String objectType) {
         String normalizedObjectType = objectType.toUpperCase();
         String overrideValue = overrideObjectTypes.get(normalizedObjectType);
