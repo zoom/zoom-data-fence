@@ -67,15 +67,13 @@ public final class FutureGrantsCompiler {
       List<String> privileges,
       String roleName,
       Boolean grantOption) {
-    String objectName =
-        String.format(
-            "%s.<%s>", containerName, objectType.getObjectType().replace(" ", "_").toUpperCase());
+    String objectName = String.format("%s.<%s>", containerName, objectType.name());
     return privileges.stream()
         .map(
             p ->
                 new SnowflakeGrantModel(
                     p,
-                    objectType.getObjectType().replace(" ", "_"),
+                    objectType.name(),
                     objectName,
                     "ROLE",
                     roleName,

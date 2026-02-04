@@ -13,10 +13,7 @@ import us.zoom.data.dfence.test.fixtures.GrantTestDataLoader;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for SnowflakeGrantBuilder.
@@ -140,6 +137,22 @@ class SnowflakeGrantBuilderTest {
         SnowflakeGrantBuilder builder = SnowflakeGrantBuilder.fromGrant(testData.grantModel());
         assertInstanceOf(testData.expectedBuilderClass(), builder,
                 "Expected builder class mismatch for: " + testData.name());
+    }
+
+    @Test
+    void agentGrantBuilderFromSnowflakeGrantModel() {
+        SnowflakeGrantModel grantModel = new SnowflakeGrantModel(
+                "USAGE",
+                "AGENT",
+                "MOCK_DB.MOCK_SCHEMA.<CORTEX_AGENT>",
+                "ROLE",
+                "MOCK_ROLE",
+                false,
+                true,
+                false
+        );
+        SnowflakeGrantBuilder builder = SnowflakeGrantBuilder.fromGrant(grantModel);
+        assertNotNull(builder);
     }
 
     /**

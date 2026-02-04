@@ -169,6 +169,15 @@ tests:
     expectedGrantStatement: "GRANT SELECT ON SEMANTIC VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" TO ROLE MOCK_ROLE_1;"
     expectedRevokeStatement: "REVOKE SELECT ON SEMANTIC VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" FROM ROLE MOCK_ROLE_1;"
 
+  - name: "MONITOR on SEMANTIC_VIEW"
+    grant:
+      privilege: MONITOR
+      objectType: SEMANTIC_VIEW
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_VIEW
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT MONITOR ON SEMANTIC VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE MONITOR ON SEMANTIC VIEW \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_VIEW\" FROM ROLE MOCK_ROLE_1;"
+
   - name: "REFERENCES on SEMANTIC_VIEW"
     grant:
       privilege: REFERENCES

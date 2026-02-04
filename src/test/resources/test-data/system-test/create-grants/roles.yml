@@ -39,10 +39,6 @@ roles:
   full_patterns_role:
     name: ${var.role2}
     grants:
-      # Qual 0: account (global object)
-      - object-type: account
-        privileges:
-          - monitor
       # Qual 1: normal/account-level role, database
       - object-type: role
         object-name: ${var.role}
