@@ -51,7 +51,7 @@ public class SnowflakeMLPermissionGrantBuilder extends SnowflakeGrantBuilder {
         return List.of(String.format(
                 "GRANT %s ON %s %s TO ROLE %s%s;",
                 transformPrivilege(grant.privilege()),
-                SnowflakeObjectType.fromString(grant.grantedOn()).getObjectType(),
+                SnowflakeObjectType.fromString(grant.grantedOn()).getSqlQueryObjectType(),
                 grant.getEscapedName(),
                 grant.granteeName(),
                 withGrantOption));
@@ -65,7 +65,7 @@ public class SnowflakeMLPermissionGrantBuilder extends SnowflakeGrantBuilder {
         return List.of(String.format(
                 "REVOKE %s ON %s %s FROM ROLE %s;",
                 transformPrivilege(grant.privilege()),
-                SnowflakeObjectType.fromString(grant.grantedOn()).getObjectType(),
+                SnowflakeObjectType.fromString(grant.grantedOn()).getSqlQueryObjectType(),
                 grant.getEscapedName(),
                 grant.granteeName()));
     }

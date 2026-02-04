@@ -74,7 +74,7 @@ public class SnowflakeOwnershipGrantBuilder extends SnowflakeGrantBuilder {
         }
         return List.of(String.format(
                 "GRANT OWNERSHIP ON %s %s TO ROLE %s COPY CURRENT GRANTS;",
-                SnowflakeObjectType.fromString(grant.grantedOn()).getObjectType(),
+                SnowflakeObjectType.fromString(grant.grantedOn()).getSqlQueryObjectType(),
                 this.grant.getEscapedName(),
                 this.grant.granteeName()));
     }
@@ -86,7 +86,7 @@ public class SnowflakeOwnershipGrantBuilder extends SnowflakeGrantBuilder {
         }
         return List.of(String.format(
                 "GRANT OWNERSHIP ON %s %s TO ROLE SECURITYADMIN COPY CURRENT GRANTS;",
-                SnowflakeObjectType.fromString(grant.grantedOn()).getObjectType(),
+                SnowflakeObjectType.fromString(grant.grantedOn()).getSqlQueryObjectType(),
                 this.grant.getEscapedName()));
     }
 
