@@ -67,16 +67,13 @@ public final class FutureGrantsCompiler {
       List<String> privileges,
       String roleName,
       Boolean grantOption) {
-    // Use grant name object type so desired state matches what Snowflake returns (e.g. CORTEX_AGENT
-    // not AGENT), avoiding spurious revokes.
-    String grantNameObjectType = objectType.getGrantNameObjectType();
-    String objectName = String.format("%s.<%s>", containerName, grantNameObjectType);
+    String objectName = String.format("%s.<%s>", containerName, objectType.name());
     return privileges.stream()
         .map(
             p ->
                 new SnowflakeGrantModel(
                     p,
-                    grantNameObjectType,
+                    objectType.name(),
                     objectName,
                     "ROLE",
                     roleName,
