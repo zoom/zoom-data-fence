@@ -51,7 +51,7 @@ public class SnowflakeObjectsService {
             String containerName) {
         String key = String.join(
                 "::",
-                List.of(containerObjectType.getSqlQueryObjectType(), objectType.getSqlQueryObjectType(), containerName));
+                List.of(containerObjectType.getObjectType(), objectType.getObjectType(), containerName));
         if (getContainerObjectQualNamesCache.containsKey(key)) {
             return getContainerObjectQualNamesCache.get(key);
         } else {
@@ -139,8 +139,8 @@ public class SnowflakeObjectsService {
             @NotEmpty String containerName) {
         log.info(
                 "Finding existing {} in {} {}.",
-                objectType.getSqlQueryObjectTypePlural(),
-                containerObjectType.getSqlQueryObjectType(),
+                objectType.getObjectTypePlural(),
+                containerObjectType.getObjectType(),
                 containerName);
         switch (objectType) {
             case TABLE, VIEW, MATERIALIZED_VIEW, EXTERNAL_TABLE, EVENT_TABLE -> {

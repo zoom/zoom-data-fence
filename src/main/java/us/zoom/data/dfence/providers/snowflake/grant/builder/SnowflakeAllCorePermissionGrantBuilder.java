@@ -35,8 +35,8 @@ public class SnowflakeAllCorePermissionGrantBuilder extends SnowflakeCorePermiss
         return List.of(String.format(
                 "GRANT %s ON ALL %s IN %s %s TO ROLE %s%s;",
                 transformPrivilege(getGrant().privilege()),
-                futureGrantObjectNameParts.objectType().getSqlQueryObjectTypePlural(),
-                futureGrantObjectNameParts.containerObjectType().getSqlQueryObjectType(),
+                futureGrantObjectNameParts.objectType().getObjectTypePlural(),
+                futureGrantObjectNameParts.containerObjectType().getObjectType(),
                 futureGrantObjectNameParts.objectName(),
                 getGrant().granteeName(),
                 withGrantOption));

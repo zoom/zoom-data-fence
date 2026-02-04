@@ -47,15 +47,15 @@ public class SnowflakeDefaultObjectService {
             if (objectType.getQualLevel() != 1) {
                 throw new RbacDataError(String.format(
                         "Object type %s cannot be qualified under the account level. Qualification level of 1 is " + "expected. Actual qualification level is %s.",
-                        objectType.getSqlQueryObjectType(),
+                        objectType.getObjectType(),
                         objectType.getQualLevel()));
             }
-            query = String.format("show %s;", objectType.getSqlQueryObjectTypePlural().toLowerCase());
+            query = String.format("show %s;", objectType.getObjectTypePlural().toLowerCase());
         } else {
             query = String.format(
                     "show %s in %s %s;",
-                    objectType.getSqlQueryObjectTypePlural().toLowerCase(),
-                    containerObjectType.getSqlQueryObjectType().toLowerCase(),
+                    objectType.getObjectTypePlural().toLowerCase(),
+                    containerObjectType.getObjectType().toLowerCase(),
                     containerName);
         }
         log.debug("Finding objects with query: \"{}\"", query);
@@ -90,9 +90,9 @@ public class SnowflakeDefaultObjectService {
             throw new DatabaseError(
                     String.format(
                             "Unable to find objects of type %s in container %s of type %s using query \"%s\"",
-                            objectType.getSqlQueryObjectType(),
+                            objectType.getObjectType(),
                             containerName,
-                            containerObjectType.getSqlQueryObjectType(),
+                            containerObjectType.getObjectType(),
                             query), e);
         }
 

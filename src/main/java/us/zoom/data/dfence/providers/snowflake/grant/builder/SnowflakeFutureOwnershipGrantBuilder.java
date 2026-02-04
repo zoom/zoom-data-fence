@@ -27,8 +27,8 @@ public class SnowflakeFutureOwnershipGrantBuilder extends SnowflakeOwnershipGran
                 = GrantObjectNameParser.futureGrantObjectNameParts(getGrant().name());
         return List.of(String.format(
                 "GRANT OWNERSHIP ON FUTURE %s IN %s %s TO ROLE %s COPY CURRENT GRANTS;",
-                futureGrantObjectNameParts.objectType().getSqlQueryObjectTypePlural(),
-                futureGrantObjectNameParts.containerObjectType().getSqlQueryObjectType(),
+                futureGrantObjectNameParts.objectType().getObjectTypePlural(),
+                futureGrantObjectNameParts.containerObjectType().getObjectType(),
                 futureGrantObjectNameParts.objectName(),
                 getGrant().granteeName()));
     }
@@ -42,8 +42,8 @@ public class SnowflakeFutureOwnershipGrantBuilder extends SnowflakeOwnershipGran
                 = GrantObjectNameParser.futureGrantObjectNameParts(getGrant().name());
         return List.of(String.format(
                 "REVOKE OWNERSHIP ON FUTURE %s IN %s %s FROM ROLE %s;",
-                futureGrantObjectNameParts.objectType().getSqlQueryObjectTypePlural(),
-                futureGrantObjectNameParts.containerObjectType().getSqlQueryObjectType(),
+                futureGrantObjectNameParts.objectType().getObjectTypePlural(),
+                futureGrantObjectNameParts.containerObjectType().getObjectType(),
                 futureGrantObjectNameParts.objectName(),
                 getGrant().granteeName()));
     }

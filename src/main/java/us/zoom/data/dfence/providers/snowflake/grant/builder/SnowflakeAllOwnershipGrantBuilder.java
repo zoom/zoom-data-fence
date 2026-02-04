@@ -28,8 +28,8 @@ public class SnowflakeAllOwnershipGrantBuilder extends SnowflakeOwnershipGrantBu
                 = GrantObjectNameParser.futureGrantObjectNameParts(getGrant().name());
         return List.of(String.format(
                 "GRANT OWNERSHIP ON ALL %s IN %s %s TO ROLE %s COPY CURRENT GRANTS;",
-                futureGrantObjectNameParts.objectType().getSqlQueryObjectTypePlural(),
-                futureGrantObjectNameParts.containerObjectType().getSqlQueryObjectType(),
+                futureGrantObjectNameParts.objectType().getObjectTypePlural(),
+                futureGrantObjectNameParts.containerObjectType().getObjectType(),
                 futureGrantObjectNameParts.objectName(),
                 getGrant().granteeName()));
     }

@@ -64,7 +64,7 @@ public class SnowflakeUnsupportedOwnershipManagementGrantBuilder extends Snowfla
                         grant.grantedOn()));
                 return List.of(String.format(
                         "DROP %s %s;",
-                        SnowflakeObjectType.fromString(grant.grantedOn()).getSqlQueryObjectType(),
+                        SnowflakeObjectType.fromString(grant.grantedOn()).getObjectType(),
                         this.grant.getEscapedName()));
             }
         }

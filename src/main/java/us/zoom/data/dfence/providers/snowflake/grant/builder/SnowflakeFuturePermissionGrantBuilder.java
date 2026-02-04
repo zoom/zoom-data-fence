@@ -32,8 +32,8 @@ public class SnowflakeFuturePermissionGrantBuilder extends SnowflakePermissionGr
         return List.of(String.format(
                 "GRANT %s ON FUTURE %s IN %s %s TO ROLE %s%s;",
                 getGrant().privilege(),
-                futureGrantObjectNameParts.objectType().getSqlQueryObjectTypePlural(),
-                futureGrantObjectNameParts.containerObjectType().getSqlQueryObjectType(),
+                futureGrantObjectNameParts.objectType().getObjectTypePlural(),
+                futureGrantObjectNameParts.containerObjectType().getObjectType(),
                 futureGrantObjectNameParts.objectName(),
                 getGrant().granteeName(),
                 withGrantOption));
@@ -49,8 +49,8 @@ public class SnowflakeFuturePermissionGrantBuilder extends SnowflakePermissionGr
         return List.of(String.format(
                 "REVOKE %s ON FUTURE %s IN %s %s FROM ROLE %s;",
                 getGrant().privilege(),
-                futureGrantObjectNameParts.objectType().getSqlQueryObjectTypePlural(),
-                futureGrantObjectNameParts.containerObjectType().getSqlQueryObjectType(),
+                futureGrantObjectNameParts.objectType().getObjectTypePlural(),
+                futureGrantObjectNameParts.containerObjectType().getObjectType(),
                 futureGrantObjectNameParts.objectName(),
                 getGrant().granteeName()));
 

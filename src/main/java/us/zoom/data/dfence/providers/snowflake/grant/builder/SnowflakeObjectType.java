@@ -10,8 +10,8 @@ import java.util.Objects;
  * <p>
  * Each type has a qualification level ({@link #getQualLevel()}) indicating how many name parts
  * it has: 0 = account-level, 1 = one part (e.g. database name), 2 = two parts (e.g. db.schema),
- * 3 = three parts (e.g. db.schema.object). The {@link #getSqlQueryObjectType()} and {@link
- * #getSqlQueryObjectTypePlural()} strings are used in SQL (e.g. "SHOW AGENTS IN DATABASE"). Use {@link
+ * 3 = three parts (e.g. db.schema.object). The {@link #getObjectType()} and {@link
+ * #getObjectTypePlural()} strings are used in SQL (e.g. "SHOW AGENTS IN DATABASE"). Use {@link
  * #name()} when building grant names so desired state matches what Snowflake
  * returns for the object type in SHOW GRANTS statements. {@link #name()} is also used for matching the object name as
  * it appears in future grant object names such as MY_DB.MY_SCHEMA.&ltTABLE&gt..
@@ -80,11 +80,11 @@ public enum SnowflakeObjectType {
 
     /** Singular form used in SQL (e.g. "TABLE" will be used in "GRANT SELECT ON TABLE TO ROLE FOO"). */
     @Getter
-    private final String sqlQueryObjectType;
+    private final String objectType;
 
     /** Plural form used in SQL (e.g. TABLES WILL BE USED IN "SHOW GRANTS ON TABLES"). */
     @Getter
-    private final String sqlQueryObjectTypePlural;
+    private final String objectTypePlural;
 
     /**
      * When non-null, used only in hash keys so that this type and another (e.g. VIEW) are
@@ -104,25 +104,25 @@ public enum SnowflakeObjectType {
      *                        3=e.g. db.schema.object)
      * @param aliasFor        when non-null, value used in hash keys so this type matches another
      *                        (e.g. MATERIALIZED_VIEW uses "VIEW"); null if no alias
-     * @param sqlQueryObjectType      singular form for SQL (e.g. "AGENT", "TABLE"); null to infer from
+     * @param objectType      singular form for SQL (e.g. "AGENT", "TABLE"); null to infer from
      *                        enum name (underscores to spaces)
      * @param sqlQueryObjectTypePlural plural form for SQL (e.g. "AGENTS", "TABLES"); null to infer from
      *                         objectType
      */
-    SnowflakeObjectType(Integer qualLevel, String aliasFor, String sqlQueryObjectType, String sqlQueryObjectTypePlural) {
+    SnowflakeObjectType(Integer qualLevel, String aliasFor, String objectType, String sqlQueryObjectTypePlural) {
         this.qualLevel = qualLevel;
         // If objectType is provided, use it; otherwise infer from enum name
-        String computedObjectType = (sqlQueryObjectType != null) ? sqlQueryObjectType : this.name().replace("_", " ");
-        this.sqlQueryObjectType = computedObjectType;
+        String computedObjectType = (objectType != null) ? objectType : this.name().replace("_", " ");
+        this.objectType = computedObjectType;
         // If objectTypePlural is provided, use it; otherwise infer from objectType
         if (sqlQueryObjectTypePlural != null) {
-            this.sqlQueryObjectTypePlural = sqlQueryObjectTypePlural;
+            this.objectTypePlural = sqlQueryObjectTypePlural;
         } else {
             // Hooked on phonics works for me.
             if (computedObjectType.endsWith("Y")) {
-                this.sqlQueryObjectTypePlural = computedObjectType.substring(0, computedObjectType.length() - 1) + "IES";
+                this.objectTypePlural = computedObjectType.substring(0, computedObjectType.length() - 1) + "IES";
             } else {
-                this.sqlQueryObjectTypePlural = computedObjectType + "S";
+                this.objectTypePlural = computedObjectType + "S";
             }
         }
         this.aliasFor = Objects.requireNonNullElseGet(aliasFor, this::name);
