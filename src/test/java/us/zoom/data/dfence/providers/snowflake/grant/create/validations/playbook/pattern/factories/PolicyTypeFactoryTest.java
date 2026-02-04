@@ -84,9 +84,9 @@ class PolicyTypeFactoryTest {
   }
 
   @Test
-  @DisplayName("Container Target - Schema Level (qualLevel 3)")
+  @DisplayName("Container Target - Schema Level without wildcard yields InvalidContainerPolicyPattern (qualLevel 3)")
   void from_ContainerSchemaLevel() {
-    // ALL TABLES IN SCHEMA MY_DB.MY_SCHEMA
+    // DB.SCH with empty object: no schema/object wildcard -> deprecated pattern, invalid
     PolicyPattern pattern = new PolicyPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
@@ -94,26 +94,30 @@ class PolicyTypeFactoryTest {
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, true));
 
-    assertTrue(result.isValid());
-    assertTrue(result.get() instanceof PolicyType.Container.Schema);
+    assertTrue(result.isInvalid());
+    assertTrue(
+        result.getError().exists(err -> err instanceof ValidationErr.InvalidContainerPolicyPattern
+            && err.message().contains("DB.SCH.* or DB.*.OBJ is expected for qual level 3 object")));
   }
 
   @Test
-  @DisplayName("Container Target - SchemaObjectAllSchemas (qualLevel 3, empty schema and object)")
+  @DisplayName("Container Target - empty schema and object without wildcard yields InvalidContainerPolicyPattern (qualLevel 3)")
   void from_ContainerSchemaObjectAllSchemas_whenEmptySchemaAndObject() {
-    // ALL TABLES IN DATABASE MY_DB (empty schema and object yield SchemaObjectAllSchemas)
+    // DB with empty schema and object: no wildcard -> deprecated pattern, invalid
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
     Validation<Seq<ValidationErr>, PolicyType> result =
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, true));
 
-    assertTrue(result.isValid());
-    assertTrue(result.get() instanceof PolicyType.Container.SchemaObjectAllSchemas);
+    assertTrue(result.isInvalid());
+    assertTrue(
+        result.getError().exists(err -> err instanceof ValidationErr.InvalidContainerPolicyPattern
+            && err.message().contains("DB.SCH.* or DB.*.OBJ is expected for qual level 3 object")));
   }
 
   @Test
-  @DisplayName("Container Target - Schema Level (qualLevel 3 for FUTURE_AND_ALL)")
+  @DisplayName("Container Target - Schema Level without wildcard yields InvalidContainerPolicyPattern (qualLevel 3 for FUTURE_AND_ALL)")
   void from_ContainerSchemaLevelForFutureAndAll() {
     PolicyPattern pattern = new PolicyPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
@@ -122,7 +126,9 @@ class PolicyTypeFactoryTest {
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, true));
 
-    assertTrue(result.isValid());
-    assertTrue(result.get() instanceof PolicyType.Container.Schema);
+    assertTrue(result.isInvalid());
+    assertTrue(
+        result.getError().exists(err -> err instanceof ValidationErr.InvalidContainerPolicyPattern
+            && err.message().contains("DB.SCH.* or DB.*.OBJ is expected for qual level 3 object")));
   }
 }

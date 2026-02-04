@@ -56,11 +56,16 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
 
     ContainerPolicyOptions containerPolicyOptions = ContainerPolicyOptions.of(options);
 
+      Validation<Seq<ValidationErr>, PolicyType.Container> validContainerGrant =
+              sch(pattern).wildcard().orElse(obj(pattern).wildcard())
+                      .map(v -> (PolicyType.Container) null)
+                      .mapError(err -> List.of((ValidationErr) err));
+
     return switch (objectType.getQualLevel()) {
         case 2 -> {
             Validation<Seq<ValidationErr>, PolicyType.Container> deprecatedPattern = database(pattern)
                     .flatMap(db -> sch(pattern).empty())
-                    .flatMap(sch -> Validation.invalid(new ValidationErr.InvalidContainerPolicyPattern("DB.* is expected for qual level 2 object")))
+                    .flatMap(sch -> invalidContainerPattern("DB.* is expected for qual level 2 object"))
                     .map(value -> (PolicyType.Container) value)
                     .mapError(err -> List.of((ValidationErr) err));
 
@@ -72,7 +77,7 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
                                 new PolicyType.Container.AccountObject(
                                         databaseName, containerPolicyOptions, SnowflakeObjectType.DATABASE));
 
-            yield validPattern.orElse(deprecatedPattern);
+            yield validContainerGrant.flatMap(i -> validPattern).orElse(deprecatedPattern);
         }
 
       case 3 -> {
@@ -80,14 +85,10 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
           Validation<Seq<ValidationErr>, PolicyType.Container> deprecatedPattern = database(pattern)
                   .flatMap(db -> sch(pattern).empty().orElse(sch(pattern).validValueVoid()))
                   .flatMap(sch -> obj(pattern).empty().orElse(obj(pattern).validValueVoid()))
-                  .flatMap(obj -> Validation.invalid(new ValidationErr.InvalidContainerPolicyPattern("DB.SCH.* or DB.*.OBJ is expected for qual level 3 object")))
+                  .flatMap(obj -> invalidContainerPattern("DB.SCH.* or DB.*.OBJ is expected for qual level 3 object"))
                   .map(value -> (PolicyType.Container) value)
                   .mapError(err -> List.of((ValidationErr) err));
 
-          Validation<Seq<ValidationErr>, PolicyType.Container> validContainerGrant =
-                  sch(pattern).wildcard().orElse(obj(pattern).wildcard())
-                  .map(v -> (PolicyType.Container) null)
-                  .mapError(err -> List.of((ValidationErr) err));
 
         Validation<Seq<ValidationErr>, PolicyType.Container>
             objectLevelAllSchemasPattern =
@@ -100,7 +101,6 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
                                 new PolicyType.Container.SchemaObjectAllSchemas(
                                     databaseName, containerPolicyOptions));
 
-        // Schema-level container (specific schema, empty/wildcard object)
         Validation<Seq<ValidationErr>, PolicyType.Container> schemaLevelPattern =
             database(pattern)
                 .combine(schema(pattern))
@@ -122,4 +122,9 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
                       objectType.getQualLevel()))));
     };
   }
+
+    private static Validation<ValidationErr, PolicyType.Container> invalidContainerPattern(
+            String message) {
+        return Validation.invalid(new ValidationErr.InvalidContainerPolicyPattern(message));
+    }
 }
