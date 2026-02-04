@@ -1,4 +1,4 @@
-package us.zoom.data.dfence.providers.snowflake.grant.create.validations.playbook.pattern.providers;
+package us.zoom.data.dfence.providers.snowflake.grant.create.validations.playbook.pattern.factories;
 
 import io.vavr.collection.Seq;
 import io.vavr.control.Option;
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.policies.pattern.factories.PolicyTypeFactory;
 import us.zoom.data.dfence.policies.pattern.models.PolicyType;
-import us.zoom.data.dfence.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.policies.pattern.models.ValidationErr;
 import us.zoom.data.dfence.policies.models.PolicyPattern;
 import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
@@ -21,7 +21,7 @@ class PolicyTypeFactoryTest {
   void from_StandardAccountLevel() {
     PolicyPattern pattern = new PolicyPattern(Option.none(), Option.none(), Option.none());
 
-    Validation<Seq<ValidationError>, PolicyType> result =
+    Validation<Seq<ValidationErr>, PolicyType> result =
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.ACCOUNT, new PolicyPatternOptions(false, false));
 
@@ -34,7 +34,7 @@ class PolicyTypeFactoryTest {
   void from_StandardDatabaseLevel() {
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
-    Validation<Seq<ValidationError>, PolicyType> result =
+    Validation<Seq<ValidationErr>, PolicyType> result =
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.DATABASE, new PolicyPatternOptions(false, false));
 
@@ -47,7 +47,7 @@ class PolicyTypeFactoryTest {
   void from_StandardSchemaLevel() {
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
-    Validation<Seq<ValidationError>, PolicyType> result =
+    Validation<Seq<ValidationErr>, PolicyType> result =
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.SCHEMA, new PolicyPatternOptions(false, false));
 
@@ -61,7 +61,7 @@ class PolicyTypeFactoryTest {
     PolicyPattern pattern = new PolicyPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.some("MY_TABLE"));
 
-    Validation<Seq<ValidationError>, PolicyType> result =
+    Validation<Seq<ValidationErr>, PolicyType> result =
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, false));
 
@@ -72,11 +72,10 @@ class PolicyTypeFactoryTest {
   @Test
   @DisplayName("Container Target - Database Level (qualLevel 2 with wildcard schema)")
   void from_ContainerDatabaseLevel() {
-    // FUTURE SCHEMAS IN DATABASE MY_DB
-    // Missing/wildcard schema implies database level for container
-    PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
+    // FUTURE SCHEMAS IN DATABASE MY_DB (wildcard schema required for valid pattern)
+    PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.some("*"), Option.none());
 
-    Validation<Seq<ValidationError>, PolicyType> result =
+    Validation<Seq<ValidationErr>, PolicyType> result =
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.SCHEMA, new PolicyPatternOptions(true, false));
 
@@ -91,7 +90,7 @@ class PolicyTypeFactoryTest {
     PolicyPattern pattern = new PolicyPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
-    Validation<Seq<ValidationError>, PolicyType> result =
+    Validation<Seq<ValidationErr>, PolicyType> result =
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, true));
 
@@ -100,17 +99,17 @@ class PolicyTypeFactoryTest {
   }
 
   @Test
-  @DisplayName("Container Target - Database Level (qualLevel 3 with wildcard schema)")
-  void from_ContainerDatabaseLevelForAll() {
-    // ALL TABLES IN DATABASE MY_DB
+  @DisplayName("Container Target - SchemaObjectAllSchemas (qualLevel 3, empty schema and object)")
+  void from_ContainerSchemaObjectAllSchemas_whenEmptySchemaAndObject() {
+    // ALL TABLES IN DATABASE MY_DB (empty schema and object yield SchemaObjectAllSchemas)
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
-    Validation<Seq<ValidationError>, PolicyType> result =
+    Validation<Seq<ValidationErr>, PolicyType> result =
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, true));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof PolicyType.Container.AccountObject);
+    assertTrue(result.get() instanceof PolicyType.Container.SchemaObjectAllSchemas);
   }
 
   @Test
@@ -119,7 +118,7 @@ class PolicyTypeFactoryTest {
     PolicyPattern pattern = new PolicyPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
-    Validation<Seq<ValidationError>, PolicyType> result =
+    Validation<Seq<ValidationErr>, PolicyType> result =
         PolicyTypeFactory.createFrom(
             pattern, SnowflakeObjectType.TABLE, new PolicyPatternOptions(false, true));
 

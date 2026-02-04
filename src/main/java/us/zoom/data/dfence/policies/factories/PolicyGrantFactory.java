@@ -1,5 +1,7 @@
 package us.zoom.data.dfence.policies.factories;
 
+import io.vavr.Tuple2;
+import io.vavr.collection.Seq;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import java.util.List;
@@ -12,7 +14,7 @@ import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.policies.pattern.factories.PolicyTypeFactory;
 import us.zoom.data.dfence.policies.pattern.models.PolicyType;
-import us.zoom.data.dfence.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.policies.pattern.models.ValidationErr;
 import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
 import us.zoom.data.dfence.policies.models.PolicyGrant;
 import us.zoom.data.dfence.policies.models.PolicyPattern;
@@ -22,7 +24,7 @@ import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PolicyGrantFactory {
 
-  public static PolicyGrant createFrom(PlaybookPrivilegeGrant grant) {
+  public static Option<PolicyGrant> createFrom(PlaybookPrivilegeGrant grant) {
     return getPlaybookGrant(grant)
         .getOrElseThrow(
             err -> {
@@ -33,12 +35,12 @@ public final class PolicyGrantFactory {
             });
   }
 
-  private static Try<PolicyGrant> getPlaybookGrant(PlaybookPrivilegeGrant grant) {
+  private static Try<Option<PolicyGrant>> getPlaybookGrant(PlaybookPrivilegeGrant grant) {
     return getSnowflakeObjectType(grant.objectType())
         .flatMap(snowflakeObjectType -> getPlaybookGrant(snowflakeObjectType, grant));
   }
 
-  private static Try<PolicyGrant> getPlaybookGrant(
+  private static Try<Option<PolicyGrant>> getPlaybookGrant(
       SnowflakeObjectType snowflakeObjectType, PlaybookPrivilegeGrant grant) {
     return Try.of(
         () -> {
@@ -52,14 +54,14 @@ public final class PolicyGrantFactory {
           PolicyPattern pattern = PolicyPattern.of(dbName, schName, objName);
           PolicyPatternOptions options =
               new PolicyPatternOptions(grant.includeFuture(), grant.includeAll());
-          PolicyType policyType =
-                  createPolicyType(pattern, snowflakeObjectType, options);
+          Option<PolicyType> policyType =
+                  createPolicyType(grant, pattern, snowflakeObjectType, options);
 
           List<PolicyGrantPrivilege> privileges =
               grant.privileges().stream().map(PolicyGrantPrivilege::new).collect(Collectors.toList());
 
-          return new PolicyGrant(
-              snowflakeObjectType, privileges, policyType, grant.enable());
+          return policyType.map(pt -> new PolicyGrant(
+              snowflakeObjectType, privileges, pt, grant.enable()));
         });
   }
 
@@ -67,7 +69,8 @@ public final class PolicyGrantFactory {
     return Try.of(() -> SnowflakeObjectType.fromString(grantObjectType));
   }
 
-  private static PolicyType createPolicyType(
+  private static Option<PolicyType> createPolicyType(
+          PlaybookPrivilegeGrant grant,
       PolicyPattern pattern,
       SnowflakeObjectType snowflakeObjectType,
       PolicyPatternOptions options) {
@@ -75,15 +78,34 @@ public final class PolicyGrantFactory {
             () -> PolicyTypeFactory.createFrom(pattern, snowflakeObjectType, options))
         .flatMap(
             validatedPattern ->
-                validatedPattern.fold(
-                    errors ->
-                        Try.failure(
-                            new RbacDataError(
-                                "Policy pattern validation failed: "
-                                    + errors
-                                        .map(ValidationError::message)
-                                        .mkString("[", ", ", "]"))),
-                    Try::success))
-        .getOrElseThrow(e -> new RbacDataError("Policy validation failed: " + e.getMessage(), e));
+                validatedPattern.fold(errors -> handleValidationErrors(grant, errors), value -> Try.success(Option.some(value)))
+        ).getOrElseThrow(e -> new RbacDataError("Policy validation failed: " + e.getMessage(), e));
+  }
+
+  private static Try<Option<PolicyType>> handleValidationErrors(
+          PlaybookPrivilegeGrant grant,
+      Seq<ValidationErr> validationErrors) {
+      Tuple2<? extends Seq<ValidationErr>, ? extends Seq<ValidationErr>> byDeprecation =
+              validationErrors.partition(err -> err instanceof ValidationErr.InvalidContainerPolicyPattern);
+      Seq<ValidationErr> deprecationErrs = (Seq<ValidationErr>) byDeprecation._1;
+      Seq<ValidationErr> rbacErrs = (Seq<ValidationErr>) byDeprecation._2;
+
+      if (!deprecationErrs.isEmpty()) {
+          log.warn(
+                  "[DEPRECATED] Container policy pattern will be treated as an error in a future release. "
+                          + "Migrate this grant to the required pattern (see validation message). "
+                          + "Grant: {} | Validation: {}",
+                  grant,
+                  deprecationErrs.map(ValidationErr::message).mkString("; "));
+      }
+      if (!rbacErrs.isEmpty()) {
+          return Try.failure(
+                  new RbacDataError(
+                          String.format(
+                                  "Policy pattern validation failed for grant: %s, errors: %s",
+                                  grant,
+                                  rbacErrs.map(ValidationErr::message).mkString("[", ", ", "]"))));
+      }
+      return Try.success(Option.none());
   }
 }

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.policies.validations.PolicyPatternValidations;
 import us.zoom.data.dfence.policies.pattern.models.PolicyType;
-import us.zoom.data.dfence.policies.pattern.models.ValidationError;
+import us.zoom.data.dfence.policies.pattern.models.ValidationErr;
 import us.zoom.data.dfence.policies.models.PolicyPattern;
 import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
@@ -21,7 +21,7 @@ class PolicyPatternValidationsTest {
 
     PolicyPatternValidations validations =
         new PolicyPatternValidations(pattern, SnowflakeObjectType.ACCOUNT);
-    Validation<Seq<ValidationError>, PolicyType.Standard> result =
+    Validation<Seq<ValidationErr>, PolicyType.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
@@ -35,7 +35,7 @@ class PolicyPatternValidationsTest {
 
     PolicyPatternValidations validations =
         new PolicyPatternValidations(pattern, SnowflakeObjectType.DATABASE);
-    Validation<Seq<ValidationError>, PolicyType.Standard> result =
+    Validation<Seq<ValidationErr>, PolicyType.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
@@ -52,7 +52,7 @@ class PolicyPatternValidationsTest {
 
     PolicyPatternValidations validations =
         new PolicyPatternValidations(pattern, SnowflakeObjectType.SCHEMA);
-    Validation<Seq<ValidationError>, PolicyType.Standard> result =
+    Validation<Seq<ValidationErr>, PolicyType.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
@@ -71,7 +71,7 @@ class PolicyPatternValidationsTest {
 
     PolicyPatternValidations validations =
         new PolicyPatternValidations(pattern, SnowflakeObjectType.TABLE);
-    Validation<Seq<ValidationError>, PolicyType.Standard> result =
+    Validation<Seq<ValidationErr>, PolicyType.Standard> result =
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
@@ -91,7 +91,7 @@ class PolicyPatternValidationsTest {
 
     PolicyPatternValidations validations =
         new PolicyPatternValidations(pattern, SnowflakeObjectType.TABLE);
-    Validation<Seq<ValidationError>, PolicyType.Container> result =
+    Validation<Seq<ValidationErr>, PolicyType.Container> result =
         validations.validateContainerPattern(new PolicyPatternOptions(false, false));
     assertTrue(result.isInvalid());
   }

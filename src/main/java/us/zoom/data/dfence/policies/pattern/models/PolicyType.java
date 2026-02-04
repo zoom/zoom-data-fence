@@ -96,7 +96,7 @@ public sealed interface PolicyType {
         }
     }
     record SchemaObjectAllSchemas(
-        String databaseName, String objectName, ContainerPolicyOptions containerPolicyOptions)
+        String databaseName, ContainerPolicyOptions containerPolicyOptions)
         implements Container {
       @Override
       public SnowflakeObjectType containerObjectType() {
