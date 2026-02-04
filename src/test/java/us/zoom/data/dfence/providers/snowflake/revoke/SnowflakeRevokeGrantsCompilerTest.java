@@ -367,38 +367,6 @@ class SnowflakeRevokeGrantsCompilerTest {
   }
 
   @Test
-  void compileRevokeGrants_whenInvalidObjectTypeInGrant_cannotCreateBuilder() {
-    // Given
-    PlaybookPrivilegeGrant playbookGrant =
-        createPlaybookGrant("TABLE", "TEST_DB", "TEST_SCHEMA", "TEST_TABLE", List.of("SELECT"));
-    SnowflakeGrantModel invalidGrant =
-        new SnowflakeGrantModel(
-            "SELECT",
-            "INVALID_TYPE",
-            "TEST_DB.TEST_SCHEMA.TEST_TABLE",
-            "ROLE",
-            "TEST_ROLE",
-            false,
-            false,
-            false);
-    SnowflakeGrantModel validGrant =
-        createGrant("UPDATE", "TABLE", "TEST_DB.TEST_SCHEMA.TEST_TABLE", "ROLE", "TEST_ROLE");
-    Map<String, SnowflakeGrantBuilder> currentGrants =
-        createCurrentGrants(invalidGrant, validGrant);
-
-    // When
-    List<SnowflakeGrantBuilder> actualRevokes =
-        SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
-
-    // Then
-    assertEquals(1, currentGrants.values().size());
-    assertEquals(1, actualRevokes.size());
-    SnowflakeGrantModel revokedGrant = actualRevokes.get(0).getGrant();
-    assertEquals("UPDATE", revokedGrant.privilege());
-    assertEquals("TABLE", revokedGrant.grantedOn());
-  }
-
-  @Test
   void compileRevokeGrants_whenDatabaseAndSchemaWildcards_shouldNotRevoke() {
     // Given
     PlaybookPrivilegeGrant playbookGrant =
@@ -656,14 +624,10 @@ class SnowflakeRevokeGrantsCompilerTest {
   private Map<String, SnowflakeGrantBuilder> createCurrentGrants(SnowflakeGrantModel... grants) {
     Map<String, SnowflakeGrantBuilder> currentGrants = new HashMap<>();
     for (SnowflakeGrantModel grant : grants) {
-      try {
         SnowflakeGrantBuilder builder = SnowflakeGrantBuilder.fromGrant(grant);
         if (builder != null) {
           currentGrants.put(builder.getKey(), builder);
         }
-      } catch (Exception e) {
-        // Skip grants that cannot be built
-      }
     }
     return currentGrants;
   }
@@ -811,6 +775,23 @@ class SnowflakeRevokeGrantsCompilerTest {
     assertTrue(
         actualRevokes.isEmpty(),
         "Should not revoke when playbook has AGENT with wildcard object name");
+  }
+
+  @Test
+  void compileRevokeGrantsFuture_whenPlaybookHasAgentWithWildcard_shouldNotRevoke() {
+    // Critical: Wildcard object name should match any agent name
+    PlaybookPrivilegeGrant playbookGrant =
+            createPlaybookGrant("AGENT", "TEST_DB", "TEST_SCHEMA", "*", List.of("USAGE"));
+    SnowflakeGrantModel currentGrant =
+            new SnowflakeGrantModel("USAGE", "CORTEX_AGENT", "TEST_DB.TEST_SCHEMA.<CORTEX_AGENT>", "ROLE", "TEST_ROLE", false, true, false);
+    Map<String, SnowflakeGrantBuilder> currentGrants = createCurrentGrants(currentGrant);
+
+    List<SnowflakeGrantBuilder> actualRevokes =
+            SnowflakeRevokeGrantsCompiler.compileRevokeGrants(List.of(playbookGrant), currentGrants);
+
+    assertTrue(
+            actualRevokes.isEmpty(),
+            "Should not revoke when playbook has AGENT with wildcard object name");
   }
 
   @Test

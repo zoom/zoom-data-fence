@@ -50,7 +50,7 @@ public final class AllGrantsCompiler {
         results.add(
             new SnowflakeGrantModel(
                 privilege,
-                objectType.getObjectType().replace(" ", "_"),
+                objectType.name(),
                 objectName,
                 "ROLE",
                 roleName,

@@ -15,7 +15,7 @@ public final class StandardGrantsCompiler {
             p ->
                 new SnowflakeGrantModel(
                     p.value(),
-                    data.objectType().getObjectType().replace(" ", "_"),
+                    data.objectType().getSqlQueryObjectType().replace(" ", "_"),
                     data.normalizedObjectName(),
                     "ROLE",
                     data.roleName(),

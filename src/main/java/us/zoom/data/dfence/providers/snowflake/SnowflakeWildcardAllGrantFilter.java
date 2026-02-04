@@ -60,11 +60,11 @@ public class SnowflakeWildcardAllGrantFilter {
                         playbookPrivilegeGrant.databaseName(),
                         playbookPrivilegeGrant.schemaName()));
             }
-            String objectName = String.format("%s.<%s>", containerName, objectType.getObjectType().replace(" ", "_"));
+            String objectName = String.format("%s.<%s>", containerName, objectType.name());
             List<SnowflakeGrantModel> grants = playbookPrivilegeGrant.privileges().stream()
                     .map(p -> new SnowflakeGrantModel(
                             p,
-                            objectType.getObjectType().replace(" ", "_"),
+                            objectType.name(),
                             objectName,
                             "ROLE",
                             roleName,
