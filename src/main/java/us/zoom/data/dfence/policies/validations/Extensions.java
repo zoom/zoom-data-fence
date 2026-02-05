@@ -13,7 +13,7 @@ public final class Extensions {
     return validation.fold(err -> Validation.invalid(List.of(err)), Validation::valid);
   }
 
-  public static <E, A, B> Validation<Seq<E>, B> foldCast(
+  public static <E, A, B> Validation<Seq<E>, B> liftAndCast(
       Validation<E, A> validation, Class<B> targetClass) {
     return validation.fold(
         err -> Validation.invalid(List.of(err)),

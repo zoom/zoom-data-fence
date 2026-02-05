@@ -41,7 +41,7 @@ public record PolicyPatternValidations(
 
     // At least one wildcard is expected in schema or object position for container grants
     Validation<Seq<ValidationError>, PolicyType.Container> preconditionValidation =
-        foldCast(
+        liftAndCast(
             sch(pattern).wildcard().orElse(obj(pattern).wildcard()), PolicyType.Container.class);
 
     return switch (objectType.getQualLevel()) {
