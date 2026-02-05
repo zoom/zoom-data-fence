@@ -27,7 +27,7 @@ public record PolicyPatternValidations(
           .combine(schema(pattern))
           .combine(object(pattern))
           .ap(PolicyType.Standard.SchemaObject::new);
-      default -> invalidPolicyPattern(
+      default -> invalidPolicyPatternError(
           String.format("Unknown qual level %s for grant object", objectType.getQualLevel()));
     };
   }
@@ -35,7 +35,7 @@ public record PolicyPatternValidations(
   public Validation<Seq<ValidationError>, PolicyType.Container> validateContainerPattern() {
 
     if (getContainerPolicyOptions().options().isEmpty()) {
-      return invalidPolicyPattern(
+      return invalidPolicyPatternError(
           "Both include-future and include-all cannot be false for container grants");
     }
 
@@ -53,7 +53,7 @@ public record PolicyPatternValidations(
 
         yield preconditionValidation
             .flatMap(i -> accountObjectContainerValidation)
-            .orElse(ErrorReportingValidations.reportInvalidContainerPatternQual2(pattern));
+            .orElse(ErrorReportingValidations.reportInvalidContainerPatternErrorQual2(pattern));
       }
 
       case 3 -> {
@@ -71,9 +71,9 @@ public record PolicyPatternValidations(
 
         yield preconditionValidation
             .flatMap(i -> allSchemasContainerValidation.orElse(schemaContainerValidation))
-            .orElse(ErrorReportingValidations.reportInvalidContainerPatternQual3(pattern));
+            .orElse(ErrorReportingValidations.reportInvalidContainerPatternErrorQual3(pattern));
       }
-      default -> invalidPolicyPattern(
+      default -> invalidPolicyPatternError(
           String.format(
               "Unknown qual level %s for container grant object", objectType.getQualLevel()));
     };
@@ -106,7 +106,7 @@ public record PolicyPatternValidations(
     return new ContainerPolicyOptions(options);
   }
 
-  private static <I> Validation<Seq<ValidationError>, I> invalidPolicyPattern(String message) {
+  private static <I> Validation<Seq<ValidationError>, I> invalidPolicyPatternError(String message) {
     return Validation.invalid(List.of(new ValidationError.InvalidPolicyPattern(message)));
   }
 }

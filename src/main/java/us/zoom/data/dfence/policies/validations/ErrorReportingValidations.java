@@ -23,12 +23,13 @@ public final class ErrorReportingValidations {
    * schema/object are empty (message: DB.* is expected for qual level 2 object-type).
    */
   public static Validation<Seq<ValidationError>, PolicyType.Container>
-      reportInvalidContainerPatternQual2(PolicyPattern pattern) {
+      reportInvalidContainerPatternErrorQual2(PolicyPattern pattern) {
     return liftAndCast(
         database(pattern)
             .flatMap(db -> sch(pattern).empty().orElse(obj(pattern).empty()))
             .flatMap(
-                sch -> invalidContainerPattern("DB.* is expected for qual level 2 object-type")),
+                sch ->
+                    invalidContainerPatternError("DB.* is expected for qual level 2 object-type")),
         PolicyType.Container.class);
   }
 
@@ -38,19 +39,19 @@ public final class ErrorReportingValidations {
    * level 3 object-type).
    */
   public static Validation<Seq<ValidationError>, PolicyType.Container>
-      reportInvalidContainerPatternQual3(PolicyPattern pattern) {
+      reportInvalidContainerPatternErrorQual3(PolicyPattern pattern) {
     return liftAndCast(
         database(pattern)
             .flatMap(db -> sch(pattern).notWildcard())
             .flatMap(sch -> obj(pattern).notWildcard())
             .flatMap(
                 obj ->
-                    invalidContainerPattern(
+                    invalidContainerPatternError(
                         "DB.SCH.* or DB.*.OBJ or DB.*.* is expected for qual level 3 object-type")),
         PolicyType.Container.class);
   }
 
-  private static <I> Validation<ValidationError, I> invalidContainerPattern(String message) {
+  private static <I> Validation<ValidationError, I> invalidContainerPatternError(String message) {
     return Validation.invalid(new ValidationError.InvalidContainerPolicyPattern(message));
   }
 }
