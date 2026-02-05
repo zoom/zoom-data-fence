@@ -5,7 +5,7 @@ import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.policies.validations.BaseValidations;
-import us.zoom.data.dfence.policies.pattern.models.ValidationErr;
+import us.zoom.data.dfence.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.policies.models.PolicyPattern;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,10 +15,10 @@ class BaseValidationsTest {
 
   @Test
   void liftError_shouldConvertSingleErrorToSequence() {
-    Validation<ValidationErr, String> validation =
-        Validation.invalid(new ValidationErr.Error("Error message"));
+    Validation<ValidationError, String> validation =
+        Validation.invalid(new ValidationError.InvalidPolicyPattern("Error message"));
 
-    Validation<Seq<ValidationErr>, String> result = BaseValidations.liftError(validation);
+    Validation<Seq<ValidationError>, String> result = BaseValidations.liftError(validation);
 
     assertTrue(result.isInvalid());
     assertEquals(1, result.getError().size());
@@ -27,9 +27,9 @@ class BaseValidationsTest {
 
   @Test
   void liftError_shouldPreserveValidValue() {
-    Validation<ValidationErr, String> validation = Validation.valid("Success");
+    Validation<ValidationError, String> validation = Validation.valid("Success");
 
-    Validation<Seq<ValidationErr>, String> result = BaseValidations.liftError(validation);
+    Validation<Seq<ValidationError>, String> result = BaseValidations.liftError(validation);
 
     assertTrue(result.isValid());
     assertEquals("Success", result.get());
@@ -40,7 +40,7 @@ class BaseValidationsTest {
     PolicyPattern pattern =
         new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
-    Validation<ValidationErr, String> result = BaseValidations.database(pattern);
+    Validation<ValidationError, String> result = BaseValidations.database(pattern);
 
     assertTrue(result.isValid());
     assertEquals("MY_DB", result.get());
@@ -50,7 +50,7 @@ class BaseValidationsTest {
   void database_shouldReturnInvalid_whenDatabaseNameIsEmpty() {
     PolicyPattern pattern = new PolicyPattern(Option.none(), Option.none(), Option.none());
 
-    Validation<ValidationErr, String> result = BaseValidations.database(pattern);
+    Validation<ValidationError, String> result = BaseValidations.database(pattern);
 
     assertTrue(result.isInvalid());
     assertTrue(result.getError().message().contains("database is empty"));
@@ -60,7 +60,7 @@ class BaseValidationsTest {
   void database_shouldReturnInvalid_whenDatabaseNameIsWildcard() {
     PolicyPattern pattern = new PolicyPattern(Option.some("*"), Option.none(), Option.none());
 
-    Validation<ValidationErr, String> result = BaseValidations.database(pattern);
+    Validation<ValidationError, String> result = BaseValidations.database(pattern);
 
     assertTrue(result.isInvalid());
     assertTrue(result.getError().message().contains("non-empty and non-wildcard value is expected"));
@@ -71,7 +71,7 @@ class BaseValidationsTest {
     PolicyPattern pattern =
         new PolicyPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
-    Validation<ValidationErr, String> result = BaseValidations.schema(pattern);
+    Validation<ValidationError, String> result = BaseValidations.schema(pattern);
 
     assertTrue(result.isValid());
     assertEquals("MY_SCHEMA", result.get());
@@ -82,7 +82,7 @@ class BaseValidationsTest {
     PolicyPattern pattern =
         new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
-    Validation<ValidationErr, String> result = BaseValidations.schema(pattern);
+    Validation<ValidationError, String> result = BaseValidations.schema(pattern);
 
     assertTrue(result.isInvalid());
     assertTrue(result.getError().message().contains("schema is empty"));
@@ -94,7 +94,7 @@ class BaseValidationsTest {
         new PolicyPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.some("MY_TABLE"));
 
-    Validation<ValidationErr, String> result = BaseValidations.object(pattern);
+    Validation<ValidationError, String> result = BaseValidations.object(pattern);
 
     assertTrue(result.isValid());
     assertEquals("MY_TABLE", result.get());
@@ -105,7 +105,7 @@ class BaseValidationsTest {
     PolicyPattern pattern =
         new PolicyPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
-    Validation<ValidationErr, String> result = BaseValidations.object(pattern);
+    Validation<ValidationError, String> result = BaseValidations.object(pattern);
 
     assertTrue(result.isInvalid());
     assertTrue(result.getError().message().contains("object is empty"));

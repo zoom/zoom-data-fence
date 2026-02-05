@@ -8,7 +8,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import us.zoom.data.dfence.policies.PolicyWildcards;
 import us.zoom.data.dfence.policies.models.PolicyPattern;
-import us.zoom.data.dfence.policies.pattern.models.ValidationErr;
+import us.zoom.data.dfence.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.sql.ObjectName;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -19,15 +19,15 @@ public class BaseValidations {
     }
 
 
-  public static Validation<ValidationErr, String> database(PolicyPattern pattern) {
+  public static Validation<ValidationError, String> database(PolicyPattern pattern) {
     return db(pattern).validValue();
   }
 
-  public static Validation<ValidationErr, String> schema(PolicyPattern pattern) {
+  public static Validation<ValidationError, String> schema(PolicyPattern pattern) {
     return sch(pattern).validValue();
   }
 
-  public static Validation<ValidationErr, String> object(PolicyPattern pattern) {
+  public static Validation<ValidationError, String> object(PolicyPattern pattern) {
     return obj(pattern).validValue();
   }
 
@@ -44,60 +44,60 @@ public class BaseValidations {
   }
   public record SelectedFieldForValidation(Option<String> fieldValue, String fieldName) {
 
-      public Validation<ValidationErr, Void> anything() {
+      public Validation<ValidationError, Void> anything() {
           return empty().orElse(wildcard()).orElse(validValueVoid());
       }
 
-      public Validation<ValidationErr, Void> validValueVoid() {
+      public Validation<ValidationError, Void> validValueVoid() {
           return validValue().map(v -> (Void) null);
       }
 
 
-    public Validation<ValidationErr, String> validValue() {
+    public Validation<ValidationError, String> validValue() {
       return nonEmpty()
           .flatMap(
               value ->
                   PolicyWildcards.isWildcard(value)
                       ? Validation.invalid(
-                          new ValidationErr.Error(
+                          new ValidationError.InvalidPolicyPattern(
                               String.format(
                                   "%s value is %s, non-empty and non-wildcard value is expected.",
                                   fieldName, value)))
                       : Validation.valid(ObjectName.normalizeObjectName(value)));
     }
 
-    public Validation<ValidationErr, Void> emptyOrWildcard() {
+    public Validation<ValidationError, Void> emptyOrWildcard() {
       return empty().orElse(wildcard());
     }
 
-    public Validation<ValidationErr, Void> empty() {
+    public Validation<ValidationError, Void> empty() {
       return fieldValue
-          .<Validation<ValidationErr, Void>>map(
+          .<Validation<ValidationError, Void>>map(
               x ->
                   Validation.invalid(
-                          new ValidationErr.Error(
+                          new ValidationError.InvalidPolicyPattern(
                           String.format("%s is not empty, empty is expected.", fieldName))))
           .getOrElse(Validation.valid(null));
     }
 
-      public Validation<ValidationErr, Void> wildcard() {
+      public Validation<ValidationError, Void> wildcard() {
           return nonEmpty()
                   .flatMap(
                           value ->
                                   PolicyWildcards.isWildcard(value)
                                           ? Validation.valid(null)
                                           : Validation.invalid(
-                                          new ValidationErr.Error(
+                                          new ValidationError.InvalidPolicyPattern(
                                           String.format(
                                                   "%s value is %s, wildcard is expected.", fieldName, value))));
       }
 
-    public Validation<ValidationErr, String> nonEmpty() {
+    public Validation<ValidationError, String> nonEmpty() {
       return fieldValue
-          .<Validation<ValidationErr, String>>map(x -> Validation.valid(x.trim()))
+          .<Validation<ValidationError, String>>map(x -> Validation.valid(x.trim()))
           .getOrElse(
               Validation.invalid(
-                      new ValidationErr.Error(
+                      new ValidationError.InvalidPolicyPattern(
                       String.format("%s is empty, non-empty value is expected.", fieldName))));
     }
   }

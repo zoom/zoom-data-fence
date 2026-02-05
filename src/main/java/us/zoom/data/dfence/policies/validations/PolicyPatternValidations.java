@@ -8,7 +8,7 @@ import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
 import java.util.ArrayList;
 
-import us.zoom.data.dfence.policies.pattern.models.ValidationErr;
+import us.zoom.data.dfence.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOption;
 import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOptions;
@@ -18,7 +18,7 @@ import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
 public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectType objectType) {
 
-  public Validation<Seq<ValidationErr>, PolicyType.Standard>
+  public Validation<Seq<ValidationError>, PolicyType.Standard>
       validateStandardPattern() {
     return switch (objectType.getQualLevel()) {
       case 0 -> Validation.valid(new PolicyType.Standard.Global());
@@ -33,13 +33,13 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
           .ap(PolicyType.Standard.SchemaObject::new);
       default -> Validation.invalid(
           List.of(
-                  new ValidationErr.Error(
+                  new ValidationError.InvalidPolicyPattern(
                   String.format("Unknown qual level %s for grant object", objectType.getQualLevel()))
           ));
     };
   }
 
-  public Validation<Seq<ValidationErr>, PolicyType.Container>
+  public Validation<Seq<ValidationError>, PolicyType.Container>
       validateContainerPattern(PolicyPatternOptions patternOptions) {
     ArrayList<ContainerPolicyOption> options = new ArrayList<>();
     if (patternOptions.all()) {
@@ -51,26 +51,26 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
 
     if (options.isEmpty()) {
       String message = "Both include-future and include-all cannot be false for container grants";
-      return Validation.invalid((List.of(new ValidationErr.Error(message))));
+      return Validation.invalid((List.of(new ValidationError.InvalidPolicyPattern(message))));
     }
 
     ContainerPolicyOptions containerPolicyOptions = ContainerPolicyOptions.of(options);
 
-      Validation<Seq<ValidationErr>, PolicyType.Container> validContainerGrant =
+      Validation<Seq<ValidationError>, PolicyType.Container> validContainerGrant =
               sch(pattern).wildcard().orElse(obj(pattern).wildcard())
                       .map(v -> (PolicyType.Container) null)
-                      .mapError(err -> List.of((ValidationErr) err));
+                      .mapError(err -> List.of((ValidationError) err));
 
     return switch (objectType.getQualLevel()) {
         case 2 -> {
-            Validation<Seq<ValidationErr>, PolicyType.Container> deprecatedPattern = database(pattern)
+            Validation<Seq<ValidationError>, PolicyType.Container> deprecatedPattern = database(pattern)
                     .flatMap(db -> sch(pattern).empty())
                     .flatMap(sch -> invalidContainerPattern("DB.* is expected for qual level 2 object"))
                     .map(value -> (PolicyType.Container) value)
-                    .mapError(err -> List.of((ValidationErr) err));
+                    .mapError(err -> List.of((ValidationError) err));
 
 
-            Validation<Seq<ValidationErr>, PolicyType.Container> validPattern = database(pattern)
+            Validation<Seq<ValidationError>, PolicyType.Container> validPattern = database(pattern)
                 .combine(sch(pattern).wildcard())
                 .ap(
                         (databaseName, unusedSchema) ->
@@ -82,15 +82,15 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
 
       case 3 -> {
 
-          Validation<Seq<ValidationErr>, PolicyType.Container> deprecatedPattern = database(pattern)
+          Validation<Seq<ValidationError>, PolicyType.Container> deprecatedPattern = database(pattern)
                   .flatMap(db -> sch(pattern).empty().orElse(sch(pattern).validValueVoid()))
                   .flatMap(sch -> obj(pattern).empty().orElse(obj(pattern).validValueVoid()))
                   .flatMap(obj -> invalidContainerPattern("DB.SCH.* or DB.*.OBJ is expected for qual level 3 object"))
                   .map(value -> (PolicyType.Container) value)
-                  .mapError(err -> List.of((ValidationErr) err));
+                  .mapError(err -> List.of((ValidationError) err));
 
 
-        Validation<Seq<ValidationErr>, PolicyType.Container>
+        Validation<Seq<ValidationError>, PolicyType.Container>
             objectLevelAllSchemasPattern =
                 database(pattern)
                         .combine(sch(pattern).emptyOrWildcard())
@@ -101,7 +101,7 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
                                 new PolicyType.Container.SchemaObjectAllSchemas(
                                     databaseName, containerPolicyOptions));
 
-        Validation<Seq<ValidationErr>, PolicyType.Container> schemaLevelPattern =
+        Validation<Seq<ValidationError>, PolicyType.Container> schemaLevelPattern =
             database(pattern)
                 .combine(schema(pattern))
                 .combine(obj(pattern).emptyOrWildcard())
@@ -116,15 +116,15 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
       }
       default -> Validation.invalid(
           List.of(
-                  new ValidationErr.Error(
+                  new ValidationError.InvalidPolicyPattern(
                   String.format(
                       "Unknown qual level %s for container grant object",
                       objectType.getQualLevel()))));
     };
   }
 
-    private static Validation<ValidationErr, PolicyType.Container> invalidContainerPattern(
+    private static Validation<ValidationError, PolicyType.Container> invalidContainerPattern(
             String message) {
-        return Validation.invalid(new ValidationErr.InvalidContainerPolicyPattern(message));
+        return Validation.invalid(new ValidationError.InvalidContainerPolicyPattern(message));
     }
 }

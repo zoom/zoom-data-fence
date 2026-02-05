@@ -14,7 +14,7 @@ import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 import us.zoom.data.dfence.policies.pattern.factories.PolicyTypeFactory;
 import us.zoom.data.dfence.policies.pattern.models.PolicyType;
-import us.zoom.data.dfence.policies.pattern.models.ValidationErr;
+import us.zoom.data.dfence.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.policies.models.PolicyGrantPrivilege;
 import us.zoom.data.dfence.policies.models.PolicyGrant;
 import us.zoom.data.dfence.policies.models.PolicyPattern;
@@ -84,11 +84,11 @@ public final class PolicyGrantFactory {
 
   private static Try<Option<PolicyType>> handleValidationErrors(
           PlaybookPrivilegeGrant grant,
-      Seq<ValidationErr> validationErrors) {
-      Tuple2<? extends Seq<ValidationErr>, ? extends Seq<ValidationErr>> byDeprecation =
-              validationErrors.partition(err -> err instanceof ValidationErr.InvalidContainerPolicyPattern);
-      Seq<ValidationErr> deprecationErrs = (Seq<ValidationErr>) byDeprecation._1;
-      Seq<ValidationErr> rbacErrs = (Seq<ValidationErr>) byDeprecation._2;
+      Seq<ValidationError> validationErrors) {
+      Tuple2<? extends Seq<ValidationError>, ? extends Seq<ValidationError>> byDeprecation =
+              validationErrors.partition(err -> err instanceof ValidationError.InvalidContainerPolicyPattern);
+      Seq<ValidationError> deprecationErrs = (Seq<ValidationError>) byDeprecation._1;
+      Seq<ValidationError> rbacErrs = (Seq<ValidationError>) byDeprecation._2;
 
       if (!deprecationErrs.isEmpty()) {
           log.warn(
@@ -96,7 +96,7 @@ public final class PolicyGrantFactory {
                           + "Migrate this grant to the required pattern (see validation message). "
                           + "Grant: {} | Validation: {}",
                   grant,
-                  deprecationErrs.map(ValidationErr::message).mkString("; "));
+                  deprecationErrs.map(ValidationError::message).mkString("; "));
       }
       if (!rbacErrs.isEmpty()) {
           return Try.failure(
@@ -104,7 +104,7 @@ public final class PolicyGrantFactory {
                           String.format(
                                   "Policy pattern validation failed for grant: %s, errors: %s",
                                   grant,
-                                  rbacErrs.map(ValidationErr::message).mkString("[", ", ", "]"))));
+                                  rbacErrs.map(ValidationError::message).mkString("[", ", ", "]"))));
       }
       return Try.success(Option.none());
   }
