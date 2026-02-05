@@ -22,8 +22,8 @@ public final class ErrorEnrichmentValidations {
    * Returns invalid container pattern validation for qual level 2 when database is present and
    * schema/object are empty (message: DB.* is expected for qual level 2 object-type).
    */
-  public static Validation<Seq<ValidationError>, PolicyType.Container> invalidContainerPatternQual2(
-      PolicyPattern pattern) {
+  public static Validation<Seq<ValidationError>, PolicyType.Container>
+      reportInvalidContainerPatternQual2(PolicyPattern pattern) {
     return fold(
         database(pattern)
             .flatMap(db -> sch(pattern).empty().orElse(obj(pattern).empty()))
@@ -37,8 +37,8 @@ public final class ErrorEnrichmentValidations {
    * schema/object are not wildcard (message: DB.SCH.* or DB.*.OBJ or DB.*.* is expected for qual
    * level 3 object-type).
    */
-  public static Validation<Seq<ValidationError>, PolicyType.Container> invalidContainerPatternQual3(
-      PolicyPattern pattern) {
+  public static Validation<Seq<ValidationError>, PolicyType.Container>
+      reportInvalidContainerPatternQual3(PolicyPattern pattern) {
     return fold(
         database(pattern)
             .flatMap(db -> sch(pattern).notWildcard())

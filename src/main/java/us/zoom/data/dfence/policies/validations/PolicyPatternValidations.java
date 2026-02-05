@@ -52,7 +52,7 @@ public record PolicyPatternValidations(
 
         yield preconditionValidation
             .flatMap(i -> accountObjectContainerValidation)
-            .orElse(ErrorEnrichmentValidations.invalidContainerPatternQual2(pattern));
+            .orElse(ErrorEnrichmentValidations.reportInvalidContainerPatternQual2(pattern));
       }
 
       case 3 -> {
@@ -70,7 +70,7 @@ public record PolicyPatternValidations(
 
         yield preconditionValidation
             .flatMap(i -> allSchemasContainerValidation.orElse(schemaContainerValidation))
-            .orElse(ErrorEnrichmentValidations.invalidContainerPatternQual3(pattern));
+            .orElse(ErrorEnrichmentValidations.reportInvalidContainerPatternQual3(pattern));
       }
       default -> invalidPolicyPattern(
           String.format(
