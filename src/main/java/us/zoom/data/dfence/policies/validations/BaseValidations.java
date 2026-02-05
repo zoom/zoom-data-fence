@@ -43,6 +43,14 @@ public class BaseValidations {
   }
   public record SelectedFieldForValidation(Option<String> fieldValue, String fieldName) {
 
+    public Validation<ValidationError, Void> notWildcard() {
+      return emptyOrValidValue();
+    }
+
+    public Validation<ValidationError, Void> emptyOrValidValue() {
+      return empty().orElse(validValueVoid());
+    }
+
     public Validation<ValidationError, Void> validValueVoid() {
       return validValue().map(v -> (Void) null);
     }

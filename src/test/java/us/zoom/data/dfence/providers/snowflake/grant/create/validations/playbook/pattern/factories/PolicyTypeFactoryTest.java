@@ -97,7 +97,7 @@ class PolicyTypeFactoryTest {
     assertTrue(result.isInvalid());
     assertTrue(
         result.getError().exists(err -> err instanceof ValidationError.InvalidContainerPolicyPattern
-            && err.message().contains("DB.SCH.* or DB.*.OBJ is expected for qual level 3 object")));
+            && err.message().contains("DB.SCH.* or DB.*.OBJ or DB.*.* is expected for qual level 3 object")));
   }
 
   @Test
@@ -113,7 +113,7 @@ class PolicyTypeFactoryTest {
     assertTrue(result.isInvalid());
     assertTrue(
         result.getError().exists(err -> err instanceof ValidationError.InvalidContainerPolicyPattern
-            && err.message().contains("DB.SCH.* or DB.*.OBJ is expected for qual level 3 object")));
+            && err.message().contains("DB.SCH.* or DB.*.OBJ or DB.*.* is expected for qual level 3 object")));
   }
 
   @Test
@@ -129,6 +129,6 @@ class PolicyTypeFactoryTest {
     assertTrue(result.isInvalid());
     assertTrue(
         result.getError().exists(err -> err instanceof ValidationError.InvalidContainerPolicyPattern
-            && err.message().contains("DB.SCH.* or DB.*.OBJ is expected for qual level 3 object")));
+            && err.message().contains("DB.SCH.* or DB.*.OBJ or DB.*.* is expected for qual level 3 object")));
   }
 }

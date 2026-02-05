@@ -27,11 +27,8 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
           .combine(schema(pattern))
           .combine(object(pattern))
           .ap(PolicyType.Standard.SchemaObject::new);
-      default -> Validation.invalid(
-          List.of(
-              new ValidationError.InvalidPolicyPattern(
-                  String.format(
-                      "Unknown qual level %s for grant object", objectType.getQualLevel()))));
+      default -> invalidPolicyPattern(
+          String.format("Unknown qual level %s for grant object", objectType.getQualLevel()));
     };
   }
 
@@ -52,7 +49,7 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
 
     ContainerPolicyOptions containerPolicyOptions = ContainerPolicyOptions.of(options);
 
-    Validation<Seq<ValidationError>, PolicyType.Container> hasSchemaOrObjectWildcard =
+    Validation<Seq<ValidationError>, PolicyType.Container> hasSchemaOrObjectWildcardPreCondition =
         sch(pattern)
             .wildcard()
             .orElse(obj(pattern).wildcard())
@@ -61,10 +58,11 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
 
     return switch (objectType.getQualLevel()) {
       case 2 -> {
-        Validation<Seq<ValidationError>, PolicyType.Container> deprecatedPattern =
+        Validation<Seq<ValidationError>, PolicyType.Container> invalidContainerGrants =
             database(pattern)
                 .flatMap(db -> sch(pattern).empty().orElse(obj(pattern).empty()))
-                .flatMap(sch -> invalidContainerPattern("DB.* is expected for qual level 2 object"))
+                .flatMap(
+                    sch -> invalidContainerPattern("DB.* is expected for qual level 2 object-type"))
                 .map(value -> (PolicyType.Container) value)
                 .mapError(err -> List.of((ValidationError) err));
 
@@ -76,18 +74,20 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
                         new PolicyType.Container.AccountObject(
                             databaseName, containerPolicyOptions, SnowflakeObjectType.DATABASE));
 
-        yield hasSchemaOrObjectWildcard.flatMap(i -> validPattern).orElse(deprecatedPattern);
+        yield hasSchemaOrObjectWildcardPreCondition
+            .flatMap(i -> validPattern)
+            .orElse(invalidContainerGrants);
       }
 
       case 3 -> {
-        Validation<Seq<ValidationError>, PolicyType.Container> deprecatedPattern =
+        Validation<Seq<ValidationError>, PolicyType.Container> invalidContainerGrants =
             database(pattern)
-                .flatMap(db -> sch(pattern).empty().orElse(sch(pattern).validValueVoid()))
-                .flatMap(sch -> obj(pattern).empty().orElse(obj(pattern).validValueVoid()))
+                .flatMap(db -> sch(pattern).notWildcard())
+                .flatMap(sch -> obj(pattern).notWildcard())
                 .flatMap(
                     obj ->
                         invalidContainerPattern(
-                            "DB.SCH.* or DB.*.OBJ is expected for qual level 3 object"))
+                            "DB.SCH.* or DB.*.OBJ or DB.*.* is expected for qual level 3 object-type"))
                 .map(value -> (PolicyType.Container) value)
                 .mapError(err -> List.of((ValidationError) err));
 
@@ -111,21 +111,21 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
                             new PolicyType.Container.Schema(
                                 databaseName, schemaName, containerPolicyOptions));
 
-        yield hasSchemaOrObjectWildcard
+        yield hasSchemaOrObjectWildcardPreCondition
             .flatMap(i -> objectLevelAllSchemasPattern.orElse(schemaLevelPattern))
-            .orElse(deprecatedPattern);
+            .orElse(invalidContainerGrants);
       }
-      default -> Validation.invalid(
-          List.of(
-              new ValidationError.InvalidPolicyPattern(
-                  String.format(
-                      "Unknown qual level %s for container grant object",
-                      objectType.getQualLevel()))));
+      default -> invalidPolicyPattern(
+          String.format(
+              "Unknown qual level %s for container grant object", objectType.getQualLevel()));
     };
   }
 
-  private static Validation<ValidationError, PolicyType.Container> invalidContainerPattern(
-      String message) {
+  private static <I> Validation<ValidationError, I> invalidContainerPattern(String message) {
     return Validation.invalid(new ValidationError.InvalidContainerPolicyPattern(message));
+  }
+
+  private static <I> Validation<Seq<ValidationError>, I> invalidPolicyPattern(String message) {
+    return Validation.invalid(List.of(new ValidationError.InvalidPolicyPattern(message)));
   }
 }
