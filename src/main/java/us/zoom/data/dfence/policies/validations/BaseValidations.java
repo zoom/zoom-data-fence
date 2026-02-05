@@ -9,6 +9,7 @@ import us.zoom.data.dfence.policies.models.PolicyPattern;
 import us.zoom.data.dfence.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.sql.ObjectName;
 
+/** Shared validation primitives for policy pattern fields (database, schema, object). */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BaseValidations {
 
