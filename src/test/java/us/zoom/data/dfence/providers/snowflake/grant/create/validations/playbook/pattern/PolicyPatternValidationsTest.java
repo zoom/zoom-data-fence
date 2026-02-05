@@ -20,7 +20,8 @@ class PolicyPatternValidationsTest {
     PolicyPattern pattern = new PolicyPattern(Option.none(), Option.none(), Option.none());
 
     PolicyPatternValidations validations =
-        new PolicyPatternValidations(pattern, SnowflakeObjectType.ACCOUNT);
+        new PolicyPatternValidations(
+            pattern, new PolicyPatternOptions(false, false), SnowflakeObjectType.ACCOUNT);
     Validation<Seq<ValidationError>, PolicyType.Standard> result =
         validations.validateStandardPattern();
 
@@ -34,7 +35,8 @@ class PolicyPatternValidationsTest {
         new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
     PolicyPatternValidations validations =
-        new PolicyPatternValidations(pattern, SnowflakeObjectType.DATABASE);
+        new PolicyPatternValidations(
+            pattern, new PolicyPatternOptions(false, false), SnowflakeObjectType.DATABASE);
     Validation<Seq<ValidationError>, PolicyType.Standard> result =
         validations.validateStandardPattern();
 
@@ -51,7 +53,8 @@ class PolicyPatternValidationsTest {
         new PolicyPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
     PolicyPatternValidations validations =
-        new PolicyPatternValidations(pattern, SnowflakeObjectType.SCHEMA);
+        new PolicyPatternValidations(
+            pattern, new PolicyPatternOptions(false, false), SnowflakeObjectType.SCHEMA);
     Validation<Seq<ValidationError>, PolicyType.Standard> result =
         validations.validateStandardPattern();
 
@@ -70,7 +73,8 @@ class PolicyPatternValidationsTest {
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.some("MY_TABLE"));
 
     PolicyPatternValidations validations =
-        new PolicyPatternValidations(pattern, SnowflakeObjectType.TABLE);
+        new PolicyPatternValidations(
+            pattern, new PolicyPatternOptions(false, false), SnowflakeObjectType.TABLE);
     Validation<Seq<ValidationError>, PolicyType.Standard> result =
         validations.validateStandardPattern();
 
@@ -90,9 +94,10 @@ class PolicyPatternValidationsTest {
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.some("MY_TABLE"));
 
     PolicyPatternValidations validations =
-        new PolicyPatternValidations(pattern, SnowflakeObjectType.TABLE);
+        new PolicyPatternValidations(
+            pattern, new PolicyPatternOptions(false, false), SnowflakeObjectType.TABLE);
     Validation<Seq<ValidationError>, PolicyType.Container> result =
-        validations.validateContainerPattern(new PolicyPatternOptions(false, false));
+        validations.validateContainerPattern();
     assertTrue(result.isInvalid());
   }
 }

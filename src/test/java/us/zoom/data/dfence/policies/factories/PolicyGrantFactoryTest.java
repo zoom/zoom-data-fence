@@ -3,6 +3,7 @@ package us.zoom.data.dfence.policies.factories;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
+import io.vavr.collection.List;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
@@ -46,7 +47,8 @@ class PolicyGrantFactoryTest {
     assertTrue(container instanceof PolicyType.Container.Schema);
     PolicyType.Container.Schema schema = (PolicyType.Container.Schema) container;
     assertEquals(
-        ContainerPolicyOptions.of(ContainerPolicyOption.FUTURE), schema.containerPolicyOptions());
+        new ContainerPolicyOptions(List.of(ContainerPolicyOption.FUTURE)),
+        schema.containerPolicyOptions());
   }
 
   @Test
@@ -62,7 +64,8 @@ class PolicyGrantFactoryTest {
     assertTrue(container instanceof PolicyType.Container.Schema);
     PolicyType.Container.Schema schema = (PolicyType.Container.Schema) container;
     assertEquals(
-        ContainerPolicyOptions.of(ContainerPolicyOption.ALL), schema.containerPolicyOptions());
+        new ContainerPolicyOptions(List.of(ContainerPolicyOption.ALL)),
+        schema.containerPolicyOptions());
   }
 
   @Test
@@ -80,7 +83,8 @@ class PolicyGrantFactoryTest {
         (PolicyType.Container.SchemaObjectAllSchemas) container;
     assertEquals("MY_DB", dbLevel.databaseName());
     assertEquals(
-        ContainerPolicyOptions.of(ContainerPolicyOption.ALL, ContainerPolicyOption.FUTURE),
+        new ContainerPolicyOptions(
+            List.of(ContainerPolicyOption.ALL, ContainerPolicyOption.FUTURE)),
         dbLevel.containerPolicyOptions());
   }
 

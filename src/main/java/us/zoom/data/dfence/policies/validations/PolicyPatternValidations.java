@@ -1,12 +1,11 @@
 package us.zoom.data.dfence.policies.validations;
 
 import static us.zoom.data.dfence.policies.validations.BaseValidations.*;
+import static us.zoom.data.dfence.policies.validations.Extensions.*;
 
-import io.vavr.Function3;
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
 import io.vavr.control.Validation;
-import java.util.ArrayList;
 import us.zoom.data.dfence.policies.models.PolicyPattern;
 import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOption;
@@ -15,7 +14,8 @@ import us.zoom.data.dfence.policies.pattern.models.PolicyType;
 import us.zoom.data.dfence.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 
-public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectType objectType) {
+public record PolicyPatternValidations(
+    PolicyPattern pattern, PolicyPatternOptions patternOptions, SnowflakeObjectType objectType) {
 
   public Validation<Seq<ValidationError>, PolicyType.Standard> validateStandardPattern() {
     return switch (objectType.getQualLevel()) {
@@ -32,93 +32,76 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
     };
   }
 
-  public Validation<Seq<ValidationError>, PolicyType.Container> validateContainerPattern(
-      PolicyPatternOptions patternOptions) {
-    ArrayList<ContainerPolicyOption> options = new ArrayList<>();
-    if (patternOptions.all()) {
-      options.add(ContainerPolicyOption.ALL);
-    }
-    if (patternOptions.future()) {
-      options.add(ContainerPolicyOption.FUTURE);
+  public Validation<Seq<ValidationError>, PolicyType.Container> validateContainerPattern() {
+
+    if (getContainerPolicyOptions().options().isEmpty()) {
+      return invalidPolicyPattern(
+          "Both include-future and include-all cannot be false for container grants");
     }
 
-    if (options.isEmpty()) {
-      String message = "Both include-future and include-all cannot be false for container grants";
-      return Validation.invalid((List.of(new ValidationError.InvalidPolicyPattern(message))));
-    }
-
-    ContainerPolicyOptions containerPolicyOptions = ContainerPolicyOptions.of(options);
-
-    Validation<Seq<ValidationError>, PolicyType.Container> hasSchemaOrObjectWildcardPreCondition =
-        sch(pattern)
-            .wildcard()
-            .orElse(obj(pattern).wildcard())
-            .map(v -> (PolicyType.Container) null)
-            .mapError(err -> List.of((ValidationError) err));
+    // At least one wildcard is expected in schema or object position for container grants
+    Validation<Seq<ValidationError>, PolicyType.Container> preconditionValidation =
+        fold(sch(pattern).wildcard().orElse(obj(pattern).wildcard()), PolicyType.Container.class);
 
     return switch (objectType.getQualLevel()) {
       case 2 -> {
-        Validation<Seq<ValidationError>, PolicyType.Container> errorReportingValidation =
-            database(pattern)
-                .flatMap(db -> sch(pattern).empty().orElse(obj(pattern).empty()))
-                .flatMap(
-                    sch -> invalidContainerPattern("DB.* is expected for qual level 2 object-type"))
-                .map(value -> (PolicyType.Container) value)
-                .mapError(err -> List.of((ValidationError) err));
-
-        Validation<Seq<ValidationError>, PolicyType.Container> validPattern =
+        Validation<Seq<ValidationError>, PolicyType.Container> accountObjectContainerValidation =
             database(pattern)
                 .combine(sch(pattern).wildcard().orElse(obj(pattern).wildcard()))
-                .ap(
-                    (databaseName, unusedSchema) ->
-                        new PolicyType.Container.AccountObject(
-                            databaseName, containerPolicyOptions, SnowflakeObjectType.DATABASE));
+                .ap(this::makeAccountObject);
 
-        yield hasSchemaOrObjectWildcardPreCondition
-            .flatMap(i -> validPattern)
-            .orElse(errorReportingValidation);
+        yield preconditionValidation
+            .flatMap(i -> accountObjectContainerValidation)
+            .orElse(ErrorEnrichmentValidations.invalidContainerPatternQual2(pattern));
       }
 
       case 3 -> {
-        Validation<Seq<ValidationError>, PolicyType.Container> errorReportingValidation =
-            database(pattern)
-                .flatMap(db -> sch(pattern).notWildcard())
-                .flatMap(sch -> obj(pattern).notWildcard())
-                .flatMap(
-                    obj ->
-                        invalidContainerPattern(
-                            "DB.SCH.* or DB.*.OBJ or DB.*.* is expected for qual level 3 object-type"))
-                .map(value -> (PolicyType.Container) value)
-                .mapError(err -> List.of((ValidationError) err));
-
-        Validation<Seq<ValidationError>, PolicyType.Container> objectLevelAllSchemasPattern =
+        Validation<Seq<ValidationError>, PolicyType.Container> allSchemasContainerValidation =
             database(pattern)
                 .combine(sch(pattern).emptyOrWildcard())
                 .combine(obj(pattern).emptyOrWildcard())
-                .ap(
-                    (Function3<String, Void, Void, PolicyType.Container>)
-                        (databaseName, unusedSchema, unusedObject) ->
-                            new PolicyType.Container.SchemaObjectAllSchemas(
-                                databaseName, containerPolicyOptions));
+                .ap(this::makeSchemaObjectAllSchemas);
 
-        Validation<Seq<ValidationError>, PolicyType.Container> schemaLevelPattern =
+        Validation<Seq<ValidationError>, PolicyType.Container> schemaContainerValidation =
             database(pattern)
                 .combine(schema(pattern))
                 .combine(obj(pattern).emptyOrWildcard())
-                .ap(
-                    (Function3<String, String, Void, PolicyType.Container>)
-                        (databaseName, schemaName, unusedObject) ->
-                            new PolicyType.Container.Schema(
-                                databaseName, schemaName, containerPolicyOptions));
+                .ap(this::makeSchema);
 
-        yield hasSchemaOrObjectWildcardPreCondition
-            .flatMap(i -> objectLevelAllSchemasPattern.orElse(schemaLevelPattern))
-            .orElse(errorReportingValidation);
+        yield preconditionValidation
+            .flatMap(i -> allSchemasContainerValidation.orElse(schemaContainerValidation))
+            .orElse(ErrorEnrichmentValidations.invalidContainerPatternQual3(pattern));
       }
       default -> invalidPolicyPattern(
           String.format(
               "Unknown qual level %s for container grant object", objectType.getQualLevel()));
     };
+  }
+
+  private PolicyType.Container makeAccountObject(String databaseName, Void unusedSchema) {
+    return new PolicyType.Container.AccountObject(
+        databaseName, getContainerPolicyOptions(), SnowflakeObjectType.DATABASE);
+  }
+
+  private PolicyType.Container makeSchemaObjectAllSchemas(
+      String databaseName, Void unusedSchema, Void unusedObject) {
+    return new PolicyType.Container.SchemaObjectAllSchemas(
+        databaseName, getContainerPolicyOptions());
+  }
+
+  private PolicyType.Container makeSchema(String databaseName, String schema, Void unusedObject) {
+    return new PolicyType.Container.Schema(databaseName, schema, getContainerPolicyOptions());
+  }
+
+  private ContainerPolicyOptions getContainerPolicyOptions() {
+    List<ContainerPolicyOption> options = List.empty();
+    if (patternOptions.all()) {
+      options = options.append(ContainerPolicyOption.ALL);
+    }
+    if (patternOptions.future()) {
+      options = options.append(ContainerPolicyOption.FUTURE);
+    }
+    return new ContainerPolicyOptions(options);
   }
 
   private static <I> Validation<Seq<ValidationError>, I> invalidPolicyPattern(String message) {

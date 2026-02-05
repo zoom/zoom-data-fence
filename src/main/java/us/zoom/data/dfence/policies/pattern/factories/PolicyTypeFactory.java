@@ -16,12 +16,13 @@ public final class PolicyTypeFactory {
 
   public static Validation<Seq<ValidationError>, PolicyType> createFrom(
       PolicyPattern pattern, SnowflakeObjectType objectType, PolicyPatternOptions options) {
-    PolicyPatternValidations validators = new PolicyPatternValidations(pattern, objectType);
+    PolicyPatternValidations validators =
+        new PolicyPatternValidations(pattern, options, objectType);
 
     Validation<Seq<ValidationError>, PolicyType> validateStandardPattern =
         liftToPolicyType(validators.validateStandardPattern());
     Validation<Seq<ValidationError>, PolicyType> validateContainerPattern =
-        liftToPolicyType(validators.validateContainerPattern(options));
+        liftToPolicyType(validators.validateContainerPattern());
 
     return validateStandardPattern.orElse(validateContainerPattern);
   }

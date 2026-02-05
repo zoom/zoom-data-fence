@@ -1,7 +1,5 @@
 package us.zoom.data.dfence.policies.validations;
 
-import io.vavr.collection.List;
-import io.vavr.collection.Seq;
 import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import lombok.AccessLevel;
@@ -13,10 +11,6 @@ import us.zoom.data.dfence.sql.ObjectName;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BaseValidations {
-
-  public static <E, A> Validation<Seq<E>, A> liftError(Validation<E, A> validation) {
-    return validation.mapError(List::of);
-  }
 
   public static Validation<ValidationError, String> database(PolicyPattern pattern) {
     return db(pattern).validValue();
@@ -98,10 +92,6 @@ public class BaseValidations {
               invalidPolicyPattern(
                   String.format("%s is empty, non-empty value is expected.", fieldName)));
     }
-  }
-
-  public static <I> Validation<ValidationError, I> invalidContainerPattern(String message) {
-    return Validation.invalid(new ValidationError.InvalidContainerPolicyPattern(message));
   }
 
   public static <I> Validation<ValidationError, I> invalidPolicyPattern(String message) {
