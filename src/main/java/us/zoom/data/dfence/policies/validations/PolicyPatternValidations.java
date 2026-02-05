@@ -121,10 +121,6 @@ public record PolicyPatternValidations(PolicyPattern pattern, SnowflakeObjectTyp
     };
   }
 
-  private static <I> Validation<ValidationError, I> invalidContainerPattern(String message) {
-    return Validation.invalid(new ValidationError.InvalidContainerPolicyPattern(message));
-  }
-
   private static <I> Validation<Seq<ValidationError>, I> invalidPolicyPattern(String message) {
     return Validation.invalid(List.of(new ValidationError.InvalidPolicyPattern(message)));
   }
