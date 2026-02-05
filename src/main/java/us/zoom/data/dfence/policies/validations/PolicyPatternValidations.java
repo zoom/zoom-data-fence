@@ -48,7 +48,7 @@ public record PolicyPatternValidations(
         Validation<Seq<ValidationError>, PolicyType.Container> accountObjectContainerValidation =
             database(pattern)
                 .combine(sch(pattern).wildcard().orElse(obj(pattern).wildcard()))
-                .ap(this::makeAccountObject);
+                .ap(this::makeAccountObjectContainer);
 
         yield preconditionValidation
             .flatMap(i -> accountObjectContainerValidation)
@@ -60,13 +60,13 @@ public record PolicyPatternValidations(
             database(pattern)
                 .combine(sch(pattern).emptyOrWildcard())
                 .combine(obj(pattern).emptyOrWildcard())
-                .ap(this::makeSchemaObjectAllSchemas);
+                .ap(this::makeAllSchemasContainer);
 
         Validation<Seq<ValidationError>, PolicyType.Container> schemaContainerValidation =
             database(pattern)
                 .combine(schema(pattern))
                 .combine(obj(pattern).emptyOrWildcard())
-                .ap(this::makeSchema);
+                .ap(this::makeSchemaContainer);
 
         yield preconditionValidation
             .flatMap(i -> allSchemasContainerValidation.orElse(schemaContainerValidation))
@@ -78,18 +78,19 @@ public record PolicyPatternValidations(
     };
   }
 
-  private PolicyType.Container makeAccountObject(String databaseName, Void unusedSchema) {
+  private PolicyType.Container makeAccountObjectContainer(String databaseName, Void unusedSchema) {
     return new PolicyType.Container.AccountObject(
         databaseName, getContainerPolicyOptions(), SnowflakeObjectType.DATABASE);
   }
 
-  private PolicyType.Container makeSchemaObjectAllSchemas(
+  private PolicyType.Container makeAllSchemasContainer(
       String databaseName, Void unusedSchema, Void unusedObject) {
     return new PolicyType.Container.SchemaObjectAllSchemas(
         databaseName, getContainerPolicyOptions());
   }
 
-  private PolicyType.Container makeSchema(String databaseName, String schema, Void unusedObject) {
+  private PolicyType.Container makeSchemaContainer(
+      String databaseName, String schema, Void unusedObject) {
     return new PolicyType.Container.Schema(databaseName, schema, getContainerPolicyOptions());
   }
 
