@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Extensions {
 
-  /** Converts Validation&lt;E, A&gt; to Validation&lt;Seq&lt;E&gt;, A&gt; by wrapping the error in a list. */
+  /**
+   * Converts {@code Validation<E, A>} to {@code Validation<Seq<E>, A>} by wrapping the error in a
+   * list.
+   */
   public static <E, A> Validation<Seq<E>, A> liftError(Validation<E, A> validation) {
     return validation.fold(err -> Validation.invalid(List.of(err)), Validation::valid);
   }
