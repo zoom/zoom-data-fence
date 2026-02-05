@@ -16,7 +16,7 @@ import us.zoom.data.dfence.policies.pattern.models.ValidationError;
  * preconditions are met. Used as the fallback branch in container pattern validation.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class ErrorEnrichmentValidations {
+public final class ErrorReportingValidations {
 
   /**
    * Returns invalid container pattern validation for qual level 2 when database is present and
