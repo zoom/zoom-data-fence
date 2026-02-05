@@ -19,17 +19,9 @@ public final class PolicyTypeFactory {
     PolicyPatternValidations validators =
         new PolicyPatternValidations(pattern, options, objectType);
 
-    Validation<Seq<ValidationError>, PolicyType> validateStandardPattern =
-        liftToPolicyType(validators.validateStandardPattern());
-    Validation<Seq<ValidationError>, PolicyType> validateContainerPattern =
-        liftToPolicyType(validators.validateContainerPattern());
-
-    return validateStandardPattern.orElse(validateContainerPattern);
-  }
-
-  private static <E extends PolicyType>
-      Validation<Seq<ValidationError>, PolicyType> liftToPolicyType(
-          Validation<Seq<ValidationError>, E> validation) {
-    return validation.map(v -> (PolicyType) v);
+    return validators
+        .validateStandardPattern()
+        .map(p -> (PolicyType) p)
+        .orElse(validators.validateContainerPattern());
   }
 }

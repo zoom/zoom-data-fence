@@ -24,7 +24,7 @@ public final class ErrorEnrichmentValidations {
    */
   public static Validation<Seq<ValidationError>, PolicyType.Container>
       reportInvalidContainerPatternQual2(PolicyPattern pattern) {
-    return fold(
+    return foldCast(
         database(pattern)
             .flatMap(db -> sch(pattern).empty().orElse(obj(pattern).empty()))
             .flatMap(
@@ -39,7 +39,7 @@ public final class ErrorEnrichmentValidations {
    */
   public static Validation<Seq<ValidationError>, PolicyType.Container>
       reportInvalidContainerPatternQual3(PolicyPattern pattern) {
-    return fold(
+    return foldCast(
         database(pattern)
             .flatMap(db -> sch(pattern).notWildcard())
             .flatMap(sch -> obj(pattern).notWildcard())
