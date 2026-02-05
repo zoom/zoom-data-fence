@@ -14,10 +14,9 @@ import us.zoom.data.dfence.sql.ObjectName;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BaseValidations {
 
-    public static <E, A> Validation<Seq<E>, A> liftError(Validation<E, A> validation) {
-        return validation.mapError(List::of);
-    }
-
+  public static <E, A> Validation<Seq<E>, A> liftError(Validation<E, A> validation) {
+    return validation.mapError(List::of);
+  }
 
   public static Validation<ValidationError, String> database(PolicyPattern pattern) {
     return db(pattern).validValue();
@@ -44,14 +43,9 @@ public class BaseValidations {
   }
   public record SelectedFieldForValidation(Option<String> fieldValue, String fieldName) {
 
-      public Validation<ValidationError, Void> anything() {
-          return empty().orElse(wildcard()).orElse(validValueVoid());
-      }
-
-      public Validation<ValidationError, Void> validValueVoid() {
-          return validValue().map(v -> (Void) null);
-      }
-
+    public Validation<ValidationError, Void> validValueVoid() {
+      return validValue().map(v -> (Void) null);
+    }
 
     public Validation<ValidationError, String> validValue() {
       return nonEmpty()
@@ -75,29 +69,29 @@ public class BaseValidations {
           .<Validation<ValidationError, Void>>map(
               x ->
                   Validation.invalid(
-                          new ValidationError.InvalidPolicyPattern(
+                      new ValidationError.InvalidPolicyPattern(
                           String.format("%s is not empty, empty is expected.", fieldName))))
           .getOrElse(Validation.valid(null));
     }
 
-      public Validation<ValidationError, Void> wildcard() {
-          return nonEmpty()
-                  .flatMap(
-                          value ->
-                                  PolicyWildcards.isWildcard(value)
-                                          ? Validation.valid(null)
-                                          : Validation.invalid(
-                                          new ValidationError.InvalidPolicyPattern(
-                                          String.format(
-                                                  "%s value is %s, wildcard is expected.", fieldName, value))));
-      }
+    public Validation<ValidationError, Void> wildcard() {
+      return nonEmpty()
+          .flatMap(
+              value ->
+                  PolicyWildcards.isWildcard(value)
+                      ? Validation.valid(null)
+                      : Validation.invalid(
+                          new ValidationError.InvalidPolicyPattern(
+                              String.format(
+                                  "%s value is %s, wildcard is expected.", fieldName, value))));
+    }
 
     public Validation<ValidationError, String> nonEmpty() {
       return fieldValue
           .<Validation<ValidationError, String>>map(x -> Validation.valid(x.trim()))
           .getOrElse(
               Validation.invalid(
-                      new ValidationError.InvalidPolicyPattern(
+                  new ValidationError.InvalidPolicyPattern(
                       String.format("%s is empty, non-empty value is expected.", fieldName))));
     }
   }

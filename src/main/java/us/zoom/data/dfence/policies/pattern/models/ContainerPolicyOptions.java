@@ -12,10 +12,10 @@ public record ContainerPolicyOptions(List<ContainerPolicyOption> options) {
   }
 
   public boolean all() {
-      return options.contains(ContainerPolicyOption.ALL);
+    return options.contains(ContainerPolicyOption.ALL);
   }
 
   public boolean future() {
-      return options.contains(ContainerPolicyOption.FUTURE);
+    return options.contains(ContainerPolicyOption.FUTURE);
   }
 }

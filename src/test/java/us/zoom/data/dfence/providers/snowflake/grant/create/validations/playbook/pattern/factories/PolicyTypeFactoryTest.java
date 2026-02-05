@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PolicyTypeFactoryTest {
 
   @Test
-  @DisplayName("Standard Target - Account Level (qualLevel 0)")
+  @DisplayName("Standard pattern - Account level (qualLevel 0)")
   void from_StandardAccountLevel() {
     PolicyPattern pattern = new PolicyPattern(Option.none(), Option.none(), Option.none());
 
@@ -30,7 +30,7 @@ class PolicyTypeFactoryTest {
   }
 
   @Test
-  @DisplayName("Standard Target - Database Level (qualLevel 1)")
+  @DisplayName("Standard pattern - Database level (qualLevel 1)")
   void from_StandardDatabaseLevel() {
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
@@ -43,7 +43,7 @@ class PolicyTypeFactoryTest {
   }
 
   @Test
-  @DisplayName("Standard Target - Schema Level (qualLevel 2)")
+  @DisplayName("Standard pattern - Schema level (qualLevel 2)")
   void from_StandardSchemaLevel() {
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
@@ -56,7 +56,7 @@ class PolicyTypeFactoryTest {
   }
 
   @Test
-  @DisplayName("Standard Target - Object Level (qualLevel 3)")
+  @DisplayName("Standard pattern - Object level (qualLevel 3)")
   void from_StandardObjectLevel() {
     PolicyPattern pattern = new PolicyPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.some("MY_TABLE"));
@@ -70,7 +70,7 @@ class PolicyTypeFactoryTest {
   }
 
   @Test
-  @DisplayName("Container Target - Database Level (qualLevel 2 with wildcard schema)")
+  @DisplayName("Container pattern - Database level (qualLevel 2 with wildcard schema)")
   void from_ContainerDatabaseLevel() {
     // FUTURE SCHEMAS IN DATABASE MY_DB (wildcard schema required for valid pattern)
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.some("*"), Option.none());
@@ -84,7 +84,7 @@ class PolicyTypeFactoryTest {
   }
 
   @Test
-  @DisplayName("Container Target - Schema Level without wildcard yields InvalidContainerPolicyPattern (qualLevel 3)")
+  @DisplayName("Container pattern - Schema level without wildcard yields InvalidContainerPolicyPattern (qualLevel 3)")
   void from_ContainerSchemaLevel() {
     // DB.SCH with empty object: no schema/object wildcard -> deprecated pattern, invalid
     PolicyPattern pattern = new PolicyPattern(
@@ -101,8 +101,8 @@ class PolicyTypeFactoryTest {
   }
 
   @Test
-  @DisplayName("Container Target - empty schema and object without wildcard yields InvalidContainerPolicyPattern (qualLevel 3)")
-  void from_ContainerSchemaObjectAllSchemas_whenEmptySchemaAndObject() {
+  @DisplayName("Container pattern - empty schema and object without wildcard yields InvalidContainerPolicyPattern (qualLevel 3)")
+  void from_ContainerQual3_emptySchemaAndObjectNoWildcard_yieldsInvalidContainerPolicyPattern() {
     // DB with empty schema and object: no wildcard -> deprecated pattern, invalid
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.none());
 
@@ -117,8 +117,8 @@ class PolicyTypeFactoryTest {
   }
 
   @Test
-  @DisplayName("Container Target - Schema Level without wildcard yields InvalidContainerPolicyPattern (qualLevel 3 for FUTURE_AND_ALL)")
-  void from_ContainerSchemaLevelForFutureAndAll() {
+  @DisplayName("Container pattern - Schema level with includeAll, no wildcard yields InvalidContainerPolicyPattern (qualLevel 3)")
+  void from_ContainerSchemaLevel_withIncludeAll_yieldsInvalidContainerPolicyPattern() {
     PolicyPattern pattern = new PolicyPattern(
             Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
