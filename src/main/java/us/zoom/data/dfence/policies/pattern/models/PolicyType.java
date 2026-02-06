@@ -2,13 +2,12 @@ package us.zoom.data.dfence.policies.pattern.models;
 
 import io.vavr.collection.List;
 import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
-import us.zoom.data.dfence.sql.ObjectName;
 
 // Check this page for terminology https://docs.snowflake.com/en/sql-reference/sql/grant-privilege
 public sealed interface PolicyType {
   List<String> parts();
 
-  String normalizeObjectName();
+  String qualifiedObjectName();
 
   sealed interface Standard extends PolicyType {
     record Global() implements Standard {
@@ -18,7 +17,7 @@ public sealed interface PolicyType {
       }
 
       @Override
-      public String normalizeObjectName() {
+      public String qualifiedObjectName() {
         return "";
       }
     }
@@ -29,8 +28,8 @@ public sealed interface PolicyType {
       }
 
       @Override
-      public String normalizeObjectName() {
-        return ObjectName.normalizeObjectName(objectName);
+      public String qualifiedObjectName() {
+        return objectName;
       }
     }
     record Schema(String databaseName, String schemaName) implements Standard {
@@ -40,8 +39,8 @@ public sealed interface PolicyType {
       }
 
       @Override
-      public String normalizeObjectName() {
-        return ObjectName.normalizeObjectName(String.join(".", List.of(databaseName, schemaName)));
+      public String qualifiedObjectName() {
+        return String.join(".", List.of(databaseName, schemaName));
       }
     }
     record SchemaObject(String databaseName, String schemaName, String objectName)
@@ -52,9 +51,8 @@ public sealed interface PolicyType {
       }
 
       @Override
-      public String normalizeObjectName() {
-        return ObjectName.normalizeObjectName(
-            String.join(".", List.of(databaseName, schemaName, objectName)));
+      public String qualifiedObjectName() {
+        return String.join(".", List.of(databaseName, schemaName, objectName));
       }
     }
   }
@@ -75,8 +73,8 @@ public sealed interface PolicyType {
       }
 
       @Override
-      public String normalizeObjectName() {
-        return ObjectName.normalizeObjectName(objectName);
+      public String qualifiedObjectName() {
+        return objectName;
       }
     }
     record Schema(
@@ -93,8 +91,8 @@ public sealed interface PolicyType {
       }
 
       @Override
-      public String normalizeObjectName() {
-        return ObjectName.normalizeObjectName(String.join(".", List.of(databaseName, schemaName)));
+      public String qualifiedObjectName() {
+        return String.join(".", List.of(databaseName, schemaName));
       }
     }
     record SchemaObjectAllSchemas(
@@ -110,8 +108,8 @@ public sealed interface PolicyType {
       }
 
       @Override
-      public String normalizeObjectName() {
-        return ObjectName.normalizeObjectName(databaseName);
+      public String qualifiedObjectName() {
+        return databaseName;
       }
     }
   }

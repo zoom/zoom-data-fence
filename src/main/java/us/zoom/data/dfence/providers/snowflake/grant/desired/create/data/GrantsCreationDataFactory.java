@@ -21,7 +21,7 @@ public final class GrantsCreationDataFactory {
 
     if (target instanceof PolicyType.Standard s) {
       return new GrantsCreationData.Standard(
-          objectType, s.normalizeObjectName(), privileges, roleName);
+          objectType, s.qualifiedObjectName(), privileges, roleName);
     } else if (target instanceof PolicyType.Container c) {
       boolean isSchemaObjectWithAllSchemas =
           c instanceof PolicyType.Container.SchemaObjectAllSchemas;
@@ -30,7 +30,7 @@ public final class GrantsCreationDataFactory {
           new ContainerGrantsCreationData(
               objectType,
               c.containerObjectType(),
-              c.normalizeObjectName(),
+              c.qualifiedObjectName(),
               isSchemaObjectWithAllSchemas,
               privileges,
               roleName),

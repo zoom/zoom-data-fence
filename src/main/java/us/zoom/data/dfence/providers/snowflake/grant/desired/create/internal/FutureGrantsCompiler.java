@@ -72,14 +72,7 @@ public final class FutureGrantsCompiler {
         .map(
             p ->
                 new SnowflakeGrantModel(
-                    p,
-                    objectType.name(),
-                    objectName,
-                    "ROLE",
-                    roleName,
-                    grantOption,
-                    true,
-                    false))
+                    p, objectType.name(), objectName, "ROLE", roleName, grantOption, true, false))
         .toList();
   }
 }
