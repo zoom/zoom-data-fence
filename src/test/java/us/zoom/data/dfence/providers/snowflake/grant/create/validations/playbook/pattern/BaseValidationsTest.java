@@ -5,6 +5,7 @@ import io.vavr.control.Option;
 import io.vavr.control.Validation;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.policies.validations.BaseValidations;
+import us.zoom.data.dfence.policies.validations.Extensions;
 import us.zoom.data.dfence.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.policies.models.PolicyPattern;
 
@@ -15,9 +16,10 @@ class BaseValidationsTest {
 
   @Test
   void liftError_shouldConvertSingleErrorToSequence() {
-    Validation<ValidationError, String> validation = Validation.invalid(ValidationError.of("Error message"));
+    Validation<ValidationError, String> validation =
+        Validation.invalid(new ValidationError.InvalidPolicyPattern("Error message"));
 
-    Validation<Seq<ValidationError>, String> result = BaseValidations.liftError(validation);
+    Validation<Seq<ValidationError>, String> result = Extensions.liftError(validation);
 
     assertTrue(result.isInvalid());
     assertEquals(1, result.getError().size());
@@ -28,7 +30,7 @@ class BaseValidationsTest {
   void liftError_shouldPreserveValidValue() {
     Validation<ValidationError, String> validation = Validation.valid("Success");
 
-    Validation<Seq<ValidationError>, String> result = BaseValidations.liftError(validation);
+    Validation<Seq<ValidationError>, String> result = Extensions.liftError(validation);
 
     assertTrue(result.isValid());
     assertEquals("Success", result.get());

@@ -1,5 +1,6 @@
 package us.zoom.data.dfence.providers.snowflake.grant.desired.create;
 
+import io.vavr.control.Option;
 import io.vavr.control.Try;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,11 +46,14 @@ public class DesiredGrantsCompiler {
       SnowflakeGrantBuilderOptions options) {
     return Try.of(
             () -> {
-              PolicyGrant grant = PolicyGrantFactory.createFrom(playbookPrivilegeGrant);
-              return compileGrants(grant, roleName).stream()
-                  .map(x -> SnowflakeGrantBuilder.fromGrant(x, options))
-                  .filter(Objects::nonNull)
-                  .toList();
+              Option<PolicyGrant> grant = PolicyGrantFactory.createFrom(playbookPrivilegeGrant);
+              return grant.fold(
+                  List::<SnowflakeGrantBuilder>of,
+                  g ->
+                      compileGrants(g, roleName).stream()
+                          .map(x -> SnowflakeGrantBuilder.fromGrant(x, options))
+                          .filter(Objects::nonNull)
+                          .toList());
             })
         .getOrElseThrow(
             e -> {

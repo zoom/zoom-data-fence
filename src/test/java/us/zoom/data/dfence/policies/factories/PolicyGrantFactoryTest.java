@@ -3,14 +3,15 @@ package us.zoom.data.dfence.policies.factories;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.ImmutableList;
+import io.vavr.collection.List;
 import org.junit.jupiter.api.Test;
 import us.zoom.data.dfence.exception.RbacDataError;
 import us.zoom.data.dfence.playbook.model.PlaybookPrivilegeGrant;
-import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
+import us.zoom.data.dfence.policies.models.PolicyGrant;
 import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOption;
 import us.zoom.data.dfence.policies.pattern.models.ContainerPolicyOptions;
 import us.zoom.data.dfence.policies.pattern.models.PolicyType;
-import us.zoom.data.dfence.policies.models.PolicyGrant;
+import us.zoom.data.dfence.providers.snowflake.grant.builder.SnowflakeObjectType;
 
 class PolicyGrantFactoryTest {
 
@@ -27,7 +28,7 @@ class PolicyGrantFactoryTest {
             false,
             true);
 
-    PolicyGrant result = PolicyGrantFactory.createFrom(grant);
+    PolicyGrant result = PolicyGrantFactory.createFrom(grant).getOrElseThrow(AssertionError::new);
 
     assertTrue(result.policyType() instanceof PolicyType.Standard);
     assertEquals(SnowflakeObjectType.TABLE, result.objectType());
@@ -39,16 +40,14 @@ class PolicyGrantFactoryTest {
         new PlaybookPrivilegeGrant(
             "table", "*", "MY_SCHEMA", "MY_DB", ImmutableList.of("SELECT"), true, false, true);
 
-    PolicyGrant result = PolicyGrantFactory.createFrom(grant);
+    PolicyGrant result = PolicyGrantFactory.createFrom(grant).getOrElseThrow(AssertionError::new);
 
     assertTrue(result.policyType() instanceof PolicyType.Container);
-    PolicyType.Container container =
-        (PolicyType.Container) result.policyType();
+    PolicyType.Container container = (PolicyType.Container) result.policyType();
     assertTrue(container instanceof PolicyType.Container.Schema);
-    PolicyType.Container.Schema schema =
-        (PolicyType.Container.Schema) container;
+    PolicyType.Container.Schema schema = (PolicyType.Container.Schema) container;
     assertEquals(
-        ContainerPolicyOptions.of(ContainerPolicyOption.FUTURE),
+        new ContainerPolicyOptions(List.of(ContainerPolicyOption.FUTURE)),
         schema.containerPolicyOptions());
   }
 
@@ -58,34 +57,34 @@ class PolicyGrantFactoryTest {
         new PlaybookPrivilegeGrant(
             "table", "*", "MY_SCHEMA", "MY_DB", ImmutableList.of("SELECT"), false, true, true);
 
-    PolicyGrant result = PolicyGrantFactory.createFrom(grant);
+    PolicyGrant result = PolicyGrantFactory.createFrom(grant).getOrElseThrow(AssertionError::new);
 
     assertTrue(result.policyType() instanceof PolicyType.Container);
-    PolicyType.Container container =
-        (PolicyType.Container) result.policyType();
+    PolicyType.Container container = (PolicyType.Container) result.policyType();
     assertTrue(container instanceof PolicyType.Container.Schema);
-    PolicyType.Container.Schema schema =
-        (PolicyType.Container.Schema) container;
+    PolicyType.Container.Schema schema = (PolicyType.Container.Schema) container;
     assertEquals(
-        ContainerPolicyOptions.of(ContainerPolicyOption.ALL), schema.containerPolicyOptions());
+        new ContainerPolicyOptions(List.of(ContainerPolicyOption.ALL)),
+        schema.containerPolicyOptions());
   }
 
   @Test
-  void from_returnsFutureAndAll_whenIncludeFutureAndIncludeAllTrue() {
+  void from_returnsSchemaObjectAllSchemas_whenFutureAndAllTrue() {
     PlaybookPrivilegeGrant grant =
         new PlaybookPrivilegeGrant(
             "table", "*", "*", "MY_DB", ImmutableList.of("SELECT"), true, true, true);
 
-    PolicyGrant result = PolicyGrantFactory.createFrom(grant);
+    PolicyGrant result = PolicyGrantFactory.createFrom(grant).getOrElseThrow(AssertionError::new);
 
     assertTrue(result.policyType() instanceof PolicyType.Container);
-    PolicyType.Container container =
-        (PolicyType.Container) result.policyType();
-    assertTrue(container instanceof PolicyType.Container.AccountObject);
-    PolicyType.Container.AccountObject dbLevel =
-        (PolicyType.Container.AccountObject) container;
+    PolicyType.Container container = (PolicyType.Container) result.policyType();
+    assertTrue(container instanceof PolicyType.Container.SchemaObjectAllSchemas);
+    PolicyType.Container.SchemaObjectAllSchemas dbLevel =
+        (PolicyType.Container.SchemaObjectAllSchemas) container;
+    assertEquals("MY_DB", dbLevel.databaseName());
     assertEquals(
-        ContainerPolicyOptions.of(ContainerPolicyOption.ALL, ContainerPolicyOption.FUTURE),
+        new ContainerPolicyOptions(
+            List.of(ContainerPolicyOption.ALL, ContainerPolicyOption.FUTURE)),
         dbLevel.containerPolicyOptions());
   }
 
@@ -95,7 +94,7 @@ class PolicyGrantFactoryTest {
         new PlaybookPrivilegeGrant(
             "database", null, null, "MY_DB", ImmutableList.of("USAGE"), false, false, true);
 
-    PolicyGrant result = PolicyGrantFactory.createFrom(grant);
+    PolicyGrant result = PolicyGrantFactory.createFrom(grant).getOrElseThrow(AssertionError::new);
 
     assertTrue(result.policyType() instanceof PolicyType.Standard);
     assertEquals(SnowflakeObjectType.DATABASE, result.objectType());
@@ -123,7 +122,7 @@ class PolicyGrantFactoryTest {
             false,
             true);
 
-    PolicyGrant result = PolicyGrantFactory.createFrom(grant);
+    PolicyGrant result = PolicyGrantFactory.createFrom(grant).getOrElseThrow(AssertionError::new);
 
     // Assert using policyType properties
     assertTrue(result.policyType() instanceof PolicyType.Standard.SchemaObject);
@@ -135,14 +134,13 @@ class PolicyGrantFactoryTest {
   }
 
   @Test
-  void from_shouldHandleNullValues() {
+  void from_returnsAccountObject_whenDatabaseOnlyAndNullSchemaAndObject() {
     PlaybookPrivilegeGrant grant =
         new PlaybookPrivilegeGrant(
             "database", null, null, "MY_DB", ImmutableList.of("USAGE"), false, false, true);
 
-    PolicyGrant result = PolicyGrantFactory.createFrom(grant);
+    PolicyGrant result = PolicyGrantFactory.createFrom(grant).getOrElseThrow(AssertionError::new);
 
-    // Assert using policyType properties
     assertTrue(result.policyType() instanceof PolicyType.Standard.AccountObject);
     PolicyType.Standard.AccountObject pattern =
         (PolicyType.Standard.AccountObject) result.policyType();

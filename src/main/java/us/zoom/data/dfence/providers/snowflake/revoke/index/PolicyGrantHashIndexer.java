@@ -26,7 +26,7 @@ public final class PolicyGrantHashIndexer {
               List<PolicyGrant> allGrants =
                   policyGrants.stream()
                       .map(PolicyGrantFactory::createFrom)
-                      .filter(java.util.Objects::nonNull)
+                      .flatMap(io.vavr.control.Option::toJavaStream)
                       .collect(Collectors.toList());
 
               return createFromGrants(allGrants);

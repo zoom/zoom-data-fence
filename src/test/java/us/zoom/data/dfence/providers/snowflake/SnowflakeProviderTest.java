@@ -79,13 +79,13 @@ class SnowflakeProviderTest {
                 new PlaybookPrivilegeGrant("account", null, null, null, List.of("monitor"), false, false));
         String roleName = "mock_role_name";
         String roleId = "mock-role-id";
-        // Grant creation (DesiredGrantsFactory) resolves view.*.*.mock_db_name as database-level
-        // container only; schema-level future grants are not produced for this pattern.
+        // Grant creation produces both database-level and schema-level future view grants for view.*.*.mock_db_name.
         List<List<String>> expectedRoleGrantStatements = List.of(
                 List.of("GRANT MONITOR ON ACCOUNT TO ROLE MOCK_ROLE_NAME;"),
                 List.of("GRANT SELECT ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"mock_table_name_2\" TO ROLE MOCK_ROLE_NAME;"),
                 List.of("GRANT SELECT ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE MOCK_ROLE_NAME;"),
                 List.of("GRANT SELECT ON FUTURE VIEWS IN DATABASE \"MOCK_DB_NAME\" TO ROLE MOCK_ROLE_NAME;"),
+                List.of("GRANT SELECT ON FUTURE VIEWS IN SCHEMA \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\" TO ROLE MOCK_ROLE_NAME;"),
                 List.of("GRANT UPDATE ON TABLE \"MOCK_DB_NAME\".\"MOCK_SCHEMA_NAME\".\"MOCK_TABLE_NAME\" TO ROLE MOCK_ROLE_NAME;"),
                 List.of("GRANT USAGE ON DATABASE \"MOCK_DB_NAME\" TO ROLE MOCK_ROLE_NAME;"));
         List<String> expectedRoleCreationStatements = List.of("CREATE ROLE IF NOT EXISTS MOCK_ROLE_NAME;");

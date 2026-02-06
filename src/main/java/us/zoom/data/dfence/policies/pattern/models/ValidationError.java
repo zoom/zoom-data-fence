@@ -1,8 +1,8 @@
 package us.zoom.data.dfence.policies.pattern.models;
 
-// Wrapper around validation error message for typesafety. Doesn't need to implement throwable.
-public record ValidationError(String message) {
-  public static ValidationError of(String message) {
-    return new ValidationError(message);
-  }
+public interface ValidationError {
+  String message();
+
+  record InvalidContainerPolicyPattern(String message) implements ValidationError {}
+  record InvalidPolicyPattern(String message) implements ValidationError {}
 }
