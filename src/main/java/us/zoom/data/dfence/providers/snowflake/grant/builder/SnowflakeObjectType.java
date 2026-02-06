@@ -8,15 +8,15 @@ import java.util.Objects;
 /**
  * Snowflake object types that can be granted on (databases, schemas, tables, agents, etc.).
  * <p>
- * Each type has a qualification level ({@link #getQualLevel()}) indicating how many name parts
+ * Each type has a qualification level ({@link #qualLevel}) indicating how many name parts
  * it has: 0 = account-level, 1 = one part (e.g. database name), 2 = two parts (e.g. db.schema),
- * 3 = three parts (e.g. db.schema.object). The {@link #getObjectType()} and {@link
- * #getObjectTypePlural()} strings are used in SQL (e.g. "SHOW AGENTS IN DATABASE"). Use {@link
- * #name()} when building grant names so desired state matches what Snowflake
- * returns for the object type in SHOW GRANTS statements. {@link #name()} is also used for matching the object name as
- * it appears in future grant object names such as MY_DB.MY_SCHEMA.&ltTABLE&gt..
+ * 3 = three parts (e.g. db.schema.object). The {@link #objectType} and {@link #objectTypePlural}
+ * strings are used in SQL (e.g. "SHOW AGENTS IN DATABASE"). Use {@link #name()} when building
+ * grant names so desired state matches what Snowflake returns for the object type in SHOW GRANTS
+ * statements. {@link #name()} is also used for matching the object name as it appears in future
+ * grant object names such as {@code MY_DB.MY_SCHEMA.<TABLE>}.
  * <p>
- * {@link #getAliasFor()} is used only when building hash keys for grants (e.g. in {@code
+ * {@link #aliasFor} is used only when building hash keys for grants (e.g. in {@code
  * SnowflakeGrantBuilder.getKey()} and the revoke index). It is not user-facing and does not
  * allow the user to specify a different name in the playbook. It exists to align on differences
  * that come from Snowflake: the same logical object type may appear under different names in
@@ -159,8 +159,8 @@ public enum SnowflakeObjectType {
     /**
      * Map of playbook (or Snowflake) input names to enum names. Used by {@link #fromString(String)}
      * so that e.g. "AGENT" in a playbook resolves to {@link #CORTEX_AGENT}. This is what allows
-     * the user to specify a different name in the playbook; it is separate from {@link
-     * #getAliasFor()}, which is only for hash keys.
+     * the user to specify a different name in the playbook; it is separate from {@link #aliasFor},
+     * which is only for hash keys.
      */
     public static Map<String, String> overrideObjectTypes = Map.of(
             "AGENT", "CORTEX_AGENT"
