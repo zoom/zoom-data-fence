@@ -126,7 +126,7 @@ public class SnowflakeProvider implements Provider {
                 ).join();
             }
         } catch (DatabaseError e) {
-            throw new DatabaseError("Unable to apply privileges to role due to database error.", e);
+            log.error("Unable to apply privileges to role {} due to database error.", compiledChanges.roleName(), e);
         }
     }
 
@@ -185,11 +185,7 @@ public class SnowflakeProvider implements Provider {
             log.info("Applying role changes for role {}", compiledChanges.roleName());
             snowflakeStatementsService.applyStatements(compiledChanges.roleCreationStatements());
         } catch (DatabaseError e) {
-            throw new DatabaseError(
-                    String.format(
-                            "Unable to create role with name %s and id %s due to database error.",
-                            compiledChanges.roleName(),
-                            compiledChanges.roleId()), e);
+            log.error("Unable to create role with name {} and id {} due to database error.", compiledChanges.roleName(), compiledChanges.roleId(), e);
         }
     }
 
