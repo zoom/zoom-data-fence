@@ -137,7 +137,7 @@ public class SnowflakeObjectsService {
             @NotNull SnowflakeObjectType containerObjectType,
             @NotNull SnowflakeObjectType objectType,
             @NotEmpty String containerName) {
-        log.info(
+        log.debug(
                 "Finding existing {} in {} {}.",
                 objectType.getObjectTypePlural(),
                 containerObjectType.getObjectType(),
