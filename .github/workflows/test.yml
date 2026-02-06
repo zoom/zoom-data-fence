@@ -36,6 +36,8 @@ jobs:
         run: mvn -B verify -DskipTests --file pom.xml
       - name: Build with Maven (regular JAR for unit tests)
         run: mvn -B package --file pom.xml
+      - name: Validate Javadoc Build
+        run: mvn javadoc:javadoc
 
   build-docker-jar:
     runs-on: ubuntu-latest
