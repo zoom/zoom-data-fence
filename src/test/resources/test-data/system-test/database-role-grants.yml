@@ -6,6 +6,6 @@ roles:
     grants:
       - object-type: database_role
         database-name: ${var.database}
-        schema-name: ${var.database-role}
+        object-name: ${var.database-role}
         privileges:
           - usage
