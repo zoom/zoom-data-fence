@@ -12,6 +12,7 @@ import us.zoom.data.dfence.policies.pattern.models.ValidationError;
 import us.zoom.data.dfence.policies.models.PolicyPattern;
 import us.zoom.data.dfence.policies.models.PolicyPatternOptions;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PolicyTypeFactoryTest {
@@ -43,8 +44,8 @@ class PolicyTypeFactoryTest {
   }
 
   @Test
-  @DisplayName("Standard pattern - Schema level (qualLevel 2)")
-  void from_StandardSchemaLevel() {
+  @DisplayName("Standard pattern - Qual level 2 with database and schema name (e.g. SCHEMA)")
+  void from_StandardQual2Level_withDatabaseAndSchemaName() {
     PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
     Validation<Seq<ValidationError>, PolicyType> result =
@@ -52,7 +53,25 @@ class PolicyTypeFactoryTest {
             pattern, SnowflakeObjectType.SCHEMA, new PolicyPatternOptions(false, false));
 
     assertTrue(result.isValid());
-    assertTrue(result.get() instanceof PolicyType.Standard.Schema);
+    assertTrue(result.get() instanceof PolicyType.Standard.DatabaseObject);
+  }
+
+  @Test
+  @DisplayName("Standard pattern - Database role (qual level 2) with database and object name")
+  void from_StandardDatabaseRoleLevel_withDatabaseAndObjectName() {
+    PolicyPattern pattern = new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.some("MY_DATABASE_ROLE"));
+
+    Validation<Seq<ValidationError>, PolicyType> result =
+        PolicyTypeFactory.createFrom(
+            pattern, SnowflakeObjectType.DATABASE_ROLE, new PolicyPatternOptions(false, false));
+
+    assertTrue(result.isValid());
+    assertTrue(result.get() instanceof PolicyType.Standard.DatabaseObject);
+    PolicyType.Standard.DatabaseObject dbAndName =
+        (PolicyType.Standard.DatabaseObject) result.get();
+    assertEquals("MY_DB", dbAndName.databaseName());
+    assertEquals("MY_DATABASE_ROLE", dbAndName.name());
+    assertEquals("MY_DB.MY_DATABASE_ROLE", dbAndName.qualifiedObjectName());
   }
 
   @Test

@@ -48,7 +48,7 @@ class PolicyPatternValidationsTest {
   }
 
   @Test
-  void validateStandardPattern_shouldReturnSchemaLevel_whenQualLevelIs2() {
+  void validateStandardPattern_shouldReturnDatabaseAndName_whenQualLevelIs2AndDatabaseAndSchemaName() {
     PolicyPattern pattern =
         new PolicyPattern(Option.some("MY_DB"), Option.some("MY_SCHEMA"), Option.none());
 
@@ -59,11 +59,31 @@ class PolicyPatternValidationsTest {
         validations.validateStandardPattern();
 
     assertTrue(result.isValid());
-    assertInstanceOf(PolicyType.Standard.Schema.class, result.get());
-    PolicyType.Standard.Schema schema =
-        (PolicyType.Standard.Schema) result.get();
-    assertEquals("MY_DB", schema.databaseName());
-    assertEquals("MY_SCHEMA", schema.schemaName());
+    assertInstanceOf(PolicyType.Standard.DatabaseObject.class, result.get());
+    PolicyType.Standard.DatabaseObject dbAndName =
+        (PolicyType.Standard.DatabaseObject) result.get();
+    assertEquals("MY_DB", dbAndName.databaseName());
+    assertEquals("MY_SCHEMA", dbAndName.name());
+  }
+
+  @Test
+  void validateStandardPattern_shouldReturnDatabaseAndName_whenQualLevelIs2AndDatabaseAndObjectName() {
+    PolicyPattern pattern =
+        new PolicyPattern(Option.some("MY_DB"), Option.none(), Option.some("MY_DATABASE_ROLE"));
+
+    PolicyPatternValidations validations =
+        new PolicyPatternValidations(
+            pattern, new PolicyPatternOptions(false, false), SnowflakeObjectType.DATABASE_ROLE);
+    Validation<Seq<ValidationError>, PolicyType.Standard> result =
+        validations.validateStandardPattern();
+
+    assertTrue(result.isValid());
+    assertInstanceOf(PolicyType.Standard.DatabaseObject.class, result.get());
+    PolicyType.Standard.DatabaseObject dbAndName =
+        (PolicyType.Standard.DatabaseObject) result.get();
+    assertEquals("MY_DB", dbAndName.databaseName());
+    assertEquals("MY_DATABASE_ROLE", dbAndName.name());
+    assertEquals("MY_DB.MY_DATABASE_ROLE", dbAndName.qualifiedObjectName());
   }
 
   @Test

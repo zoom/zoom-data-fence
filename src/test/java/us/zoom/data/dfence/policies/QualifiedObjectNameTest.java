@@ -61,7 +61,7 @@ class QualifiedObjectNameTest {
     PolicyGrant policyGrant =
         PolicyGrantFactory.createFrom(grant).getOrElseThrow(AssertionError::new);
 
-    assertInstanceOf(PolicyType.Standard.Schema.class, policyGrant.policyType());
+    assertInstanceOf(PolicyType.Standard.DatabaseObject.class, policyGrant.policyType());
 
     String normalizedObjectName = policyGrant.policyType().qualifiedObjectName();
     assertEquals("""

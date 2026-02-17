@@ -22,7 +22,9 @@ public record PolicyPatternValidations(
       case 0 -> Validation.valid(new PolicyType.Standard.Global());
       case 1 -> liftError(database(pattern).orElse(object(pattern)))
           .map(PolicyType.Standard.AccountObject::new);
-      case 2 -> database(pattern).combine(schema(pattern)).ap(PolicyType.Standard.Schema::new);
+      case 2 -> database(pattern)
+          .combine(schema(pattern).orElse(object(pattern)))
+          .ap(PolicyType.Standard.DatabaseObject::new);
       case 3 -> database(pattern)
           .combine(schema(pattern))
           .combine(object(pattern))
