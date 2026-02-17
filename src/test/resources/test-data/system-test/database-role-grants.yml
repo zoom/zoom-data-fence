@@ -1,5 +1,6 @@
 # System test for database role grants.
 # Grants USAGE on a database role to a role (GRANT DATABASE ROLE ... TO ROLE ...).
+# Database role name is specified in object-name (qual level 2: database + object name).
 roles:
   role_1:
     name: ${var.role}

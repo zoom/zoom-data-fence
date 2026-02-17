@@ -32,15 +32,16 @@ public sealed interface PolicyType {
         return objectName;
       }
     }
-    record Schema(String databaseName, String schemaName) implements Standard {
+    /** Qual level 2: database + one name (e.g. schema name, database role name). */
+    record DatabaseObject(String databaseName, String name) implements Standard {
       @Override
       public List<String> parts() {
-        return List.of(databaseName, schemaName);
+        return List.of(databaseName, name);
       }
 
       @Override
       public String qualifiedObjectName() {
-        return String.join(".", List.of(databaseName, schemaName));
+        return String.join(".", List.of(databaseName, name));
       }
     }
     record SchemaObject(String databaseName, String schemaName, String objectName)
