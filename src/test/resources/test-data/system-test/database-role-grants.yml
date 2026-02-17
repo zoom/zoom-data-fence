@@ -1,0 +1,11 @@
+# System test for database role grants.
+# Grants USAGE on a database role to a role (GRANT DATABASE ROLE ... TO ROLE ...).
+roles:
+  role_1:
+    name: ${var.role}
+    grants:
+      - object-type: database_role
+        database-name: ${var.database}
+        schema-name: ${var.database-role}
+        privileges:
+          - usage

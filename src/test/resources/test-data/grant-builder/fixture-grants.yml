@@ -1216,6 +1216,14 @@ tests:
       role: MY_ROLE
     expectedBuilder: SnowflakeOwnershipGrantBuilder
 
+  - name: "USAGE on DATABASE_ROLE"
+    grant:
+      privilege: USAGE
+      objectType: DATABASE_ROLE
+      objectName: FOO.BAR
+      role: MY_ROLE
+    expectedBuilder: SnowflakeDatabaseRoleGrantBuilder
+
   - name: "OWNERSHIP on DIRECTORY_TABLE"
     grant:
       privilege: OWNERSHIP

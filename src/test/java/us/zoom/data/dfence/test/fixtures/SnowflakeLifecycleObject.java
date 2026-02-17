@@ -53,6 +53,21 @@ public class SnowflakeLifecycleObject implements LifecycleObject {
                 String.format("DROP ROLE IF EXISTS %s", roleName));
     }
 
+    /**
+     * Creates a database role in the given database. Database roles are qual level 2 (database + role name).
+     * Teardown revokes and drops the database role.
+     */
+    public static LifecycleObject databaseRole(
+            SnowflakeConnectionProvider snowflakeConnectionProvider,
+            String databaseName,
+            String databaseRoleName) {
+        String qualName = String.format("\"%s\".\"%s\"", databaseName, databaseRoleName);
+        return new SnowflakeLifecycleObject(
+                snowflakeConnectionProvider,
+                String.format("CREATE OR REPLACE DATABASE ROLE %s", qualName),
+                String.format("DROP DATABASE ROLE IF EXISTS %s", qualName));
+    }
+
     public static LifecycleObject grantRole(SnowflakeConnectionProvider snowflakeConnectionProvider, String parentRole, String childRole) {
         return new SnowflakeLifecycleObject(
                 snowflakeConnectionProvider,
