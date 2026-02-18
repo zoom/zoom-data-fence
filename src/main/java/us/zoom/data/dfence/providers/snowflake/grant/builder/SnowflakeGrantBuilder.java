@@ -76,7 +76,7 @@ public abstract class SnowflakeGrantBuilder {
         String msg = String.format("No compatible grant builder found for grant %s", normalizedGrant);
         NoGrantBuilderError err = new NoGrantBuilderError(msg);
         if (options.getSuppressErrors()) {
-            log.error(msg, err);
+            log.warn(msg, err);
             return null;
         }
         throw err;

@@ -73,7 +73,7 @@ public class SnowflakeObjectExistsFilter {
                     , e);
         }
         if (!ret) {
-            log.info("{} {} not found. Skipping.", snowflakeObjectType.toString().toLowerCase(), objectName);
+            log.debug("{} {} not found. Skipping.", snowflakeObjectType.toString().toLowerCase(), objectName);
         }
         return ret;
     }

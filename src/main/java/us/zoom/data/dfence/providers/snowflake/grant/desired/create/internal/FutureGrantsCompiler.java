@@ -47,7 +47,7 @@ public final class FutureGrantsCompiler {
       String roleName,
       Boolean grantOption) {
     if (!snowflakeObjectsService.objectExists(databaseName, SnowflakeObjectType.DATABASE)) {
-      log.info("Database {} does not exist. Skipping future grants for schemas.", databaseName);
+      log.debug("Database {} does not exist. Skipping future grants for schemas.", databaseName);
       return List.of();
     }
     List<String> schemas =

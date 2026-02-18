@@ -35,7 +35,7 @@ public final class AllGrantsCompiler {
       String roleName,
       Boolean grantOption) {
     if (!snowflakeObjectsService.objectExists(containerName, containerObjectType)) {
-      log.warn(
+      log.debug(
           "Container {} {} does not exist. Skipping grant expansion.",
           containerObjectType,
           containerName);
