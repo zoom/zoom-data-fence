@@ -14,6 +14,8 @@ public record TestRunFixture(
         String procedureName,
         String procedureNameShowGrantsQual,
         String procedureNameNoArgsShowGrantsQual,
+        String procedureNameNewFormatQual,
+        String procedureNameNoArgsNewFormatQual,
         LifecycleManager lifecycleManager
 ) {
     /**

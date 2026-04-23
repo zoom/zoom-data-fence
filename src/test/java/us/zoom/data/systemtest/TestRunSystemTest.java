@@ -127,23 +127,37 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
         Assert.assertTrue(newChanges.changes().isEmpty(), "Expected no remaining changes after apply");
 
         // Validate that the role has the expected grants.
-        List<Grant> grantsExpected = new ArrayList<>(List.of(
+        // Snowflake may return either old format (pre-BCR-2190) or new format (BCR-2190) procedure names.
+        List<Grant> nonProcGrants = List.of(
                 new Grant("USAGE", "DATABASE", fixture.databaseName(), "ROLE", fixture.roleName()),
                 new Grant("MONITOR", "DATABASE", fixture.databaseName(), "ROLE", fixture.roleName()),
                 new Grant("USAGE", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
                 new Grant("MONITOR", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
                 new Grant("CREATE SEMANTIC VIEW", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
                 new Grant("SELECT", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName()),
-                new Grant("OWNERSHIP", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName()),
+                new Grant("OWNERSHIP", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName())
+        );
+
+        // Old format procedure grants
+        List<Grant> grantsExpectedOld = new ArrayList<>(nonProcGrants);
+        grantsExpectedOld.addAll(List.of(
                 new Grant("USAGE", "PROCEDURE", fixture.procedureNameShowGrantsQual(), "ROLE", fixture.roleName()),
                 new Grant("USAGE", "PROCEDURE", fixture.procedureNameNoArgsShowGrantsQual(), "ROLE", fixture.roleName()),
                 new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameShowGrantsQual(), "ROLE", fixture.roleName()),
                 new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameNoArgsShowGrantsQual(), "ROLE", fixture.roleName())
         ));
-        grantsExpected.sort(Comparator.comparing(x -> x.toString().hashCode()));
+
+        // New format procedure grants (BCR-2190)
+        List<Grant> grantsExpectedNew = new ArrayList<>(nonProcGrants);
+        grantsExpectedNew.addAll(List.of(
+                new Grant("USAGE", "PROCEDURE", fixture.procedureNameNewFormatQual(), "ROLE", fixture.roleName()),
+                new Grant("USAGE", "PROCEDURE", fixture.procedureNameNoArgsNewFormatQual(), "ROLE", fixture.roleName()),
+                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameNewFormatQual(), "ROLE", fixture.roleName()),
+                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameNoArgsNewFormatQual(), "ROLE", fixture.roleName())
+        ));
 
         List<Grant> grants = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
-        assertGrantsMatch(grants, grantsExpected);
+        assertGrantsMatchAny(grants, List.of(grantsExpectedOld, grantsExpectedNew));
     }
 
     @Test(dependsOnMethods = {"testApply"}, groups = {"a"})
@@ -175,15 +189,19 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
 
         // Validate that role1 has no grants (all revoked)
         List<Grant> grantsExpectedRole1 = new ArrayList<>(List.of());
-        grantsExpectedRole1.sort(Comparator.comparing(x -> x.toString().hashCode()));
 
         // Validate that role2 has ownership grants (transferred from role1)
-        List<Grant> grantsExpectedRole2 = new ArrayList<>(List.of(
+        // Snowflake may return either old or new format procedure names (BCR-2190)
+        List<Grant> grantsExpectedRole2Old = new ArrayList<>(List.of(
                 new Grant("OWNERSHIP", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName2()),
                 new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameShowGrantsQual(), "ROLE", fixture.roleName2()),
                 new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameNoArgsShowGrantsQual(), "ROLE", fixture.roleName2())
         ));
-        grantsExpectedRole2.sort(Comparator.comparing(x -> x.toString().hashCode()));
+        List<Grant> grantsExpectedRole2New = new ArrayList<>(List.of(
+                new Grant("OWNERSHIP", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName2()),
+                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameNewFormatQual(), "ROLE", fixture.roleName2()),
+                new Grant("OWNERSHIP", "PROCEDURE", fixture.procedureNameNoArgsNewFormatQual(), "ROLE", fixture.roleName2())
+        ));
 
         // Snowflake appears to have eventual consistency on this metadata after the ownership change.
         // We need to wait for the metadata to catch up.
@@ -199,7 +217,7 @@ public class TestRunSystemTest extends BaseGrantSystemTest {
 
                 // Verify role2 has ownership grants
                 List<Grant> grantsRole2 = getRoleGrants(fixture.roleName2(), securityadminSnowflakeConnectionProvider);
-                assertGrantsMatch(grantsRole2, grantsExpectedRole2);
+                assertGrantsMatchAny(grantsRole2, List.of(grantsExpectedRole2Old, grantsExpectedRole2New));
                 
                 success = true;
             } catch (AssertionError e) {

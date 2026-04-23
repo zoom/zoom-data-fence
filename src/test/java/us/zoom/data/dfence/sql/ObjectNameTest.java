@@ -140,7 +140,16 @@ class ObjectNameTest {
                     "SNOWFLAKE.CORE.\"AVG(ARG_T TABLE(TABLE(FLOAT)), ARG2 TABLE(FLOAT, VARCHAR, NUMBER(38,2))):FLOAT\";SNOWFLAKE.CORE.AVG(TABLE(TABLE(FLOAT)), TABLE(FLOAT, VARCHAR, NUMBER(38,2)))",
                     "SNOWFLAKE.CORE.\"avg123%(ARG_T TABLE(FLOAT), ARG2 TABLE(FLOAT, VARCHAR, NUMBER(38,2))):FLOAT\";SNOWFLAKE.CORE.\"avg123%\"(TABLE(FLOAT), TABLE(FLOAT, VARCHAR, NUMBER(38,2)))",
                     "FOO.BAR.\"DUPLICATE_COUNT(ARG_T TABLE(ARG_C FLOAT)):NUMBER(38,0)\";FOO.BAR.DUPLICATE_COUNT(TABLE(FLOAT))",
-                    "FOO.BAR.\"ZAR()\";FOO.BAR.ZAR()"}, delimiter = ';')
+                    "FOO.BAR.\"ZAR()\";FOO.BAR.ZAR()",
+                    // New format (BCR-2190): DB.SCHEMA.NAME(TYPES) — no quotes, no arg names, no return type
+                    "MY_DB.MY_SCHEMA.AREA_OF_CIRCLE(FLOAT);MY_DB.MY_SCHEMA.AREA_OF_CIRCLE(FLOAT)",
+                    "MY_DB.MY_SCHEMA.OUTPUT_MESSAGE(VARCHAR);MY_DB.MY_SCHEMA.OUTPUT_MESSAGE(VARCHAR)",
+                    "DB.TEST.PYTHON_ADD1(NUMBER, VARCHAR);DB.TEST.PYTHON_ADD1(NUMBER, VARCHAR)",
+                    "DB.GOV.SP_APPLY_ROW_ACCESS_POLICY(VARCHAR, VARCHAR, ARRAY);DB.GOV.SP_APPLY_ROW_ACCESS_POLICY(VARCHAR, VARCHAR, ARRAY)",
+                    "FOO.BAR.ZAR();FOO.BAR.ZAR()",
+                    "SNOWFLAKE.CORE.AVG(TABLE(FLOAT));SNOWFLAKE.CORE.AVG(TABLE(FLOAT))",
+                    "SNOWFLAKE.CORE.AVG(TABLE(FLOAT), TABLE(FLOAT, VARCHAR, NUMBER(38,2)));SNOWFLAKE.CORE.AVG(TABLE(FLOAT), TABLE(FLOAT, VARCHAR, NUMBER(38,2)))",
+                    "FOO.BAR.DUPLICATE_COUNT(TABLE(FLOAT));FOO.BAR.DUPLICATE_COUNT(TABLE(FLOAT))"}, delimiter = ';')
     void procedureGrantNameToObjectName(String input, String expected) {
         String actual = ObjectName.procedureGrantNameToObjectName(input);
         assertEquals(expected, actual);
