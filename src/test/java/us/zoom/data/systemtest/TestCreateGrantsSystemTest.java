@@ -148,7 +148,8 @@ public class TestCreateGrantsSystemTest extends BaseGrantSystemTest {
 
         // Validate that the role has all the expected grants from the playbook.
         // The playbook includes database, schema (with create semantic view/agent), table, procedure
-        List<Grant> grantsExpected = new ArrayList<>(List.of(
+        // Snowflake may return either old format (pre-BCR-2190) or new format (BCR-2190) procedure names.
+        List<Grant> nonProcGrants = List.of(
                 new Grant("USAGE", "DATABASE", fixture.databaseName(), "ROLE", fixture.roleName()),
                 new Grant("MONITOR", "DATABASE", fixture.databaseName(), "ROLE", fixture.roleName()),
                 new Grant("USAGE", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
@@ -156,14 +157,25 @@ public class TestCreateGrantsSystemTest extends BaseGrantSystemTest {
                 new Grant("CREATE SEMANTIC VIEW", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
                 new Grant("CREATE AGENT", "SCHEMA", fixture.qualifiedSchemaName(), "ROLE", fixture.roleName()),
                 new Grant("SELECT", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName()),
-                new Grant("INSERT", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName()),
+                new Grant("INSERT", "TABLE", fixture.qualifiedTableName(), "ROLE", fixture.roleName())
+        );
+
+        // Old format procedure grants
+        List<Grant> grantsExpectedOld = new ArrayList<>(nonProcGrants);
+        grantsExpectedOld.addAll(List.of(
                 new Grant("USAGE", "PROCEDURE", fixture.procedureNameShowGrantsQual(), "ROLE", fixture.roleName()),
                 new Grant("USAGE", "PROCEDURE", fixture.procedureNameNoArgsShowGrantsQual(), "ROLE", fixture.roleName())
         ));
-        grantsExpected.sort(Comparator.comparing(x -> x.toString().hashCode()));
+
+        // New format procedure grants (BCR-2190)
+        List<Grant> grantsExpectedNew = new ArrayList<>(nonProcGrants);
+        grantsExpectedNew.addAll(List.of(
+                new Grant("USAGE", "PROCEDURE", fixture.procedureNameNewFormatQual(), "ROLE", fixture.roleName()),
+                new Grant("USAGE", "PROCEDURE", fixture.procedureNameNoArgsNewFormatQual(), "ROLE", fixture.roleName())
+        ));
 
         List<Grant> grants = getRoleGrants(fixture.roleName(), securityadminSnowflakeConnectionProvider);
-        assertGrantsMatch(grants, grantsExpected);
+        assertGrantsMatchAny(grants, List.of(grantsExpectedOld, grantsExpectedNew));
     }
 
 }

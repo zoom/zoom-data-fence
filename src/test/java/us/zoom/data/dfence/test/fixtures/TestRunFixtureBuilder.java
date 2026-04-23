@@ -157,6 +157,7 @@ public class TestRunFixtureBuilder {
         }
 
         String procedureName = procedureNamePartial + "(STRING, STRING, NUMBER)";
+        // Old format (pre-BCR-2190): DB.SCHEMA."NAME(ARG_NAME TYPE, ...):RETURN_TYPE"
         String procedureNameShowGrantsQual = String.format(
                 "%s.%s.\"%s(FROM_TABLE VARCHAR, TO_TABLE VARCHAR, COUNT NUMBER):VARCHAR\"",
                 databaseName,
@@ -164,6 +165,17 @@ public class TestRunFixtureBuilder {
                 procedureNamePartial);
         String procedureNameNoArgsShowGrantsQual = String.format(
                 "%s.%s.\"%s():VARCHAR\"",
+                databaseName,
+                schemaName,
+                procedureNamePartial);
+        // New format (BCR-2190): DB.SCHEMA.NAME(TYPES) — no quotes, no arg names, no return type
+        String procedureNameNewFormatQual = String.format(
+                "%s.%s.%s(VARCHAR, VARCHAR, NUMBER)",
+                databaseName,
+                schemaName,
+                procedureNamePartial);
+        String procedureNameNoArgsNewFormatQual = String.format(
+                "%s.%s.%s()",
                 databaseName,
                 schemaName,
                 procedureNamePartial);
@@ -181,6 +193,8 @@ public class TestRunFixtureBuilder {
                 procedureName,
                 procedureNameShowGrantsQual,
                 procedureNameNoArgsShowGrantsQual,
+                procedureNameNewFormatQual,
+                procedureNameNoArgsNewFormatQual,
                 lifecycleManager
         );
     }

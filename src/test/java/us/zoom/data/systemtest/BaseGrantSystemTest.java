@@ -48,6 +48,28 @@ public abstract class BaseGrantSystemTest extends SnowflakeSysTestBase {
     }
 
     /**
+     * Asserts that the actual grants match one of the expected grant sets.
+     * This is useful when the Snowflake instance may return either old or new format
+     * procedure names (BCR-2190 backward compatibility).
+     *
+     * @param actualGrants The actual grants from Snowflake
+     * @param expectedGrantSets Multiple possible expected grant lists (e.g., old format, new format)
+     */
+    protected static void assertGrantsMatchAny(List<Grant> actualGrants, List<List<Grant>> expectedGrantSets) {
+        AssertionError lastError = null;
+        for (List<Grant> expectedGrants : expectedGrantSets) {
+            try {
+                assertGrantsMatch(actualGrants, expectedGrants);
+                return; // Match found
+            } catch (AssertionError e) {
+                lastError = e;
+            }
+        }
+        // None matched — throw the last error for diagnostics
+        throw lastError;
+    }
+
+    /**
      * Asserts that the actual grants match the expected grants.
      * Sorts both lists before comparison to ensure order doesn't matter.
      * 

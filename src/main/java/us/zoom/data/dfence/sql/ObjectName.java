@@ -135,7 +135,15 @@ public class ObjectName {
         if (procedureName.isEmpty()) {
             return "";
         }
-        SqlObject sqlObject = ObjectName.parseSqlObjectFromShowGrantsProcedureName(procedureName);
+        // Try parsing as the new format first (BCR-2190: DB.SCHEMA.NAME(TYPES))
+        SqlObject sqlObject = ObjectName.parseSqlObject(procedureName);
+        if (sqlObject.isHasArguments()) {
+            // New format: already has parsed arguments, just normalize
+            return sqlObject.normalizedName();
+        }
+        // Old format: DB.SCHEMA."NAME(ARG_NAME TYPE, ...):RETURN_TYPE"
+        // The callable signature is inside a quoted identifier, needs special parsing
+        sqlObject = ObjectName.parseSqlObjectFromShowGrantsProcedureName(procedureName);
         return sqlObject.normalizedName();
     }
 

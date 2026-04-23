@@ -141,6 +141,92 @@ class SnowflakeGrantsServiceTest {
     }
 
     @Test
+    void getGrantsWithNewFormatProcedureName() throws SQLException {
+        String roleName = "MOCK_ROLE";
+        Boolean skipUnkownTypes = true;
+        try (Statement currentGrantsStatement = Mockito.mock(Statement.class)) {
+            try (Statement futureGrantsStatement = Mockito.mock(Statement.class)) {
+                when(snowflakeConnection.createStatement()).thenReturn(currentGrantsStatement, futureGrantsStatement);
+                List columnNames = List.of(
+                        "privilege",
+                        "granted_on",
+                        "name",
+                        "granted_to",
+                        "grantee_name",
+                        "grant_option");
+                // BCR-2190: New format — DB.SCHEMA.NAME(TYPES) without quotes, arg names, or return type
+                when(currentGrantsStatement.getResultSet()).thenReturn(new MockResultSet(
+                        List.of(
+                                List.of(
+                                        new I("USAGE"),
+                                        new I("PROCEDURE"),
+                                        new I("MOCK_DB.MOCK_SCHEMA.MOCK_PROC(VARCHAR, NUMBER)"),
+                                        new I("ROLE"),
+                                        new I("MOCK_ROLE"),
+                                        new I(false))),
+                        columnNames));
+                when(futureGrantsStatement.getResultSet()).thenReturn(new MockResultSet(List.of(), columnNames));
+                SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
+                SnowflakeGrantBuilder builder = new SnowflakePermissionGrantBuilder(new SnowflakeGrantModel(
+                        "USAGE",
+                        "PROCEDURE",
+                        "MOCK_DB.MOCK_SCHEMA.MOCK_PROC(VARCHAR, NUMBER)",
+                        "ROLE",
+                        "MOCK_ROLE",
+                        false,
+                        false,
+                        false), options);
+                Map<String, SnowflakeGrantBuilder> expected = Map.of(builder.getKey(), builder);
+                Map<String, SnowflakeGrantBuilder> actual = snowflakeGrantsService.getGrants(roleName, skipUnkownTypes);
+                assertEquals(expected, actual);
+            }
+        }
+    }
+
+    @Test
+    void getGrantsWithOldFormatProcedureName() throws SQLException {
+        String roleName = "MOCK_ROLE";
+        Boolean skipUnkownTypes = true;
+        try (Statement currentGrantsStatement = Mockito.mock(Statement.class)) {
+            try (Statement futureGrantsStatement = Mockito.mock(Statement.class)) {
+                when(snowflakeConnection.createStatement()).thenReturn(currentGrantsStatement, futureGrantsStatement);
+                List columnNames = List.of(
+                        "privilege",
+                        "granted_on",
+                        "name",
+                        "granted_to",
+                        "grantee_name",
+                        "grant_option");
+                // Old format — DB.SCHEMA."NAME(ARG_NAME TYPE, ...):RETURN_TYPE"
+                when(currentGrantsStatement.getResultSet()).thenReturn(new MockResultSet(
+                        List.of(
+                                List.of(
+                                        new I("USAGE"),
+                                        new I("PROCEDURE"),
+                                        new I("MOCK_DB.MOCK_SCHEMA.\"MOCK_PROC(FROM_TABLE VARCHAR, COUNT NUMBER):VARCHAR\""),
+                                        new I("ROLE"),
+                                        new I("MOCK_ROLE"),
+                                        new I(false))),
+                        columnNames));
+                when(futureGrantsStatement.getResultSet()).thenReturn(new MockResultSet(List.of(), columnNames));
+                SnowflakeGrantBuilderOptions options = new SnowflakeGrantBuilderOptions();
+                SnowflakeGrantBuilder builder = new SnowflakePermissionGrantBuilder(new SnowflakeGrantModel(
+                        "USAGE",
+                        "PROCEDURE",
+                        "MOCK_DB.MOCK_SCHEMA.MOCK_PROC(VARCHAR, NUMBER)",
+                        "ROLE",
+                        "MOCK_ROLE",
+                        false,
+                        false,
+                        false), options);
+                Map<String, SnowflakeGrantBuilder> expected = Map.of(builder.getKey(), builder);
+                Map<String, SnowflakeGrantBuilder> actual = snowflakeGrantsService.getGrants(roleName, skipUnkownTypes);
+                assertEquals(expected, actual);
+            }
+        }
+    }
+
+    @Test
     void filterUnsupportedObjectGrantType() throws SQLException {
         String roleName = "MOCK_ROLE";
         Boolean skipUnkownTypes = true;
