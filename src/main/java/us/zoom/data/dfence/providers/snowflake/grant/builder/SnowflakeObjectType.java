@@ -36,6 +36,7 @@ public enum SnowflakeObjectType {
     DATABASE(1, null),
     DATABASE_ROLE(2, null),
     DIRECTORY_TABLE(3, null),
+    DYNAMIC_TABLE(3, "TABLE"),
     EVENT_TABLE(3, null),
     EXTERNAL_TABLE(3, "TABLE"),
     FILE_FORMAT(3, null),
