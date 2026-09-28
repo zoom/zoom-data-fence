@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static us.zoom.data.dfence.test.fixtures.resultset.MockResultSet.I;
 
-class SnowflakeDefaultObjectsServiceTestService {
+class SnowflakeDefaultObjectsServiceTest {
 
     @Mock
     SnowflakeConnectionService snowflakeConnectionService;
