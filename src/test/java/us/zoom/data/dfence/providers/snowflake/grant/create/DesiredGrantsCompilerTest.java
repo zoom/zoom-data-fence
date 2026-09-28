@@ -16,6 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @DisplayName("DesiredGrantsCompiler")
@@ -30,6 +31,38 @@ class DesiredGrantsCompilerTest {
     mockObjectsService = mock(SnowflakeObjectsService.class);
     desiredGrantsCompiler = new DesiredGrantsCompiler(mockObjectsService);
     options = new SnowflakeGrantBuilderOptions();
+  }
+
+  @Test
+  void cortexSearchServiceAllExpandsEachDiscoveredService() {
+    when(mockObjectsService.objectExists(anyString(), eq(SnowflakeObjectType.SCHEMA))).thenReturn(true);
+    when(mockObjectsService.getContainerObjectQualNames(
+            eq(SnowflakeObjectType.SCHEMA), eq(SnowflakeObjectType.CORTEX_SEARCH_SERVICE), anyString()))
+        .thenReturn(List.of("MOCK_DB.MOCK_SCHEMA.SEARCH_ONE", "MOCK_DB.MOCK_SCHEMA.SEARCH_TWO"));
+    PlaybookPrivilegeGrant grant = new PlaybookPrivilegeGrant(
+        "cortex_search_service", "*", "MOCK_SCHEMA", "MOCK_DB", List.of("USAGE"), false, true, true);
+
+    List<SnowflakeGrantBuilder> builders = desiredGrantsCompiler.compileGrants(grant, "MOCK_ROLE", options);
+
+    assertEquals(2, builders.size());
+    assertEquals(List.of(
+        "GRANT USAGE ON CORTEX SEARCH SERVICE \"MOCK_DB\".\"MOCK_SCHEMA\".\"SEARCH_ONE\" TO ROLE MOCK_ROLE;",
+        "GRANT USAGE ON CORTEX SEARCH SERVICE \"MOCK_DB\".\"MOCK_SCHEMA\".\"SEARCH_TWO\" TO ROLE MOCK_ROLE;"),
+        builders.stream().flatMap(builder -> builder.getGrantStatements().stream()).toList());
+    verify(mockObjectsService).getContainerObjectQualNames(
+        eq(SnowflakeObjectType.SCHEMA), eq(SnowflakeObjectType.CORTEX_SEARCH_SERVICE), anyString());
+  }
+
+  @Test
+  void cortexSearchServiceFutureUsesGenericFutureGrant() {
+    PlaybookPrivilegeGrant grant = new PlaybookPrivilegeGrant(
+        "cortex_search_service", "*", "MOCK_SCHEMA", "MOCK_DB", List.of("USAGE"), true, false, true);
+
+    List<SnowflakeGrantBuilder> builders = desiredGrantsCompiler.compileGrants(grant, "MOCK_ROLE", options);
+
+    assertEquals(1, builders.size());
+    assertEquals(List.of("GRANT USAGE ON FUTURE CORTEX SEARCH SERVICES IN SCHEMA "
+        + "\"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE;"), builders.get(0).getGrantStatements());
   }
 
   @Test

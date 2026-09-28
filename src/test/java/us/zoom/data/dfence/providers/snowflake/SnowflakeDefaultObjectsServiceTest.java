@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static us.zoom.data.dfence.test.fixtures.resultset.MockResultSet.I;
 
-class SnowflakeDefaultObjectsServiceTestService {
+class SnowflakeDefaultObjectsServiceTest {
 
     @Mock
     SnowflakeConnectionService snowflakeConnectionService;
@@ -40,6 +40,13 @@ class SnowflakeDefaultObjectsServiceTestService {
 
     public static Stream<GetContainerObjectQualNamesRawParams> getContainerObjectQualNamesRawParamsStream() {
         return Stream.of(
+                new GetContainerObjectQualNamesRawParams(
+                        new MockResultSet(List.of(List.of(new I("SEARCH_SERVICE"))), List.of("name")),
+                        List.of("MOCK_DB.MOCK_SCHEMA.SEARCH_SERVICE"),
+                        "MOCK_DB.MOCK_SCHEMA",
+                        SnowflakeObjectType.SCHEMA,
+                        SnowflakeObjectType.CORTEX_SEARCH_SERVICE,
+                        "show cortex search services in schema MOCK_DB.MOCK_SCHEMA;"),
                 new GetContainerObjectQualNamesRawParams(
                         new MockResultSet(
                                 List.of(
