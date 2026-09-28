@@ -73,6 +73,32 @@ Each item in the `grants` list has the following fields:
 
 At least one of `object-name`, `schema-name`, or `database-name` must be provided, except for account-level grants.
 
+### Cortex Search Service grants
+
+Grant a role access to a specific Cortex Search Service with `cortex_search_service`:
+
+```yaml
+roles:
+  search-consumer:
+    name: search_consumer
+    grants:
+      - object-type: database
+        object-name: search_db
+        privileges: [usage]
+      - object-type: schema
+        database-name: search_db
+        schema-name: search
+        privileges: [usage]
+      - object-type: cortex_search_service
+        database-name: search_db
+        schema-name: search
+        object-name: customer_search
+        privileges: [usage]
+```
+
+`OPERATE` and `OWNERSHIP` are also supported. `include-all` and `include-future` apply
+through the normal Data Fence wildcard rules.
+
 ## Role with Wildcard Grants
 Most of the time, we don't want to define every single grant. Instead, we want to 
 grant a role a privilege on every object within a database or schema. In these cases we 
@@ -223,4 +249,3 @@ Certain features and grants are not supported. These include.
 
 * Snowflake Imported Privileges on Shares
 * New grant types for features that have not yet been mapped in this application.
-

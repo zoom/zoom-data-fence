@@ -94,6 +94,27 @@ class SnowflakeGrantsServiceTest {
     }
 
     @Test
+    void cortexSearchServiceShowGrantsMatchesDesiredKey() throws SQLException {
+        try (Statement currentGrantsStatement = Mockito.mock(Statement.class);
+             Statement futureGrantsStatement = Mockito.mock(Statement.class)) {
+            when(snowflakeConnection.createStatement()).thenReturn(currentGrantsStatement, futureGrantsStatement);
+            List<String> columns = List.of("privilege", "granted_on", "name", "granted_to", "grantee_name", "grant_option");
+            when(currentGrantsStatement.getResultSet()).thenReturn(new MockResultSet(
+                    List.of(List.of(new I("USAGE"), new I("CORTEX SEARCH SERVICE"),
+                            new I("MOCK_DB.MOCK_SCHEMA.SEARCH_SERVICE"), new I("ROLE"),
+                            new I("MOCK_ROLE"), new I(false))), columns));
+            when(futureGrantsStatement.getResultSet()).thenReturn(new MockResultSet(List.of(), columns));
+
+            SnowflakeGrantBuilder desired = SnowflakeGrantBuilder.fromGrant(new SnowflakeGrantModel(
+                    "USAGE", "CORTEX_SEARCH_SERVICE", "MOCK_DB.MOCK_SCHEMA.SEARCH_SERVICE",
+                    "ROLE", "MOCK_ROLE", false, false, false));
+            Map<String, SnowflakeGrantBuilder> imported = snowflakeGrantsService.getGrants("MOCK_ROLE", true);
+
+            assertEquals(List.of(desired.getKey()), List.copyOf(imported.keySet()));
+        }
+    }
+
+    @Test
     void getGrantsDuplicateKey() throws SQLException {
         String roleName = "MOCK_ROLE";
         Boolean skipUnkownTypes = true;

@@ -34,6 +34,41 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class SnowflakeGrantBuilderTest {
 
+    @Test
+    void cortexSearchServiceTypeResolvesBothSpellings() {
+        assertEquals("CORTEX_SEARCH_SERVICE", SnowflakeObjectType.fromString("CORTEX SEARCH SERVICE").name());
+        assertEquals("CORTEX_SEARCH_SERVICE", SnowflakeObjectType.fromString("CORTEX_SEARCH_SERVICE").name());
+    }
+
+    @Test
+    void cortexSearchServiceDirectUsageAndOperate() {
+        for (String privilege : List.of("USAGE", "OPERATE")) {
+            SnowflakeGrantModel grant = new SnowflakeGrantModel(privilege, "CORTEX_SEARCH_SERVICE",
+                    "MOCK_DB.MOCK_SCHEMA.SEARCH_SERVICE", "ROLE", "MOCK_ROLE", false, false, false);
+            assertEquals(List.of("GRANT " + privilege + " ON CORTEX SEARCH SERVICE "
+                            + "\"MOCK_DB\".\"MOCK_SCHEMA\".\"SEARCH_SERVICE\" TO ROLE MOCK_ROLE;"),
+                    SnowflakeGrantBuilder.fromGrant(grant).getGrantStatements());
+        }
+    }
+
+    @Test
+    void cortexSearchServiceOwnershipTransfer() {
+        SnowflakeGrantModel grant = new SnowflakeGrantModel("OWNERSHIP", "CORTEX_SEARCH_SERVICE",
+                "MOCK_DB.MOCK_SCHEMA.SEARCH_SERVICE", "ROLE", "MOCK_ROLE", false, false, false);
+        assertEquals(List.of("GRANT OWNERSHIP ON CORTEX SEARCH SERVICE "
+                        + "\"MOCK_DB\".\"MOCK_SCHEMA\".\"SEARCH_SERVICE\" TO ROLE MOCK_ROLE COPY CURRENT GRANTS;"),
+                SnowflakeGrantBuilder.fromGrant(grant).getGrantStatements());
+    }
+
+    @Test
+    void cortexSearchServiceFutureUsage() {
+        SnowflakeGrantModel grant = new SnowflakeGrantModel("USAGE", "CORTEX_SEARCH_SERVICE",
+                "MOCK_DB.MOCK_SCHEMA.<CORTEX_SEARCH_SERVICE>", "ROLE", "MOCK_ROLE", false, true, false);
+        assertEquals(List.of("GRANT USAGE ON FUTURE CORTEX SEARCH SERVICES IN SCHEMA "
+                        + "\"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE;"),
+                SnowflakeGrantBuilder.fromGrant(grant).getGrantStatements());
+    }
+
     /**
      * Tests that invalid privileges are handled correctly when suppressInvalidPrivilege is true.
      * This test is not suitable for the YAML-driven approach as it tests error handling behavior.

@@ -41,6 +41,13 @@ class SnowflakeDefaultObjectsServiceTestService {
     public static Stream<GetContainerObjectQualNamesRawParams> getContainerObjectQualNamesRawParamsStream() {
         return Stream.of(
                 new GetContainerObjectQualNamesRawParams(
+                        new MockResultSet(List.of(List.of(new I("SEARCH_SERVICE"))), List.of("name")),
+                        List.of("MOCK_DB.MOCK_SCHEMA.SEARCH_SERVICE"),
+                        "MOCK_DB.MOCK_SCHEMA",
+                        SnowflakeObjectType.SCHEMA,
+                        SnowflakeObjectType.CORTEX_SEARCH_SERVICE,
+                        "show cortex search services in schema MOCK_DB.MOCK_SCHEMA;"),
+                new GetContainerObjectQualNamesRawParams(
                         new MockResultSet(
                                 List.of(
                                         List.of(new I("MOCK_TABLE_0"), new I("MOCK_SCHEMA_0")),
