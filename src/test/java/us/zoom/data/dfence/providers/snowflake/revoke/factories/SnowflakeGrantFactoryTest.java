@@ -137,6 +137,18 @@ class SnowflakeGrantFactoryTest {
   }
 
   @Test
+  void from_shouldHandleDynamicTable() {
+    SnowflakeGrantModel model =
+        new SnowflakeGrantModel(
+            "SELECT", "DYNAMIC_TABLE", "DB.SCHEMA.MY_DT", "ROLE", "USER", false, false, false);
+
+    SnowflakeGrant result = SnowflakeGrantFactory.createFrom(model);
+
+    assertEquals(SnowflakeObjectType.DYNAMIC_TABLE, result.snowflakeObjectType());
+    assertEquals("SELECT", result.privilege().value());
+  }
+
+  @Test
   void from_shouldValidateContainerQualLevel1() {
     // Valid: Object Schema (level 2) -> Container DB (level 1)
     SnowflakeGrantModel model =
