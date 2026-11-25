@@ -99,29 +99,6 @@ roles:
 `OPERATE` and `OWNERSHIP` are also supported. `include-all` and `include-future` apply
 through the normal Data Fence wildcard rules.
 
-### Dynamic Table grants
-
-Grant a role access to dynamic tables with `dynamic_table` (or `dynamic table`):
-
-```yaml
-roles:
-  dt-consumer:
-    name: dt_consumer
-    grants:
-      - object-type: dynamic_table
-        database-name: analytics_db
-        schema-name: marts
-        object-name: "*"
-        privileges: [select]
-```
-
-`SELECT`, `OPERATE`, `MONITOR`, and `OWNERSHIP` are supported. `include-all` and
-`include-future` apply through the normal Data Fence wildcard rules.
-
-Snowflake only accepts grants on dynamic tables as `DYNAMIC TABLE`, so a `table`
-wildcard grant does not include dynamic tables. Add a separate `dynamic_table` grant
-for any role that needs access to them.
-
 ## Role with Wildcard Grants
 Most of the time, we don't want to define every single grant. Instead, we want to 
 grant a role a privilege on every object within a database or schema. In these cases we 
