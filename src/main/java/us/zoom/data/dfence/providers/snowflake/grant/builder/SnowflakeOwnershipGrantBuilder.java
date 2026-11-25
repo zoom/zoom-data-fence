@@ -26,6 +26,7 @@ public class SnowflakeOwnershipGrantBuilder extends SnowflakeGrantBuilder {
                 SnowflakeObjectType.DATABASE,
                 SnowflakeObjectType.DATABASE_ROLE,
                 SnowflakeObjectType.DIRECTORY_TABLE,
+                SnowflakeObjectType.DYNAMIC_TABLE,
                 SnowflakeObjectType.EVENT_TABLE,
                 SnowflakeObjectType.EXTERNAL_TABLE,
                 SnowflakeObjectType.FILE_FORMAT,

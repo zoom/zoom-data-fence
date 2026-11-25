@@ -66,7 +66,7 @@ class SnowflakeTableObjectServiceTest {
                 SnowflakeObjectType.TABLE);
         assertEquals(actual, expected);
         verify(statement).execute(
-                "select table_catalog, table_name, table_schema from MOCK_DB.information_schema.tables where table_schema = 'MOCK_SCHEMA_0' and table_type in ( 'BASE TABLE', 'TEMPORARY TABLE' );");
+                "select table_catalog, table_name, table_schema from MOCK_DB.information_schema.tables where table_schema = 'MOCK_SCHEMA_0' and table_type in ( 'BASE TABLE', 'TEMPORARY TABLE' ) and is_dynamic = 'NO';");
     }
 
     @Test
@@ -88,7 +88,7 @@ class SnowflakeTableObjectServiceTest {
                 SnowflakeObjectType.TABLE);
         assertEquals(actual, expected);
         verify(statement).execute(
-                "select table_catalog, table_name, table_schema from \"MockDb!\".information_schema.tables where table_schema = 'mock_schema_0$' and table_type in ( 'BASE TABLE', 'TEMPORARY TABLE' );");
+                "select table_catalog, table_name, table_schema from \"MockDb!\".information_schema.tables where table_schema = 'mock_schema_0$' and table_type in ( 'BASE TABLE', 'TEMPORARY TABLE' ) and is_dynamic = 'NO';");
     }
 
     @Test
@@ -108,6 +108,22 @@ class SnowflakeTableObjectServiceTest {
                 SnowflakeObjectType.TABLE);
         assertEquals(actual, expected);
         verify(statement).execute(
-                "select table_catalog, table_name, table_schema from MOCK_DB.information_schema.tables where table_schema != 'INFORMATION_SCHEMA' and table_type in ( 'BASE TABLE', 'TEMPORARY TABLE' );");
+                "select table_catalog, table_name, table_schema from MOCK_DB.information_schema.tables where table_schema != 'INFORMATION_SCHEMA' and table_type in ( 'BASE TABLE', 'TEMPORARY TABLE' ) and is_dynamic = 'NO';");
+    }
+
+    @Test
+    void getContainerTablesViewDoesNotFilterDynamic() throws SQLException {
+        ResultSet resultSet = new MockResultSet(
+                List.of(List.of(new I("MOCK_DB"), new I("MOCK_SCHEMA_0"), new I("MOCK_VIEW_0"))),
+                List.of("TABLE_CATALOG", "TABLE_SCHEMA", "TABLE_NAME"));
+        when(snowflakeConnectionService.connection(SnowflakeRoleType.SYSADMIN)).thenReturn(connection);
+        when(connection.createStatement()).thenReturn(statement);
+        when(statement.getResultSet()).thenReturn(resultSet);
+        snowflakeTableObjectService.getContainerTables(
+                "MOCK_DB.MOCK_SCHEMA_0",
+                SnowflakeObjectType.SCHEMA,
+                SnowflakeObjectType.VIEW);
+        verify(statement).execute(
+                "select table_catalog, table_name, table_schema from MOCK_DB.information_schema.tables where table_schema = 'MOCK_SCHEMA_0' and table_type in ( 'VIEW' );");
     }
 }

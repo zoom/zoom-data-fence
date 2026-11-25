@@ -32,9 +32,13 @@ public class SnowflakeTableObjectService {
             @NotNull SnowflakeObjectType containerObjectType,
             @NotNull SnowflakeObjectType objectType) {
         List<String> tableTypes;
+        // Dynamic tables are reported as BASE TABLE in INFORMATION_SCHEMA.TABLES, but Snowflake only accepts
+        // grants on them as DYNAMIC TABLE. Exclude them from TABLE so they are handled by DYNAMIC_TABLE.
+        String dynamicFilterSql = "";
         switch (objectType) {
             case TABLE -> {
                 tableTypes = List.of("BASE TABLE", "TEMPORARY TABLE");
+                dynamicFilterSql = " and is_dynamic = 'NO'";
             }
             case EXTERNAL_TABLE -> {
                 tableTypes = List.of("EXTERNAL TABLE");
@@ -58,9 +62,10 @@ public class SnowflakeTableObjectService {
         switch (containerObjectType) {
             case DATABASE -> {
                 query = String.format(
-                        "select table_catalog, table_name, table_schema from %s.information_schema.tables where table_schema != 'INFORMATION_SCHEMA' and table_type in ( %s );",
+                        "select table_catalog, table_name, table_schema from %s.information_schema.tables where table_schema != 'INFORMATION_SCHEMA' and table_type in ( %s )%s;",
                         ObjectName.normalizeObjectNamePart(containerName),
-                        tableTypesSql);
+                        tableTypesSql,
+                        dynamicFilterSql);
             }
             case SCHEMA -> {
                 List<String> containerParts = ObjectName.splitObjectName(containerName);
@@ -73,10 +78,11 @@ public class SnowflakeTableObjectService {
                     throw new RbacDataError("Cannot grant privileges directly on INFORMATION_SCHEMA.");
                 }
                 query = String.format(
-                        "select table_catalog, table_name, table_schema from %s.information_schema.tables where table_schema = '%s' and table_type in ( %s );",
+                        "select table_catalog, table_name, table_schema from %s.information_schema.tables where table_schema = '%s' and table_type in ( %s )%s;",
                         containerParts.get(0),
                         ObjectName.unquotedObjectNamePart(containerParts.get(1)),
-                        tableTypesSql);
+                        tableTypesSql,
+                        dynamicFilterSql);
 
             }
             default -> {
