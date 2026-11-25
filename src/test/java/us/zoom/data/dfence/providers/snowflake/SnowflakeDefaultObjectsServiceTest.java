@@ -48,6 +48,22 @@ class SnowflakeDefaultObjectsServiceTest {
                         SnowflakeObjectType.CORTEX_SEARCH_SERVICE,
                         "show cortex search services in schema MOCK_DB.MOCK_SCHEMA;"),
                 new GetContainerObjectQualNamesRawParams(
+                        new MockResultSet(List.of(List.of(new I("MOCK_DT"))), List.of("name")),
+                        List.of("MOCK_DB.MOCK_SCHEMA.MOCK_DT"),
+                        "MOCK_DB.MOCK_SCHEMA",
+                        SnowflakeObjectType.SCHEMA,
+                        SnowflakeObjectType.DYNAMIC_TABLE,
+                        "show dynamic tables in schema MOCK_DB.MOCK_SCHEMA;"),
+                new GetContainerObjectQualNamesRawParams(
+                        new MockResultSet(
+                                List.of(List.of(new I("MOCK_DT"), new I("MOCK_SCHEMA_0"))),
+                                List.of("name", "schema_name")),
+                        List.of("MOCK_DB.MOCK_SCHEMA_0.MOCK_DT"),
+                        "MOCK_DB",
+                        SnowflakeObjectType.DATABASE,
+                        SnowflakeObjectType.DYNAMIC_TABLE,
+                        "show dynamic tables in database MOCK_DB;"),
+                new GetContainerObjectQualNamesRawParams(
                         new MockResultSet(
                                 List.of(
                                         List.of(new I("MOCK_TABLE_0"), new I("MOCK_SCHEMA_0")),

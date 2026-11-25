@@ -35,6 +35,32 @@ import static org.junit.jupiter.api.Assertions.*;
 class SnowflakeGrantBuilderTest {
 
     @Test
+    void dynamicTableTypeResolvesBothSpellings() {
+        assertEquals("DYNAMIC_TABLE", SnowflakeObjectType.fromString("DYNAMIC TABLE").name());
+        assertEquals("DYNAMIC_TABLE", SnowflakeObjectType.fromString("DYNAMIC_TABLE").name());
+        assertEquals("DYNAMIC TABLES", SnowflakeObjectType.DYNAMIC_TABLE.getObjectTypePlural());
+    }
+
+    @Test
+    void dynamicTableOwnershipTransfer() {
+        SnowflakeGrantModel grant = new SnowflakeGrantModel("OWNERSHIP", "DYNAMIC_TABLE",
+                "MOCK_DB.MOCK_SCHEMA.MOCK_DT", "ROLE", "MOCK_ROLE", false, false, false);
+        assertEquals(List.of("GRANT OWNERSHIP ON DYNAMIC TABLE "
+                        + "\"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_DT\" TO ROLE MOCK_ROLE COPY CURRENT GRANTS;"),
+                SnowflakeGrantBuilder.fromGrant(grant).getGrantStatements());
+    }
+
+    @Test
+    void dynamicTableRejectsTableOnlyPrivileges() {
+        // Snowflake rejects e.g. REFERENCES/UPDATE on dynamic tables, so these must not be considered valid.
+        for (String privilege : List.of("REFERENCES", "UPDATE", "INSERT")) {
+            SnowflakeGrantModel grant = new SnowflakeGrantModel(privilege, "DYNAMIC_TABLE",
+                    "MOCK_DB.MOCK_SCHEMA.MOCK_DT", "ROLE", "MOCK_ROLE", false, false, false);
+            assertThrows(RuntimeException.class, () -> SnowflakeGrantBuilder.fromGrant(grant));
+        }
+    }
+
+    @Test
     void cortexSearchServiceTypeResolvesBothSpellings() {
         assertEquals("CORTEX_SEARCH_SERVICE", SnowflakeObjectType.fromString("CORTEX SEARCH SERVICE").name());
         assertEquals("CORTEX_SEARCH_SERVICE", SnowflakeObjectType.fromString("CORTEX_SEARCH_SERVICE").name());

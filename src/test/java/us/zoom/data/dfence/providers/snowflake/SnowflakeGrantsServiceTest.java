@@ -94,6 +94,29 @@ class SnowflakeGrantsServiceTest {
     }
 
     @Test
+    void dynamicTableShowGrantsMatchesDesiredKey() throws SQLException {
+        // SHOW GRANTS reports dynamic tables as DYNAMIC_TABLE. The imported key must match the desired key,
+        // otherwise the same grant is re-issued on every run.
+        try (Statement currentGrantsStatement = Mockito.mock(Statement.class);
+             Statement futureGrantsStatement = Mockito.mock(Statement.class)) {
+            when(snowflakeConnection.createStatement()).thenReturn(currentGrantsStatement, futureGrantsStatement);
+            List<String> columns = List.of("privilege", "granted_on", "name", "granted_to", "grantee_name", "grant_option");
+            when(currentGrantsStatement.getResultSet()).thenReturn(new MockResultSet(
+                    List.of(List.of(new I("OWNERSHIP"), new I("DYNAMIC_TABLE"),
+                            new I("MOCK_DB.MOCK_SCHEMA.MOCK_DT"), new I("ROLE"),
+                            new I("MOCK_ROLE"), new I(false))), columns));
+            when(futureGrantsStatement.getResultSet()).thenReturn(new MockResultSet(List.of(), columns));
+
+            SnowflakeGrantBuilder desired = SnowflakeGrantBuilder.fromGrant(new SnowflakeGrantModel(
+                    "OWNERSHIP", "DYNAMIC_TABLE", "MOCK_DB.MOCK_SCHEMA.MOCK_DT",
+                    "ROLE", "MOCK_ROLE", false, false, false));
+            Map<String, SnowflakeGrantBuilder> imported = snowflakeGrantsService.getGrants("MOCK_ROLE", true);
+
+            assertEquals(List.of(desired.getKey()), List.copyOf(imported.keySet()));
+        }
+    }
+
+    @Test
     void cortexSearchServiceShowGrantsMatchesDesiredKey() throws SQLException {
         try (Statement currentGrantsStatement = Mockito.mock(Statement.class);
              Statement futureGrantsStatement = Mockito.mock(Statement.class)) {

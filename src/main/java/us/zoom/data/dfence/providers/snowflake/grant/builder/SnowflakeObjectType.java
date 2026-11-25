@@ -37,6 +37,7 @@ public enum SnowflakeObjectType {
     DATABASE(1, null),
     DATABASE_ROLE(2, null),
     DIRECTORY_TABLE(3, null),
+    DYNAMIC_TABLE(3, null),
     EVENT_TABLE(3, null),
     EXTERNAL_TABLE(3, "TABLE"),
     FILE_FORMAT(3, null),
@@ -165,6 +166,7 @@ public enum SnowflakeObjectType {
      */
     public static Map<String, String> overrideObjectTypes = Map.of(
             "AGENT", "CORTEX_AGENT",
-            "CORTEX SEARCH SERVICE", "CORTEX_SEARCH_SERVICE"
+            "CORTEX SEARCH SERVICE", "CORTEX_SEARCH_SERVICE",
+            "DYNAMIC TABLE", "DYNAMIC_TABLE"
     );
 }

@@ -151,6 +151,7 @@ public class SnowflakePermissionGrantBuilder extends SnowflakeGrantBuilder {
         add(new GrantValidationDefinition(List.of("SELECT", "REFERENCES", "MONITOR"), List.of(SnowflakeObjectType.SEMANTIC_VIEW)));
         add(new GrantValidationDefinition(List.of("USAGE", "MODIFY", "MONITOR"), List.of(SnowflakeObjectType.CORTEX_AGENT)));
         add(new GrantValidationDefinition(List.of("OPERATE", "USAGE"), List.of(SnowflakeObjectType.CORTEX_SEARCH_SERVICE)));
+        add(new GrantValidationDefinition(List.of("SELECT", "OPERATE", "MONITOR"), List.of(SnowflakeObjectType.DYNAMIC_TABLE)));
     }});
 
     private SnowflakeGrantModel grant;

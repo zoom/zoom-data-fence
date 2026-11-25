@@ -34,6 +34,35 @@ class DesiredGrantsCompilerTest {
   }
 
   @Test
+  void dynamicTableAllExpandsEachDiscoveredDynamicTable() {
+    when(mockObjectsService.objectExists(anyString(), eq(SnowflakeObjectType.SCHEMA))).thenReturn(true);
+    when(mockObjectsService.getContainerObjectQualNames(
+            eq(SnowflakeObjectType.SCHEMA), eq(SnowflakeObjectType.DYNAMIC_TABLE), anyString()))
+        .thenReturn(List.of("MOCK_DB.MOCK_SCHEMA.DT_ONE", "MOCK_DB.MOCK_SCHEMA.DT_TWO"));
+    PlaybookPrivilegeGrant grant = new PlaybookPrivilegeGrant(
+        "dynamic_table", "*", "MOCK_SCHEMA", "MOCK_DB", List.of("OWNERSHIP"), false, true, true);
+
+    List<SnowflakeGrantBuilder> builders = desiredGrantsCompiler.compileGrants(grant, "MOCK_ROLE", options);
+
+    assertEquals(List.of(
+        "GRANT OWNERSHIP ON DYNAMIC TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"DT_ONE\" TO ROLE MOCK_ROLE COPY CURRENT GRANTS;",
+        "GRANT OWNERSHIP ON DYNAMIC TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"DT_TWO\" TO ROLE MOCK_ROLE COPY CURRENT GRANTS;"),
+        builders.stream().flatMap(builder -> builder.getGrantStatements().stream()).toList());
+  }
+
+  @Test
+  void dynamicTableFutureUsesGenericFutureGrant() {
+    PlaybookPrivilegeGrant grant = new PlaybookPrivilegeGrant(
+        "dynamic_table", "*", "MOCK_SCHEMA", "MOCK_DB", List.of("SELECT"), true, false, true);
+
+    List<SnowflakeGrantBuilder> builders = desiredGrantsCompiler.compileGrants(grant, "MOCK_ROLE", options);
+
+    assertEquals(1, builders.size());
+    assertEquals(List.of("GRANT SELECT ON FUTURE DYNAMIC TABLES IN SCHEMA "
+        + "\"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE;"), builders.get(0).getGrantStatements());
+  }
+
+  @Test
   void cortexSearchServiceAllExpandsEachDiscoveredService() {
     when(mockObjectsService.objectExists(anyString(), eq(SnowflakeObjectType.SCHEMA))).thenReturn(true);
     when(mockObjectsService.getContainerObjectQualNames(

@@ -127,6 +127,55 @@ tests:
     expectedGrantStatement: "GRANT OWNERSHIP ON FUTURE EXTERNAL TABLES IN SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1 COPY CURRENT GRANTS;"
     expectedRevokeStatement: "REVOKE OWNERSHIP ON FUTURE EXTERNAL TABLES IN SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
 
+  # Dynamic Table Privileges
+  # https://docs.snowflake.com/en/user-guide/dynamic-tables/privileges
+  - name: "SELECT on DYNAMIC_TABLE"
+    grant:
+      privilege: SELECT
+      objectType: DYNAMIC_TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_DT
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT SELECT ON DYNAMIC TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_DT\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE SELECT ON DYNAMIC TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_DT\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "OPERATE on DYNAMIC_TABLE"
+    grant:
+      privilege: OPERATE
+      objectType: DYNAMIC_TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_DT
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT OPERATE ON DYNAMIC TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_DT\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE OPERATE ON DYNAMIC TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_DT\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "MONITOR on DYNAMIC_TABLE"
+    grant:
+      privilege: MONITOR
+      objectType: DYNAMIC_TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.MOCK_DT
+      role: MOCK_ROLE_1
+    expectedGrantStatement: "GRANT MONITOR ON DYNAMIC TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_DT\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE MONITOR ON DYNAMIC TABLE \"MOCK_DB\".\"MOCK_SCHEMA\".\"MOCK_DT\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "SELECT on FUTURE DYNAMIC_TABLES"
+    grant:
+      privilege: SELECT
+      objectType: DYNAMIC_TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.<DYNAMIC_TABLE>
+      role: MOCK_ROLE_1
+      future: true
+    expectedGrantStatement: "GRANT SELECT ON FUTURE DYNAMIC TABLES IN SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1;"
+    expectedRevokeStatement: "REVOKE SELECT ON FUTURE DYNAMIC TABLES IN SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
+
+  - name: "OWNERSHIP on FUTURE DYNAMIC_TABLES"
+    grant:
+      privilege: OWNERSHIP
+      objectType: DYNAMIC_TABLE
+      objectName: MOCK_DB.MOCK_SCHEMA.<DYNAMIC_TABLE>
+      role: MOCK_ROLE_1
+      future: true
+    expectedGrantStatement: "GRANT OWNERSHIP ON FUTURE DYNAMIC TABLES IN SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" TO ROLE MOCK_ROLE_1 COPY CURRENT GRANTS;"
+    expectedRevokeStatement: "REVOKE OWNERSHIP ON FUTURE DYNAMIC TABLES IN SCHEMA \"MOCK_DB\".\"MOCK_SCHEMA\" FROM ROLE MOCK_ROLE_1;"
+
   # Account-Level Privileges
   # https://docs.snowflake.com/en/sql-reference/sql/grant-privilege#global-privileges
   - name: "CREATE DATABASE on ACCOUNT"
